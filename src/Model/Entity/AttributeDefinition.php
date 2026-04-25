@@ -3,12 +3,16 @@
 namespace App\Model\Entity;
 
 final class AttributeDefinition {
-
     public function __construct(
+        private int $id,
         private string $key,
         private string $label,
         private int $displayOrder
     ) {}
+
+    public function getId() : int {
+        return $this->id;
+    }
 
     public function getKey() : string {
         return $this->key;
