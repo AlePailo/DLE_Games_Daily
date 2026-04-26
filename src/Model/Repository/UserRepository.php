@@ -2,6 +2,8 @@
 
 namespace App\Model\Repository;
 
-/*class UserRepository implements IUserRepository {
+/*
+class UserRepository implements IUserRepository {
     
-}*/
+}
+*/
