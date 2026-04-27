@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\View\View;
 use App\Model\Repository\IFranchiseRepository;
 
-class HomeController {
+class HomeController extends BaseController {
     public function __construct(
         private IFranchiseRepository $franchises
     ) {}
@@ -13,8 +13,8 @@ class HomeController {
     public function index(array $vars) : void {
         $franchises = $this->franchises->findAll();
 
-        View::render('home/index', [
-            'title' => 'Home',
+        $this->render('home/index', [
+            'title' => 'Home | DLE Games Daily',
             'franchises' => $franchises,
             'css' => ['home.css'],
             'js' => ['home.js']

@@ -38,6 +38,7 @@ $uri = strtok($uri, '?');
 // Dispatching
 $routeInfo = $dispatcher->dispatch($method, $uri);
 
+
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
         http_response_code(404);

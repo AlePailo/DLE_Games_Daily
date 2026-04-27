@@ -14,4 +14,10 @@ class View {
         echo $content;
         //require BASE_PATH . 'templates/layout/footer.php';
     }
+
+    public static function renderJson(mixed $data, int $status = 200) {
+        http_response_code($status);
+        header('Content-type: application/json');
+        echo json_encode($data);
+    }
 }
