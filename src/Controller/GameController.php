@@ -22,7 +22,7 @@ class GameController extends BaseController{
 
         $characters = $this->characters->findByFranchiseId($franchise->getId());
 
-        $this->render("game/index", [
+        $this->render("game", [
             'title' => "{$slug} | DLE Games Daily",
             'characters' => $characters,
             'css' => ['game.css'],

@@ -6,15 +6,20 @@ use App\View\View;
 
 abstract class BaseController {
     protected function render(string $template, array $data = []) : void {
+        $defaultCss = ['style.css'];
+
+        $data['css'] = array_merge($defaultCss, $data['css']);
+
         View::render($template, $data);
     }
 
-    protected function renderJson(mixed $data, int $status) : void {
+    protected function renderJson(mixed $data, int $status = 200) : void {
         View::renderJson($data, $status);
     }
 
     protected function redirect(string $url) : void {
         header("Location: /DLE_Games_Daily/{$url}");
+        //header('Location: ' . BASE_URL . '/' . ltrim($url, '/'));
         exit;
     }
 
@@ -24,7 +29,7 @@ abstract class BaseController {
 
     protected function notFound() : void {
         http_response_code(404);
-        View::render('404/index', [
+        View::render('404', [
             'title' => 'Page not found | DLE Games Daily',
             'css' => [],
             'js' => []

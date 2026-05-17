@@ -2,10 +2,14 @@
 
 use Dotenv\Dotenv;
 
+session_start();
+
 define ('BASE_PATH', dirname(__DIR__) . '/');
+define('BASE_URL', '/DLE_Games_Daily/');
 
 require BASE_PATH . 'vendor/autoload.php';
 
+/*
 //.env loading
 $dotenv = Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
@@ -58,3 +62,6 @@ switch ($routeInfo[0]) {
         $controller->$action($vars);
         break;
 }
+*/
+
+App\Core\Application::run();

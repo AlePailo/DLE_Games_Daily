@@ -1,14 +1,14 @@
 <?php declare(strict_types = 1);
 
-
+use App\Core\SessionManager;
+use App\Service\AuthService;
+use App\Core\Mailer;
 use App\Model\Repository\FranchiseRepository;
 use App\Model\Repository\IFranchiseRepository;
 use App\Model\Repository\CharacterRepository;
 use App\Model\Repository\ICharacterRepository;
-/*
 use App\Model\Repository\UserRepository;
-use App\Model\Entity\IUserRepository;
-*/
+use App\Model\Repository\IUserRepository;
 
 return [
     \PDO::class => function() {
@@ -22,5 +22,10 @@ return [
     },
     IFranchiseRepository::class => \DI\autowire(FranchiseRepository::class),
     ICharacterRepository::class => \DI\autowire(CharacterRepository::class),
-    //IUserRepository::class => \DI\autowire(UserRepository::class)
+    IUserRepository::class => \DI\autowire(UserRepository::class),
+
+    SessionManager::class => \DI\autowire(SessionManager::class),
+    AuthService::class => \DI\autowire(AuthService::class),
+
+    Mailer::class => \DI\autowire(Mailer::class)
 ];

@@ -13,7 +13,7 @@ class HomeController extends BaseController {
     public function index(array $vars) : void {
         $franchises = $this->franchises->findAll();
 
-        $this->render('home/index', [
+        $this->render('home', [
             'title' => 'Home | DLE Games Daily',
             'franchises' => $franchises,
             'css' => ['home.css'],

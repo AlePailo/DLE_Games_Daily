@@ -7,7 +7,7 @@ final class User {
         private int $id,
         private string $username,
         private string $email,
-        private string $passwordHash,
+        private bool $isVerified,
         private \DateTimeImmutable $createdAt,
         private \DateTimeImmutable $updatedAt
     ) {}
@@ -24,15 +24,15 @@ final class User {
         return $this->email;
     }
 
+    public function isVerified() : bool {
+        return $this->isVerified;
+    }
+
     public function getCreatedAt() : \DateTimeImmutable {
         return $this->createdAt;
     }
     
     public function getUpdatedAt() : \DateTimeImmutable {
         return $this->updatedAt;
-    }
-
-    public function verifyPassword(string $plainPassword) : bool {
-        return password_verify($plainPassword, $this->passwordHash);
     }
 }

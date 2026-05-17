@@ -2,14 +2,14 @@
 
 namespace App\Model\Entity;
 
-use LDAP\Result;
+//use LDAP\Result;
 
 final class GameAttemptResult {
     public function __construct(
         private int $id,
         private int $attemptId,
         private int $attributeDefId,
-        //private ResultStatus $resultStatus
+        private ResultStatus $resultStatus
     ) {}
 
     public function getId() : int {
@@ -24,11 +24,11 @@ final class GameAttemptResult {
         return $this->attributeDefId;
     }
 
-    /*
     public function getResultStatus() : ResultStatus {
         return $this->resultStatus;
     }
     
+    /*
     public function isCorrect() : bool {
         return $this->resultStatus === ResultStatus::Correct;
     }
