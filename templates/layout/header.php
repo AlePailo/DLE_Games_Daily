@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'DLE Games Daily'?></title>
-    <link rel="stylesheet" href="main.css">
 
     <?php if(isset($css) && is_array($css)): ?>
         <?php foreach($css as $sheet): ?>
-            <link rel="stylesheet" href="css/<?= htmlspecialchars($sheet) ?>">
+            <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/<?= htmlspecialchars($sheet) ?>">
         <?php endforeach; ?>
     <?php endif; ?>
 </head>

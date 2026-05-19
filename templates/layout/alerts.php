@@ -1,19 +1,40 @@
-<div id="flash-messages" class="container">
-    <?php if(!empty($error)): ?>
-        <div class="alert alert-error" role="alert" aria-live="assertive">
-            <span class="sr-only">Error: </span><?= htmlspecialchars($error) ?>
-        </div>
-    <?php endif; ?>
+<div id="toast-container" class="toast-container">
+    <?php 
+    // Messaggi passati dal Controller via PHP
+    $types = [
+        'error'   => $error   ?? null, 
+        'success' => $success ?? null, 
+        'info'    => $info    ?? null
+    ];
 
-    <?php if(!empty($success)): ?>
-        <div class="alert alert-success" role="alert" aria-live="assertive">
-            <span class="sr-only">Error: </span><?= htmlspecialchars($success) ?>
-        </div>
-    <?php endif; ?>
+    foreach ($types as $type => $message): 
+        if ($message): 
+            //Split multiple messages
+            $message = str_replace(['<br/>', '<br />', "\n"], '<br>', $message);
+            $lines = array_filter(explode('<br>', $message)); 
+            ?>
+            
+            <div class="toast toast-<?= $type ?>" role="alert">
+                <div class="toast-content">
+                    <span class="toast-icon"></span>
+                    <div class="toast-message">
+                        
+                        <?php if (count($lines) > 1): ?>
+                            <ul class="toast-list">
+                                <?php foreach ($lines as $line): ?>
+                                    <li><?= htmlspecialchars(trim($line)) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php else: ?>
+                            <p><?= htmlspecialchars(trim($lines[0])) ?></p>
+                        <?php endif; ?>
+                        
+                    </div>
+                </div>
+                <button type="button" class="toast-close">&times;</button>
+                <div class="toast-progress"></div>
+            </div>
+        <?php endif; 
+    endforeach; ?>
 
-    <?php if(!empty($info)): ?>
-        <div class="alert alert-info" role="alert" aria-live="assertive">
-            <span class="sr-only">Error: </span><?= htmlspecialchars($info) ?>
-        </div>
-    <?php endif; ?>
 </div>

@@ -6,9 +6,22 @@ use App\View\View;
 
 abstract class BaseController {
     protected function render(string $template, array $data = []) : void {
-        $defaultCss = ['style.css'];
+        $defaultCss = ['reset.css', 'base.css'];
 
-        $data['css'] = array_merge($defaultCss, $data['css']);
+        if(isset($data['css'])) {
+            $data['css'] = array_merge($defaultCss, $data['css']);
+        } else {
+            $data['css'] = $defaultCss;
+        }
+
+
+        $defaultJs = ['utils/alerts.js'];
+
+        if(isset($data['js'])) {
+            $data['js'] = array_merge($defaultJs, $data['js']);
+        } else {
+            $data['js'] = $defaultJs;
+        }
 
         View::render($template, $data);
     }

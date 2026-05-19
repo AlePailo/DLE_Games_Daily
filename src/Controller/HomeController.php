@@ -16,8 +16,8 @@ class HomeController extends BaseController {
         $this->render('home', [
             'title' => 'Home | DLE Games Daily',
             'franchises' => $franchises,
-            'css' => ['home.css'],
-            'js' => ['home.js']
+            /*'css' => ['home.css'],
+            'js' => ['home.js']*/
         ]);
     }
 }

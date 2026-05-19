@@ -40,8 +40,8 @@ class Application {
         $publicRoutes = ['/', '/login', '/register', '/verify', '/auth/google', '/auth/google/callback'];
 
         if (!in_array($uri, $publicRoutes) && $currentUser === null) {
-            /*header('Location: ' . $basePath . 'login');
-            exit;*/
+            header('Location: ' . $basePath . 'login');
+            exit;
         }
     }
 }

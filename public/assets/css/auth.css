@@ -1,0 +1,108 @@
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-wrapper {
+    width: min(500px, 90%);
+}
+
+.form-container {
+    width: 100%;
+    padding: 3rem;
+    /*background: linear-gradient(to bottom right, var(--boh), var(--boh) 20%, var(--black-secondary));*/
+    background-image: 
+        radial-gradient(
+            circle at 0% 0%, 
+            var(--boh) 0%,
+            var(--black-secondary) 50%,
+            transparent 60%                
+        );
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border-radius: 16px;
+    border: 1px solid #222222;
+}
+
+h1 {
+    text-align: center;
+}
+
+form, .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+form {
+    gap: 1rem;
+}
+
+.form-group {
+    gap: 0.5rem;
+}
+
+.form-group > label {
+    color: var(--gray-main);
+    font-size: 1.15rem;
+}
+
+button {
+    color: var(--white-main);
+    background: var(--purple-accent);
+    transition: 0.25s all ease;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+button:focus-visible, button:hover {
+    background: var(--purple-primary);
+    box-shadow: 7px 5px 56px -14px var(--purple-primary);
+}
+
+button:active {
+    transform: scale(0.97);
+    box-shadow: 7px 5px 56px -10px var(--purple-primary);
+}
+
+input, button {
+    border: 0;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 1.35rem;
+}
+
+input {
+    background: var(--black-tertiary);
+    outline: 1px solid var(--gray-main);
+    color: var(--white-main);
+    transition: outline 0.2s ease;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--black-tertiary) inset !important;
+    -webkit-text-fill-color: var(--white-main) !important; /* Optional: Change text color */
+}
+
+input:focus-visible {
+    outline: 1px solid var(--white-main);
+}
+
+/*
+label:has(+ input:focus-visible) {
+    color: var(--white-main);
+}
+*/
+
+.form-group:focus-within > label {
+    color: var(--white-main);
+}
+
+.auth-footer,
+input[type="checkbox"] + label{
+    font-size: 1.15rem;
+    text-align: center;
+}

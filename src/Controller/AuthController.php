@@ -184,7 +184,7 @@ class AuthController extends BaseController {
         $this->renderJson(['available' => !empty($email) && !$this->authService->emailExists($email)]);
     }
 
-    private function renderAuthForm(string $view, string $title, array $css = [], array $js = []) : void {
+    private function renderAuthForm(string $view, string $title, array $css = ['auth.css'], array $js = ['formHandler.js']) : void {
         $this->render("auth/{$view}", [
             'title' => $title,
             'css' => $css,

@@ -25,8 +25,8 @@ class GameController extends BaseController{
         $this->render("game", [
             'title' => "{$slug} | DLE Games Daily",
             'characters' => $characters,
-            'css' => ['game.css'],
-            'js' => ['game.js']
+            /*'css' => ['game.css'],
+            'js' => ['game.js']*/
         ]);
     }
 }
