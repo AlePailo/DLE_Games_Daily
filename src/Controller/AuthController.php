@@ -45,7 +45,7 @@ class AuthController extends BaseController {
 
         try {
             $user = $this->authService->loginLocal($email, $password);
-            $this->sessionManager->login($user, $remember);
+            $this->authService->createSessionForUser($user, $remember);
             $this->redirect('');
         } catch(AuthException $e) {
             $this->sessionManager->setFlash('error', $e->getMessage());
@@ -106,7 +106,14 @@ class AuthController extends BaseController {
         }
 
         try {
-            $this->authService->registerLocalUser($username, $email, $password);
+            $guestToken = $this->sessionManager->getGuestToken();
+            $user = $this->authService->registerLocalUser($username, $email, $password);
+
+            if($guestToken !== null) {
+                //$this->gameSessionService->migrateGuestSessions($guestToken, $user->getId());     TO DO: implement logic to migrate guest session to newly created user
+                $this->sessionManager->clearGuestToken();
+            }
+
             $this->sessionManager->setFlash('success', 'Registration completed! Check Your email box.');
             $this->redirect('login');
         } catch(AuthException $e) {
@@ -126,17 +133,9 @@ class AuthController extends BaseController {
 
         try {
             $this->authService->verifyEmail($token);
-            //$this->redirect('login?verified=1');
             $this->sessionManager->setFlash('success', 'Email verified! You can now login.');
             $this->redirect('login');
         } catch(AuthException $e) {
-            /*
-            match($e->getCode()) {
-                AuthException::EXPIRED_TOKEN => $this->redirect('login?expired=1'),
-                AuthException::INVALID_TOKEN => $this->redirect('login?invalid=1'),
-                default => $this->redirect('login?error=1')
-            };
-            */
             $message = match($e->getCode()) {
                 AuthException::EXPIRED_TOKEN => 'Verification link expired. Request a new one.',
                 AuthException::INVALID_TOKEN => 'Verification link is invalid. Request a new one.',
@@ -158,7 +157,6 @@ class AuthController extends BaseController {
 
         try {
             $this->authService->resendVerification($email);
-            //$this->redirect('login=registered=1');
             $this->sessionManager->setFlash('success', 'If an account exists with this email, a new verification link has been sent.');
             $this->redirect('login');
         } catch(\Exception $e) {
@@ -168,7 +166,7 @@ class AuthController extends BaseController {
     }
 
     public function logout(array $vars) : void {
-        $this->sessionManager->logout();
+        $this->authService->logout();
         $this->redirect('login');
     }
 

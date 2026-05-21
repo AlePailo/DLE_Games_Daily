@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Service\AuthService;
 use Dotenv\Dotenv;
 
 class Application {
@@ -11,8 +12,8 @@ class Application {
         $dotenv->required(['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_CHARSET', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM', 'MAIL_FROM_NAME']);
         $container = self::buildContainer();
 
-        $sessionManager = $container->get(SessionManager::class);
-        $currentUser = $sessionManager->attemptAutoLogin();
+        $authService = $container->get(AuthService::class);
+        $currentUser = $authService->attemptAutoLogin();
 
         self::guardRoutes($currentUser);
 
@@ -37,10 +38,19 @@ class Application {
             $uri = '/' . ltrim(substr($uri, strlen($basePath)), '/');
         }
 
+        /*
         $publicRoutes = ['/', '/login', '/register', '/verify', '/auth/google', '/auth/google/callback'];
 
         if (!in_array($uri, $publicRoutes) && $currentUser === null) {
             header('Location: ' . $basePath . 'login');
+            exit;
+        }
+        */
+
+        $protectedRoutes = ['/profile'];
+
+        if(in_array($uri, $protectedRoutes) && $currentUser === null) {
+            header('Location:' . $_ENV['APP_BASE_PATH'] . 'login');
             exit;
         }
     }

@@ -34,7 +34,7 @@
                 <button type="button" class="toast-close">&times;</button>
                 <div class="toast-progress"></div>
             </div>
-        <?php endif; 
+        <?php endif;
     endforeach; ?>
 
 </div>

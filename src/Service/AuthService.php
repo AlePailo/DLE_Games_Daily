@@ -4,14 +4,20 @@ namespace App\Service;
 
 use App\Model\Entity\User;
 use App\Model\Repository\IUserRepository;
+use App\Core\SessionManager;
 use App\Core\Mailer;
 use App\Exception\AuthException;
 
 class AuthService {
     public function __construct(
         private IUserRepository $userRepository,
+        private SessionManager $sessionManager,
         private Mailer $mailer
     ) {}
+
+
+
+    // ----- Login Methods -----
 
     public function loginLocal(string $email, string $password, /*bool $remember*/) : User {
         $user = $this->userRepository->findByEmail($email);
@@ -30,31 +36,9 @@ class AuthService {
             throw AuthException::invalidCredentials();
         }
 
-        /*
-        if($remember) {
-            $this->setRememberToken($user->getId());
-        }
-        */
-
         return $user;
     }
 
-    /*
-    private function setRememberToken(int $userId) {
-        $token = bin2hex(random_bytes(32));
-        $hash = hash('sha256', $token);
-        $expires = new \DateTimeImmutable('+30 days');
-
-        $this->userRepository->saveRememberToken($userId, $hash, $expires);
-
-        setcookie('remember_token', $token, [
-            'expires' => $expires->getTimestamp(),
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
-    }
-    */
 
     public function loginOauth(string $provider, string $providerId, string $username, string $email) : User {
         $user = $this->userRepository->findByOAuthProvider($provider, $providerId);
@@ -66,15 +50,73 @@ class AuthService {
         return $user;
     }
 
-    public function usernameExists(string $username) : bool {
-        return $this->userRepository->findByUsername($username) !== null;
+
+
+    // ----- Auto-login -----
+
+    public function attemptAutoLogin() : ?User {
+        $userId = $this->sessionManager->getUserId();
+        if($userId !== null) {
+            return $this->userRepository->findById($userId);
+        }
+
+        $token = $this->sessionManager->getRememberToken();
+        if($token === null) {
+            return null;
+        }
+
+        $hashedToken = hash('sha256', $token);
+        $user = $this->userRepository->findByRememberToken($hashedToken);
+
+        if($user === null) {
+            $this->sessionManager->clearRememberCookie();
+            return null;
+        }
+
+        return $user;
     }
 
-    public function emailExists(string $email) : bool {
-        return $this->userRepository->findByEmail($email) !== null;
+
+
+    // ----- Remember me methods -----
+
+    public function createSessionForUser(User $user, bool $remember) : void {
+        $this->sessionManager->regenerateAndSet($user->getId());
+
+        if($remember) {
+            $this->createRememberToken($user->getId());
+        }
     }
 
-    public function registerLocalUser(string $username, string $email, string $plainPassword) : void {
+
+    public function createRememberToken(int $userId) : void {
+        $token = bin2hex(random_bytes(32));
+        $hashedToken = hash('sha256', $token);
+        $expires = new \DateTimeImmutable('+30 days');
+
+        $this->userRepository->saveRememberToken($userId, $hashedToken, $expires);
+        $this->sessionManager->setRememberCookie($token, $expires);
+    }
+
+
+
+    // ----- Logout -----
+
+    public function logout() : void {
+        $token = $this->sessionManager->getRememberToken();
+        if($token !== null) {
+            $this->userRepository->deleteRememberToken(hash('sha256,', $token));
+            $this->sessionManager->clearRememberCookie();
+        }
+        
+        $this->sessionManager->clearUserSession();
+    }
+
+
+
+    // ----- Registration -----
+
+    public function registerLocalUser(string $username, string $email, string $plainPassword) : User {
         if($this->usernameExists($username)) {
             throw AuthException::usernameAlreadyTaken();
         }
@@ -92,7 +134,13 @@ class AuthService {
         $createdUserId = $this->userRepository->createLocalUser($username, $email, $hashedPassword, $hashedToken, $expiresAt);
 
         $this->mailer->sendVerification($email, $verificationToken);
+
+        return $this->userRepository->findById($createdUserId);     //Returning user so that controller can use the id for session guest migration
     }
+
+
+
+    // ----- Email verification methods -----
 
     public function verifyEmail(string $rawToken) : void {
         $hashedToken = hash('sha256', $rawToken);
@@ -111,14 +159,11 @@ class AuthService {
         $this->userRepository->removeVerificationToken($userPassword->getUserId());
     }
 
+
     public function resendVerification(string $email) : void {
         $user = $this->userRepository->findByEmail($email);
 
-        if($user === null) {
-            return;
-        }
-
-        if($user->isVerified()) {
+        if($user === null || $user->isVerified()) {
             return;
         }
 
@@ -129,5 +174,18 @@ class AuthService {
         $this->userRepository->updateVerificationToken($user->getId(), $hashedToken, $expiresAt);
 
         $this->mailer->sendVerification($email, $newVerificationToken);
+    }
+
+
+
+    // ----- Helpers -----
+
+    public function usernameExists(string $username) : bool {
+        return $this->userRepository->findByUsername($username) !== null;
+    }
+
+
+    public function emailExists(string $email) : bool {
+        return $this->userRepository->findByEmail($email) !== null;
     }
 }
