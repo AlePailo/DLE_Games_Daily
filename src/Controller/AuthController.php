@@ -5,11 +5,13 @@ namespace App\Controller;
 use App\Service\AuthService;
 use App\Core\SessionManager;
 use App\Exception\AuthException;
+use App\Service\GameSessionService;
 
 class AuthController extends BaseController {
     public function __construct(
         private AuthService $authService,
-        private SessionManager $sessionManager
+        private SessionManager $sessionManager,
+        private GameSessionService $gameSessionService
     ) {}
 
     public function loginForm(array $vars) : void {
@@ -110,8 +112,12 @@ class AuthController extends BaseController {
             $user = $this->authService->registerLocalUser($username, $email, $password);
 
             if($guestToken !== null) {
-                //$this->gameSessionService->migrateGuestSessions($guestToken, $user->getId());     TO DO: implement logic to migrate guest session to newly created user
-                $this->sessionManager->clearGuestToken();
+                try {
+                    $this->gameSessionService->migrateGuestSessions($guestToken, $user->getId());     //TO DO: implement logic to migrate guest session to newly created user
+                    $this->sessionManager->clearGuestToken();
+                } catch(\Exception $e) {
+                    //handle catch - user registered but no sessions to migrate
+                }
             }
 
             $this->sessionManager->setFlash('success', 'Registration completed! Check Your email box.');

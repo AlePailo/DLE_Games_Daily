@@ -41,7 +41,7 @@ class CharacterRepository implements ICharacterRepository {
 
     public function mapCharacter(array $data) : Character {
         return new Character (
-            id: $data['id'],
+            id: (int)$data['id'],
             name: $data['name'],
             imageUrl: $data['image_url'],
             attributes: $data['attributes']

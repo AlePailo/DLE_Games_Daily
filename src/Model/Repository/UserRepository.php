@@ -99,7 +99,7 @@ class UserRepository implements IUserRepository {
 
     private function mapUser(array $row) : User {
         return new User(
-            id: $row['id'],
+            id: (int)$row['id'],
             username: $row['username'],
             email: $row['email'],
             isVerified: (bool)$row['is_verified'],
@@ -110,7 +110,7 @@ class UserRepository implements IUserRepository {
 
     private function mapUserPassword(array $row) : UserPassword {
         return new UserPassword(
-            userId: $row['user_id'],
+            userId: (int)$row['user_id'],
             passwordHash: $row['password_hash'],
             verificationToken: $row['verification_token'] ?? null,
             tokenExpiresAt: $row['token_expires_at'] ? new \DateTimeImmutable($row['token_expires_at']) : null

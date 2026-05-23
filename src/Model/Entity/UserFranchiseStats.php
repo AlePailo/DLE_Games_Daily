@@ -11,7 +11,7 @@ final class UserFranchiseStats {
         private int $gamesWon,
         private int $currentStreak,
         private int $maxStreak,
-        private int $avgAttempts,
+        private float $avgAttempts,
         private \DateTimeImmutable $updatedAt
     ) {}
 
@@ -43,7 +43,7 @@ final class UserFranchiseStats {
         return $this->maxStreak;
     }
 
-    public function getAvgAttempts() : int {
+    public function getAvgAttempts() : float {
         return $this->avgAttempts;
     }
 

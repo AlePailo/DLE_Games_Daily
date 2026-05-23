@@ -5,7 +5,8 @@ namespace App\Model\Entity;
 final class GameSession {
     public function __construct(
         private int $id,
-        private int $userId,
+        private ?int $userId,
+        private ?string $guestToken,
         private int $challengeId,
         private int $attemptsCount,
         private bool $solved,
@@ -17,8 +18,12 @@ final class GameSession {
         return $this->id;
     }
 
-    public function getUserId() : int {
+    public function getUserId() : ?int {
         return $this->userId;
+    }
+
+    public function getGuestToken() : ?string {
+        return $this->guestToken;
     }
 
     public function getChallengeId() : int {
@@ -40,4 +45,10 @@ final class GameSession {
     public function getCreatedAt() : \DateTimeImmutable {
         return $this->created_at;
     }
+
+    /*
+    public function isGuest() : bool {
+        return $this->guestToken !== null;
+    }
+    */
 }

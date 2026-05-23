@@ -7,7 +7,7 @@ final class GameAttempt {
         private int $id,
         private int $sessionId,
         private int $guessedCharacterId,
-        //private int $attemptNumber,
+        private int $attemptNumber,
         private \DateTimeImmutable $createdAt
     ){}
 
@@ -23,9 +23,9 @@ final class GameAttempt {
         return $this->guessedCharacterId;
     }
 
-    /*public function getAttemptNumber() : int {
-        return $this->attemptNumber
-    }*/
+    public function getAttemptNumber() : int {
+        return $this->attemptNumber;
+    }
     
     public function getCreatedAt() : \DateTimeImmutable {
         return $this->createdAt;
