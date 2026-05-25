@@ -12,7 +12,9 @@ class AuthController extends BaseController {
         private AuthService $authService,
         private SessionManager $sessionManager,
         private GameSessionService $gameSessionService
-    ) {}
+    ) {
+        parent::__construct($sessionManager);
+    }
 
     public function loginForm(array $vars) : void {
         $this->redirectIfLoggedIn();

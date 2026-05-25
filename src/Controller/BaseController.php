@@ -3,8 +3,13 @@
 namespace App\Controller;
 
 use App\View\View;
+use App\Core\SessionManager;
 
 abstract class BaseController {
+    public function __construct(
+        protected SessionManager $sessionManager
+    ) {}
+
     protected function render(string $template, array $data = []) : void {
         $defaultCss = ['reset.css', 'base.css'];
 
@@ -22,6 +27,8 @@ abstract class BaseController {
         } else {
             $data['js'] = $defaultJs;
         }
+
+        $data = array_merge($this->sessionManager->getSessionData(), $data);
 
         View::render($template, $data);
     }

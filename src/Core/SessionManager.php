@@ -22,10 +22,28 @@ class SessionManager {
         return isset($_SESSION['user_id']) ? (int)($_SESSION['user_id']) : null;
     }
 
-    public function regenerateAndSet(int $userId) : void {
+    public function getSessionData() : array {
+        return [
+            'is_logged_in' => $this->isLoggedIn(),
+            'username' => $_SESSION['username'] ?? null,
+            'user_icon_url' => $_SESSION['user_icon_url'] ?? null
+        ];
+    }
+
+    public function updateSessionUsername(string $newUsername) : void {
+        $_SESSION['username'] = $newUsername;
+    }
+
+    public function updateSessionIconUrl(string $newUrl) : void {
+        $_SESSION['user_icon_url'] = $newUrl;
+    }
+
+    public function regenerateAndSet(int $userId, string $username, string $userIconUrl) : void {
         session_regenerate_id(true);
         unset($_SESSION['csrf_token']);
         $_SESSION['user_id'] = $userId;
+        $_SESSION['username'] = $username;
+        $_SESSION['user_icon_url'] = $userIconUrl;
     }
 
     public function clearUserSession() : void {

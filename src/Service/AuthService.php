@@ -81,7 +81,7 @@ class AuthService {
     // ----- Remember me methods -----
 
     public function createSessionForUser(User $user, bool $remember) : void {
-        $this->sessionManager->regenerateAndSet($user->getId());
+        $this->sessionManager->regenerateAndSet($user->getId(), $user->getUsername(), $user->getUserIconUrl());
 
         if($remember) {
             $this->createRememberToken($user->getId());

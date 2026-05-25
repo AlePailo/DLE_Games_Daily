@@ -102,6 +102,7 @@ class UserRepository implements IUserRepository {
             id: (int)$row['id'],
             username: $row['username'],
             email: $row['email'],
+            userIconUrl: $row['user_icon_url'],
             isVerified: (bool)$row['is_verified'],
             createdAt: new \DateTimeImmutable($row['created_at']),
             updatedAt: new \DateTimeImmutable($row['updated_at'])
@@ -148,5 +149,17 @@ class UserRepository implements IUserRepository {
         $res = $stmt->fetch();
 
         return $res ? $this->mapUser($res) : null;
+    }
+
+
+
+    public function updateUsername(int $id, string $newUsername) : void {
+        $stmt = $this->pdo->prepare("UPDATE users SET username = :username WHERE id = :id");
+        $stmt->execute(['id' => $id, 'username' => $newUsername]);
+    }
+
+    public function updateUserIconUrl(int $id, string $newUrl) : void {
+        $stmt = $this->pdo->prepare("UPDATE users SET user_icon_url = :user_icon_url WHERE id = :id");
+        $stmt->execute(['id' => $id, 'user_icon_url' => $newUrl]);
     }
 }

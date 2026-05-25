@@ -27,4 +27,7 @@ interface IUserRepository {
 
     public function saveRememberToken(int $userId, string $hash, \DateTimeImmutable $expires) : void;
     public function deleteRememberToken(string $hashedToken) : void;
+
+    public function updateUsername(int $id, string $newUsername) : void;
+    public function updateUserIconUrl(int $id, string $newUrl) : void;
 }

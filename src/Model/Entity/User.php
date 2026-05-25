@@ -7,6 +7,7 @@ final class User {
         private int $id,
         private string $username,
         private string $email,
+        private string $userIconUrl,
         private bool $isVerified,
         private \DateTimeImmutable $createdAt,
         private \DateTimeImmutable $updatedAt
@@ -22,6 +23,10 @@ final class User {
 
     public function getEmail() : string {
         return $this->email;
+    }
+
+    public function getUserIconUrl() : string {
+        return $this->userIconUrl;
     }
 
     public function isVerified() : bool {

@@ -23,7 +23,6 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
 
     public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved): void
     {
-        $wonYesterday = $this->wonYesterday($userId, $franchiseId);
         
         $current = $this->findByUserAndFranchise($userId, $franchiseId);
 
@@ -41,13 +40,15 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
             return;
         }
 
-        $newStreak = match(true) {
+        $wonYesterday = $this->wonYesterday($userId, $franchiseId);
+
+        $updatedCurrentStreak = match(true) {
             !$solved          => 0,
             $wonYesterday     => $current->getCurrentStreak() + 1,
             default           => 1
         };
 
-        $newMaxStreak = max($current->getMaxStreak(), $newStreak);
+        $updatedMaxStreak = max($current->getMaxStreak(), $updatedCurrentStreak);
 
         
         if($solved) {
@@ -71,8 +72,8 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         ");
         $stmt->execute([
             'games_won_increment' => $solved ? 1 : 0,
-            'current_streak'      => $newStreak,
-            'max_streak'          => $newMaxStreak,
+            'current_streak'      => $updatedCurrentStreak,
+            'max_streak'          => $updatedMaxStreak,
             'avg_attempts'        => $newAvg,
             'user_id'             => $userId,
             'franchise_id'        => $franchiseId,
