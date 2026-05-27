@@ -6,8 +6,8 @@ final class Franchise {
     public function __construct(
         private int $id,
         private string $name,
-        private ?string $slug,
-        private string $description,
+        private string $slug,
+        private ?string $description,
         private bool $isActive, 
         private string $iconUrl,
         private string $bgImageUrl,

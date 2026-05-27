@@ -16,6 +16,12 @@ class FranchiseRepository implements IFranchiseRepository {
         return array_map([$this, 'mapFranchise'], $stmt->fetchAll());
     }
 
+    public function findAllActive() : array {
+        $stmt = $this->pdo->prepare("SELECT * FROM franchises WHERE is_active = true");
+        $stmt->execute();
+        return array_map([$this, 'mapFranchise'], $stmt->fetchAll());
+    }
+
     public function findBySlug(string $slug): ?Franchise {
         $stmt = $this->pdo->prepare("SELECT * FROM franchises WHERE slug = ?");
         $stmt->execute([$slug]);

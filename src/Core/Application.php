@@ -10,7 +10,8 @@ class Application {
         $dotenv = Dotenv::createImmutable(BASE_PATH);
         $dotenv->load();
         $dotenv->required(['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_CHARSET', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM', 'MAIL_FROM_NAME']);
-        $container = self::buildContainer();
+        //$container = self::buildContainer();
+        $container = ContainerFactory::build();
 
         $authService = $container->get(AuthService::class);
         $currentUser = $authService->attemptAutoLogin();
@@ -24,12 +25,14 @@ class Application {
         $router->dispatch();
     }
 
+    /*
     private static function buildContainer() : \DI\Container {
         $definitions = require BASE_PATH . 'config/container.php';
         return (new \DI\ContainerBuilder())
             ->addDefinitions($definitions)
             ->build();
     }
+    */
 
     private static function guardRoutes(?object $currentUser) : void {
         $uri = strtok($_SERVER['REQUEST_URI'], '?');

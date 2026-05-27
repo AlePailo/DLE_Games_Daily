@@ -6,5 +6,6 @@ use App\Model\Entity\Franchise;
 
 interface IFranchiseRepository {
     public function findAll() : array;
+    public function findAllActive() : array;
     public function findBySlug(string $slug) : ?Franchise;
 }

@@ -21,7 +21,22 @@ class CharacterRepository implements ICharacterRepository {
         return $this->mapCharacters($stmt->fetchAll());
     }
 
-    public function mapCharacters(array $rows) : array {
+    public function findRandomIdByFranchise(int $franchiseId, array $excludedIds) : ?int {
+        if(empty($excludedIds)) {
+            $stmt = $this->pdo->prepare("SELECT id FROM characters WHERE franchise_id = :franchise_id ORDER BY RAND() LIMIT 1");
+            $stmt->execute(['franchise_id' => $franchiseId]);
+        } else {
+            $placeholders = implode(',', array_fill(0, count($excludedIds), '?'));
+
+            $stmt = $this->pdo->prepare("SELECT id FROM characters WHERE franchise_id = ? AND id NOT IN($placeholders) ORDER BY RAND() LIMIT 1");
+            $stmt->execute(array_merge([$franchiseId], $excludedIds));
+        }
+        
+        $res = $stmt->fetchColumn();
+        return $res !== false ? (int)$res : null;
+    }
+
+    private function mapCharacters(array $rows) : array {
         $grouped = [];
         foreach($rows as $row) {
             $id = (int) $row['id'];
@@ -39,7 +54,7 @@ class CharacterRepository implements ICharacterRepository {
         return array_map([$this, 'mapCharacter'], $grouped);
     }
 
-    public function mapCharacter(array $data) : Character {
+    private function mapCharacter(array $data) : Character {
         return new Character (
             id: (int)$data['id'],
             name: $data['name'],
