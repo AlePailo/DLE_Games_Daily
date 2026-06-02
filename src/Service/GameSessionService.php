@@ -42,4 +42,8 @@ class GameSessionService {
             throw $e;
         }
     }
+
+    public function updateStatsOnComplete(int $userId, int $franchiseId, int $attempts, bool $solved) : void {
+        $this->statsRepository->upsertOnGameCompletion($userId, $franchiseId, $attempts, $solved);
+    }
 }

@@ -20,6 +20,7 @@ return function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/check/email', [AuthController::class, 'checkEmail']);
     */
 
-    $r->addRoute('GET', '/{slug}', [GameController::class, 'index']);
-    //$r->addRoute('POST', '/{slug}/attempt', [GameController::class, 'attempt']);
+    $r->addRoute('GET', '/{slug}', [GameController::class, 'start']);
+    $r->addRoute('POST', '/{slug}/attempt', [GameController::class, 'attempt']);
+    $r->addRoute('POST', '/{slug}/surrender', [GameController::class, 'surrender']);
 };

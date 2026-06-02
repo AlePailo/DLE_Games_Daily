@@ -38,6 +38,10 @@ final class GameSession {
         return $this->solved;
     }
 
+    public function isCompleted() : bool {
+        return $this->completed_at !== null;
+    }
+
     public function getCompletedAt() : ?\DateTimeImmutable {
         return $this->completed_at;
     }

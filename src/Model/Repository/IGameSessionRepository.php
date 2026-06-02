@@ -16,4 +16,5 @@ interface IGameSessionRepository {
     public function migrateGuestSessions(string $guestToken, int $userId) : void;
     public function incrementAttempts(int $id) : void;
     public function markAsSolved(int $id): void;
+    public function markAsCompleted(int $id) : void;
 }

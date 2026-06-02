@@ -36,6 +36,26 @@ class CharacterRepository implements ICharacterRepository {
         return $res !== false ? (int)$res : null;
     }
 
+    public function findByIdWithAttributes(int $id) : ?Character {
+        $stmt = $this->pdo->prepare("SELECT c.id, c.name, c.image_url, ad.attribute_key, ca.value
+                                        FROM characters c
+                                        JOIN character_attributes ca ON ca.characters_id = c.id
+                                        JOIN attribute_definitions ad ON ad.id = ca.attribute_definition_id
+                                        WHERE c.id = :id
+                                        ORDER BY ad.display_order");
+        $stmt->execute(['id' => $id]);
+        $rows = $stmt->fetchAll();
+
+        if(empty($rows)) return null;
+
+        return $this->mapCharacter([
+            'id' => $rows[0]['id'],
+            'name' => $rows[0]['name'],
+            'image_url' => $rows[0]['image_url'],
+            'attributes' => array_column($rows, 'value', 'attribute_key')
+        ]);
+    }
+
     private function mapCharacters(array $rows) : array {
         $grouped = [];
         foreach($rows as $row) {

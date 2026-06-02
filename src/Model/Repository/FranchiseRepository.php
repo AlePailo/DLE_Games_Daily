@@ -29,6 +29,28 @@ class FranchiseRepository implements IFranchiseRepository {
         return $row ? $this->mapFranchise($row) : null;
     }
 
+    public function findBySlugWithAttributes(string $slug) : ?Franchise {
+        $stmt = $this->pdo->prepare("
+        SELECT f.*, ad.id as def_id, ad.attribute_key, ad.attribute_label, ad.display_order
+        FROM franchises f LEFT JOIN attribute_definitions ad ON ad.franchise_id = f.id
+        WHERE f.slug = :slug
+        AND (ad.is_active = 1 OR ad.id IS NULL)
+        ORDER BY ad.display_order");
+        $stmt->execute(['slug' => $slug]);
+        $rows = $stmt->fetchAll();
+
+        if(empty($rows)) return null;
+
+        $attributes = [];
+        foreach($rows as $row) {
+            if($row['def_id'] !== null) {
+                $attributes[] = $this->mapAttributeDefinition($row);
+            }
+        }
+
+        return $this->mapFranchise($rows[0], $attributes);
+    }
+
 
     public function mapFranchise(array $row, array $attributes = []) : Franchise {
         return new Franchise (
@@ -40,13 +62,14 @@ class FranchiseRepository implements IFranchiseRepository {
             iconUrl: $row['icon_url'],
             bgImageUrl: $row['bg_image_url'],
             createdAt: new \DateTimeImmutable($row['created_at']),
-            updatedAt: new \DateTimeImmutable($row['updated_at'])
+            updatedAt: new \DateTimeImmutable($row['updated_at']),
+            attributeDefinitions: $attributes
         );
     }
 
     public function mapAttributeDefinition(array $row): AttributeDefinition {
         return new AttributeDefinition (
-            id: (int) $row['id'],
+            id: (int) $row['def_id'] ?? $row['id'],
             key: $row['attribute_key'],
             label: $row['attribute_label'],
             displayOrder: (int) $row['display_order']

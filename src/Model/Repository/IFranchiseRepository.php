@@ -8,4 +8,5 @@ interface IFranchiseRepository {
     public function findAll() : array;
     public function findAllActive() : array;
     public function findBySlug(string $slug) : ?Franchise;
+    public function findBySlugWithAttributes(string $slug) : ?Franchise;
 }

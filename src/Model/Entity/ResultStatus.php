@@ -3,7 +3,7 @@
 namespace App\Model\Entity;
 
 enum ResultStatus : string {
-    case Correct = "Correct";
-    case Partial = "Partial";
-    case Wrong = "Wrong";
+    case CORRECT = "Correct";
+    case PARTIAL = "Partial";
+    case WRONG = "Wrong";
 }

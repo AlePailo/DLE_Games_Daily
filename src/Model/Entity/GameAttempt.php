@@ -8,7 +8,8 @@ final class GameAttempt {
         private int $sessionId,
         private int $guessedCharacterId,
         private int $attemptNumber,
-        private \DateTimeImmutable $createdAt
+        private \DateTimeImmutable $createdAt,
+        private array $results = []
     ){}
 
     public function getId() : int {
@@ -29,5 +30,9 @@ final class GameAttempt {
     
     public function getCreatedAt() : \DateTimeImmutable {
         return $this->createdAt;
+    }
+
+    public function getResults() : array {
+        return $this->results;
     }
 }

@@ -63,7 +63,13 @@ class GameSessionRepository implements IGameSessionRepository {
 
     public function markAsSolved(int $id): void
     {
-        $stmt = $this->pdo->prepare("UPDATE game_sessions SET solved = 1 WHERE id = :id");
+        $stmt = $this->pdo->prepare("UPDATE game_sessions SET solved = 1, completed_at = CURDATE() WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+    }
+
+    public function markAsCompleted(int $id): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE game_sessions SET completed_at = CURDATE() WHERE id = :id");
         $stmt->execute(['id' => $id]);
     }
 
