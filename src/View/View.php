@@ -6,16 +6,16 @@ class View {
     public static function render(string $template, array $data = []) : void {
         extract($data);
 
-        ob_start();
         $templatePath = BASE_PATH . "templates/{$template}.php";
-
-        if(file_exists($templatePath)) {
-            require $templatePath;
-        } else {
-            trigger_error("Template non trovato: {$template}", E_USER_ERROR);
+        if(!file_exists($templatePath)) {
+            throw new \RuntimeException("Template non trovato: {$template}");
         }
 
+        ob_start();
+        require $templatePath;
         $content = ob_get_clean();
+
+        require BASE_PATH . 'templates/layout/page-layout.php';
         
         require BASE_PATH . 'templates/layout/header.php';
         echo $content;

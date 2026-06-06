@@ -10,7 +10,7 @@ abstract class BaseController {
         protected SessionManager $sessionManager
     ) {}
 
-    protected function render(string $template, array $data = []) : void {
+    protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
         $defaultCss = ['reset.css', 'base.css'];
 
         if(isset($data['css'])) {

@@ -4,13 +4,17 @@ namespace App\Core;
 
 use App\Service\AuthService;
 use Dotenv\Dotenv;
+use App\View\View;
+use DI\NotFoundException;
 
 class Application {
     public static function run() : void {
         $dotenv = Dotenv::createImmutable(BASE_PATH);
         $dotenv->load();
         $dotenv->required(['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_CHARSET', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM', 'MAIL_FROM_NAME']);
-        //$container = self::buildContainer();
+        
+        self::registerErrorHandlers();
+
         $container = ContainerFactory::build();
 
         $authService = $container->get(AuthService::class);
@@ -24,15 +28,6 @@ class Application {
         $router = new Router($container, $dispatcher);
         $router->dispatch();
     }
-
-    /*
-    private static function buildContainer() : \DI\Container {
-        $definitions = require BASE_PATH . 'config/container.php';
-        return (new \DI\ContainerBuilder())
-            ->addDefinitions($definitions)
-            ->build();
-    }
-    */
 
     private static function guardRoutes(?object $currentUser) : void {
         $uri = strtok($_SERVER['REQUEST_URI'], '?');
@@ -56,5 +51,47 @@ class Application {
             header('Location:' . $_ENV['APP_BASE_PATH'] . 'login');
             exit;
         }
+    }
+
+    /* ----- Handles errors and exceptions that are not handled already somewhere else ----- */
+    private static function registerErrorHandlers() : void {
+        set_exception_handler(function (\Throwable $e) {
+            // Future possible cases
+            /*
+            if ($e instanceof NotFoundException) {
+                http_response_code(404);
+                if ($_ENV['APP_ENV'] === 'development') {
+                    echo '<pre>' . $e->getMessage() . '</pre>';
+                } else {
+                    View::render('errors/404', [], false);
+                }
+                return;
+            }
+
+            if ($e instanceof DatabaseException) {
+                error_log($e->getMessage()); // log su file
+                http_response_code(500);
+                if ($_ENV['APP_ENV'] === 'development') {
+                    echo '<pre>' . $e->getMessage() . "\n" . $e->getTraceAsString() . '</pre>';
+                } else {
+                    View::render('errors/500', [], false);
+                }
+                return;
+            }
+            */
+
+            // Default case
+            http_response_code(500);
+            if($_ENV['APP_ENV'] === 'development') {
+                echo '<pre>' . $e->getMessage() . "\n" . $e->getTraceAsString() . '</pre>';
+            } else {
+                View::render('errors/500', []);
+            }
+        });
+
+        //Converts PHP errors in Exceptions
+        set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) {
+            throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
+        });
     }
 }

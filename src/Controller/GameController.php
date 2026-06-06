@@ -52,6 +52,11 @@ class GameController extends BaseController{
 
         $characters = $this->characterRepository->findByFranchiseId($franchise->getId());
 
+        $correctChar = null;
+        if($gameSession->isSolved() || $gameSession->isCompleted()) {
+            $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
+        }
+
         $this->render("game", [
             'title' => "{$slug} | DLE Games Daily",
             /*'css' => ['game.css'],
@@ -60,6 +65,7 @@ class GameController extends BaseController{
             'gameSession' => $gameSession,
             'characters' => $characters,
             'show_recap' => $gameSession->isSolved() || $gameSession->isCompleted(),
+            'correct_char' => $correctChar,
             'attempts' => $attempts
         ]);
     }
@@ -106,15 +112,35 @@ class GameController extends BaseController{
         $this->gameSessionRepository->incrementAttempts($gameSession->getId());
 
         $solved = $guessedCharId === $dailyChallenge->getCharacterId();
+        $response = [
+            'success' => true,
+            'solved' => $solved,
+            'attempt' => [
+                'character' => [
+                    'name' => $guessedChar->getName(),
+                    'image_url' => $guessedChar->getImageUrl(),
+                ],
+                'results' => array_map(fn($r) => $r->value, $compareResults)
+            ]];
+
         if($solved) {
             $this->gameSessionRepository->markAsSolved($gameSession->getId());
 
             if($userId = $this->sessionManager->getUserId()) {
                 $this->gameSessionService->updateStatsOnComplete($userId, $franchise->getId(), $attemptNumber, true);
             }
+
+            $response = array_merge($response, [
+                'correct_char' => [
+                    'name' => $correctChar->getName(),
+                    'image_url' => $correctChar->getImageUrl(),
+                    'attributes' => $correctChar->getAttributes()
+                ],
+                'attempts_count' => $attemptNumber
+            ]);
         }
 
-        $this->renderJson(['success' => true, 'solved' => $solved, 'attempt' => ['character' => ['name' => $guessedChar->getName(), 'imageUrl' => $guessedChar->getImageUrl()], 'results' => array_map(fn($r) => $r->value, $compareResults)]]);
+        $this->renderJson($response);
     }
 
     public function surrender(array $vars) : void {

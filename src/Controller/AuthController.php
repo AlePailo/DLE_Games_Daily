@@ -200,7 +200,7 @@ class AuthController extends BaseController {
             'info' => $this->sessionManager->getFlash('info'),
             'csrf_token' => $this->sessionManager->getCsrfToken(),
             'old' => $this->sessionManager->getFlash('oldInput')
-        ]);
+        ], false);
     }
     
     private function redirectIfLoggedIn() : void {
