@@ -3,7 +3,7 @@
 namespace App\View;
 
 class View {
-    public static function render(string $template, array $data = []) : void {
+    public static function render(string $template, array $data = [], bool $withNav = true) : void {
         extract($data);
 
         $templatePath = BASE_PATH . "templates/{$template}.php";

@@ -2,13 +2,17 @@
 
 namespace App\Controller;
 
+use App\Core\SessionManager;
 use App\View\View;
 use App\Model\Repository\IFranchiseRepository;
 
 class HomeController extends BaseController {
     public function __construct(
-        private IFranchiseRepository $franchises
-    ) {}
+        private IFranchiseRepository $franchises,
+        SessionManager $sessionManager
+    ) {
+        parent::__construct($sessionManager);
+    }
 
     public function index(array $vars) : void {
         $franchises = $this->franchises->findAll();

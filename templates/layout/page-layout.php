@@ -36,7 +36,7 @@ require BASE_PATH . 'templates/layout/alerts.php'; ?>
             </main>
         </div>
     </div>
-    <?php require 'templates/layout/bottombar.php'; ?>
+    <?php require BASE_PATH . 'templates/layout/bottombar.php'; ?>
 <?php else: ?>
     <main id="main-content">
         <?= $content ?>

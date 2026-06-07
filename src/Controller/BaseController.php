@@ -30,7 +30,7 @@ abstract class BaseController {
 
         $data = array_merge($this->sessionManager->getSessionData(), $data);
 
-        View::render($template, $data);
+        View::render($template, $data, $requiresNav);
     }
 
     protected function renderJson(mixed $data, int $status = 200) : void {
