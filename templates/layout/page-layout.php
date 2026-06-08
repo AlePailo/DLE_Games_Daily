@@ -23,8 +23,7 @@ if(!function_exists('checkActive')) {
 
 ?>
 
-<?php require BASE_PATH . 'templates/layout/header.php';
-require BASE_PATH . 'templates/layout/alerts.php'; ?>
+<?php require BASE_PATH . 'templates/layout/header.php'; ?>
 
 <?php if($withNav): ?>
     <div class="app-layout">

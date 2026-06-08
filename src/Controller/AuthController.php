@@ -10,7 +10,7 @@ use App\Service\GameSessionService;
 class AuthController extends BaseController {
     public function __construct(
         private AuthService $authService,
-        private SessionManager $sessionManager,
+        protected SessionManager $sessionManager,
         private GameSessionService $gameSessionService
     ) {
         parent::__construct($sessionManager);

@@ -12,5 +12,4 @@
     <?php endif; ?>
 </head>
 <body>
-    <main>
-        <?php require BASE_PATH . 'templates/layout/alerts.php' ?>
+    <?php require BASE_PATH . 'templates/layout/alerts.php' ?>

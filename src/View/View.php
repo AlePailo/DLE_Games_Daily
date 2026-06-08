@@ -16,13 +16,6 @@ class View {
         $content = ob_get_clean();
 
         require BASE_PATH . 'templates/layout/page-layout.php';
-        
-        require BASE_PATH . 'templates/layout/header.php';
-        echo $content;
-
-        if (file_exists(BASE_PATH . 'templates/layout/footer.php')) {
-            require BASE_PATH . 'templates/layout/footer.php';
-        }
     }
 
     public static function renderJson(mixed $data, int $status = 200) {

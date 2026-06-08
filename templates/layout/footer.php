@@ -1,4 +1,3 @@
-    </main>
     <footer>
         <p>&copy; 2026 DLE Games Daily</p>
     </footer>
