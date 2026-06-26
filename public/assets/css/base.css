@@ -8,6 +8,7 @@
     --black-main: #0A0A0A;
     --black-secondary: #0F0F0F;
     --black-tertiary: #161616;
+    --selection-light: #363636;
 
     --purple-primary: #7C86FF;
     --purple-secondary: #191332;
@@ -17,6 +18,8 @@
     --gray-main: #848586;
 
     --boh: #18132E;
+
+    --bottom-nav-height: 65px;
 }
 
 body {
@@ -136,3 +139,9 @@ a:hover {
 .toast-success .toast-icon::before { content: '✓'; color: #4ade80; }
 .toast-error   .toast-icon::before { content: '✕'; color: #f87171; }
 .toast-info    .toast-icon::before { content: 'ℹ'; color: #60a5fa; }
+
+
+
+body {
+    min-height: 100svh;
+}

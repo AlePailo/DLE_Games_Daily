@@ -1,8 +1,9 @@
 <aside id="main-sidebar" class="sidebar" aria-label="Main navigation menu">
     <div class="sidebar-header">
-        <span class="logo">DLE Games Daily</span>
-        <button id="sidebar-toggle" aria-expanded="true" aria-controls="main-sidebar" aria-label="Toggle sidebar">
-            <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-columns2-icon lucide-columns-2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg>
+        <!--<span class="logo">DLE Games Daily</span>-->
+        <button id="sidebar-toggle" class="logo-toggle-btn" aria-expanded="true" aria-controls="main-sidebar" aria-label="Toggle sidebar">
+            <svg class="logo-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-columns2-icon lucide-columns-2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg>
+            <span class="logo-text">DLE Games</span>
         </button>
     </div>
 
@@ -23,7 +24,7 @@
             <li>
                 <a href="<?= BASE_URL ?>/leaderboards" <?= checkActive('/leaderboards') ?>>
                     <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy-icon lucide-trophy"><path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"/><path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"/><path d="M18 9h1.5a1 1 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6 9H4.5a1 1 0 0 1 0-5H6"/></svg>
-                    <span class="menu-text">leaderboards</span>
+                    <span class="menu-text">Leaderboards</span>
                 </a>
             </li>
         </ul>

@@ -11,7 +11,11 @@ abstract class BaseController {
     ) {}
 
     protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
-        $defaultCss = ['reset.css', 'base.css'];
+        $defaultCss = ['reset.css', 'base.css', 'layout/app-shell.css'];
+
+        if($requiresNav) {
+            $defaultCss[] = 'layout/navigation.css';
+        }
 
         if(isset($data['css'])) {
             $data['css'] = array_merge($defaultCss, $data['css']);
@@ -20,7 +24,7 @@ abstract class BaseController {
         }
 
 
-        $defaultJs = ['utils/alerts.js'];
+        $defaultJs = ['base.js', 'utils/alerts.js'];
 
         if(isset($data['js'])) {
             $data['js'] = array_merge($defaultJs, $data['js']);

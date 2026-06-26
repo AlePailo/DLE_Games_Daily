@@ -11,7 +11,7 @@
         if ($message): 
             //Split multiple messages
             $message = str_replace(['<br/>', '<br />', "\n"], '<br>', $message);
-            $lines = array_filter(explode('<br>', $message)); 
+            $lines = array_filter(explode('<br>', $message));
             ?>
             
             <div class="toast toast-<?= $type ?>" role="alert">
