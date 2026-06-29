@@ -9,6 +9,16 @@ $isLoggedIn = !empty($username);
 ?>
 
 <header class="headbar">
+    <div class="headbar-left">
+        <a href="<?= BASE_URL ?>" class="site-logo" aria-label="DLE Games Daily">
+            <span class="logo-badge">DLE</span>
+            
+            <div class="logo-text-group">
+                <span class="logo-main-text">Games</span>
+                <span class="logo-sub-text">Daily</span>
+            </div>
+        </a>
+    </div>
     <?php if($isLoggedIn): ?>
         <a href="<?= BASE_URL ?>/profile" aria-label="Your profile" class="user-profile">
             <span><?= htmlspecialchars($username) ?></span>
