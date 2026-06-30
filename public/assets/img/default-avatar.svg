@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#F3F4F6">
+    <g>
+        <!-- Testa -->
+        <circle cx="12" cy="8" r="4" />
+        <!-- Busto allungato fino al bordo inferiore assoluto -->
+        <path d="M12 14c-4.42 0-8 2.58-8 6v4h16v-4c0-3.42-3.58-6-8-6z" />
+    </g>
+</svg>

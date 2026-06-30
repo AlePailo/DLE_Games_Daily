@@ -38,7 +38,7 @@ class SessionManager {
         $_SESSION['user_icon_url'] = $newUrl;
     }
 
-    public function regenerateAndSet(int $userId, string $username, string $userIconUrl) : void {
+    public function regenerateAndSet(int $userId, string $username, ?string $userIconUrl) : void {
         session_regenerate_id(true);
         unset($_SESSION['csrf_token']);
         $_SESSION['user_id'] = $userId;

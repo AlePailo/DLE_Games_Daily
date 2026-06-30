@@ -21,8 +21,11 @@ $isLoggedIn = !empty($username);
     </div>
     <?php if($isLoggedIn): ?>
         <a href="<?= BASE_URL ?>/profile" aria-label="Your profile" class="user-profile">
-            <span><?= htmlspecialchars($username) ?></span>
-            <img src="<?= BASE_PATH ?>/assets/img/<?= htmlspecialchars($user_icon_url ?? BASE_URL . '/assets/img/default-avatar.png') ?>" alt="Your avatar">
+            <span class="user-name"><?= htmlspecialchars($username) ?></span>
+            <?php
+                $avatarFile = !empty($user_icon_url) ? htmlspecialchars($user_icon_url) : 'default-avatar.svg';
+            ?>
+            <img src="<?= BASE_URL ?>/assets/img/<?= $avatarFile ?>" class="user-img" alt="Your avatar">
         </a>
     <?php else: ?>
         <div class="auth-actions">

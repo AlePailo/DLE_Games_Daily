@@ -11,7 +11,7 @@ abstract class BaseController {
     ) {}
 
     protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
-        $defaultCss = ['reset.css', 'base.css', 'layout/app-shell.css'];
+        $defaultCss = ['base.css', 'layout/app-shell.css'];
 
         if($requiresNav) {
             $defaultCss[] = 'layout/navigation.css';

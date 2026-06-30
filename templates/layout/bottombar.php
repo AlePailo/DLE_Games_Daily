@@ -18,7 +18,10 @@
         <li>
             <?php if(!empty($username)): ?>
                 <a href="<?= BASE_URL ?>/profile" <?= checkActive('/profile') ?> aria-label="Your profile">
-                    /* USER ICON */
+                    <?php
+                        $avatarFile = !empty($user_icon_url) ? htmlspecialchars($user_icon_url) : 'default-avatar.svg';
+                    ?>
+                    <img src="<?= BASE_URL ?>/assets/img/<?= $avatarFile ?>" class="avatar-bottombar" alt="Your avatar">
                 </a>
             <?php else: ?>
                 <a href="<?= BASE_URL ?>/login" aria-label="Login or Sign up">

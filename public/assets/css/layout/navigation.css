@@ -20,8 +20,8 @@
     padding: 0;
     margin: 0;
 
-    padding-bottom: env(safe-area-inset-bottom, 0px); 
-    height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+    /*padding-bottom: env(safe-area-inset-bottom, 0px); 
+    height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));*/
 }
 
 .bottom-nav li {
@@ -62,7 +62,7 @@
     transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
 }
 
-.bottom-nav svg.icon {
+.bottom-nav svg.icon, .avatar-bottombar {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
@@ -78,6 +78,19 @@
     transform: scale(0.92);
 }
 
+.avatar-bottombar {
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--black-secondary);
+    outline: 1px solid var(--white-main);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.bottom-nav a.active .avatar-bottombar {
+    fill: var(--purple-primary);
+    outline-color: var(--purple-primary);
+}
+
 aside {
     display: none;
 }
@@ -86,9 +99,58 @@ aside {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: var(--headbar-height, 60px);
+    background-color: var(--black-main);
+    padding: 0 1.5rem;
+}
+
+.site-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--white-main, #ffffff);
+    gap: 8px;
+    user-select: none;
+}
+
+.logo-badge {
+    background-color: var(--purple-primary, #8b5cf6);
+    color: var(--white-main);
+    font-weight: 900;
+    font-size: 1.1rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.logo-text-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1;
+}
+
+.logo-main-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.logo-sub-text {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #8a8a93;
+    letter-spacing: 2px;
+    margin-top: 2px;
 }
 
 .auth-actions {
+    display: none;
+}
+
+.user-profile {
     display: none;
 }
 
@@ -258,78 +320,39 @@ aside {
     .auth-actions .btn-primary:active {
         transform: translateY(0);
     }
-}
 
-
-.headbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: var(--headbar-height, 60px);
-    background-color: var(--black-main);
-    padding: 0 1.5rem;
-}
-
-.site-logo {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--white-main, #ffffff);
-    gap: 8px;
-    user-select: none;
-}
-
-.logo-badge {
-    background-color: var(--purple-primary, #8b5cf6);
-    color: #ffffff;
-    font-weight: 900;
-    font-size: 1.1rem;
-    padding: 4px 8px;
-    border-radius: 6px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.logo-text-group {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    line-height: 1;
-}
-
-.logo-main-text {
-    font-size: 1.2rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.logo-sub-text {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #8a8a93;
-    letter-spacing: 2px;
-    margin-top: 2px;
-}
-
-
-/* TODO: FIX OIVERFLOW ON 500px or less vw screens */
-
-@media (max-width: 500px) {
-    .headbar {
-        padding: 0 0.75rem;
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--white-main);
+        padding: 6px 12px;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
     }
 
-    .logo-badge {
+    .user-profile:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .user-name {
         font-size: 0.95rem;
-        padding: 3px 6px;
+        font-weight: 600;
+        text-transform: uppercase;
     }
 
-    .logo-main-text {
-        font-size: 1rem;
+    .user-img {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--purple-primary);
+        background-color: var(--black-secondary);
+        transition: transform 0.2s ease;
     }
 
-    .logo-sub-text {
-        display: none; 
+    .user-profile:hover .avatar-img {
+        transform: scale(1.05);
     }
 }
