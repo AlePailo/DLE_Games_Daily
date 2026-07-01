@@ -4,17 +4,16 @@ namespace App\Controller;
 
 use App\Core\SessionManager;
 
-class HomeController extends BaseController {
+class LeaderboardsController extends BaseController {
     public function __construct(
-        SessionManager $sessionManager
+        protected SessionManager $sessionManager
     ) {
         parent::__construct($sessionManager);
     }
 
     public function index(array $vars) : void {
-
-        $this->render('home', [
-            'title' => 'Home | DLE Games Daily'
+        $this->render('leaderboards', [
+            'title' => 'Leaderboards | DLE Games Daily'
         ]);
     }
 }
