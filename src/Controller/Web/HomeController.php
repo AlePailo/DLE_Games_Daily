@@ -1,10 +1,11 @@
 <?php declare(strict_types = 1);
 
-namespace App\Controller;
+namespace App\Controller\Web;
 
+use App\Controller\WebController;
 use App\Core\SessionManager;
 
-class HomeController extends BaseController {
+class HomeController extends WebController {
     public function __construct(
         SessionManager $sessionManager
     ) {

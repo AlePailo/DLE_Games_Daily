@@ -17,10 +17,4 @@ class View {
 
         require BASE_PATH . 'templates/layout/page-layout.php';
     }
-
-    public static function renderJson(mixed $data, int $status = 200) {
-        http_response_code($status);
-        header('Content-type: application/json');
-        echo json_encode($data);
-    }
 }

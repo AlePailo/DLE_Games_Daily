@@ -1,11 +1,13 @@
 <?php declare(strict_types = 1);
 
-use App\Controller\AuthController;
-use App\Controller\FranchiseController;
-use App\Controller\HomeController;
-use App\Controller\GameController;
-use App\Controller\LeaderboardsController;
-use App\Controller\ProfileController;
+use App\Controller\Api\FavouriteApiController;
+use App\Controller\Api\GameApiController;
+use App\Controller\Web\AuthController;
+use App\Controller\Web\FranchiseController;
+use App\Controller\Web\HomeController;
+use App\Controller\Web\GameController;
+use App\Controller\Web\LeaderboardsController;
+use App\Controller\Web\ProfileController;
 
 return function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/', [HomeController::class, 'index']);
@@ -25,6 +27,9 @@ return function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/check/username', [AuthController::class, 'checkUsername']);
     $r->addRoute('GET', '/check/email', [AuthController::class, 'checkEmail']);
     */
+
+    $r->addRoute('POST', '/api/favourites/toggle', [FavouriteApiController::class, 'toggle']);
+    
 
     $r->addRoute('GET', '/{slug}', [GameController::class, 'start']);
     $r->addRoute('POST', '/{slug}/attempt', [GameController::class, 'attempt']);

@@ -5,7 +5,23 @@ footer {
 .app-layout {
     flex: 1;
     display: block;
-    /*padding-bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom, 0px));*/
+    min-height: 100vh;
+    overflow: hidden;
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+#main-content {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
 }
 
 @media screen and (min-width: 768px) {
@@ -16,22 +32,11 @@ footer {
     .app-layout {
         display: grid;
         grid-template-columns: 260px 1fr;
-        min-height: 100vh;
         transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding-bottom: 0;
     }
 
     .app-layout.sidebar-collapsed {
         grid-template-columns: 72px 1fr;
-    }
-
-    .main-wrapper {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-    }
-
-    #main-content {
-        flex: 1;
-        padding: 2rem;
     }
 }

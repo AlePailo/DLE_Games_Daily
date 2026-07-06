@@ -15,9 +15,11 @@ use App\Model\Repository\IDailyChallengeRepository;
 use App\Model\Repository\IGameAttemptRepository;
 use App\Model\Repository\IGameAttemptResultRepository;
 use App\Model\Repository\IGameSessionRepository;
+use App\Model\Repository\IUserFavouritesRepository;
 use App\Model\Repository\IUserFranchiseStatsRepository;
 use App\Model\Repository\UserRepository;
 use App\Model\Repository\IUserRepository;
+use App\Model\Repository\UserFavouritesRepository;
 use App\Model\Repository\UserFranchiseStatsRepository;
 use App\Service\CharacterComparisonService;
 use App\Service\GameSessionService;
@@ -46,6 +48,7 @@ return [
     IGameAttemptRepository::class           => \DI\autowire(GameAttemptRepository::class),
     IGameAttemptResultRepository::class     => \DI\autowire(GameAttemptResultRepository::class),
     IDailyChallengeRepository::class        => \DI\autowire(DailyChallengeRepository::class),
+    IUserFavouritesRepository::class    => \DI\autowire(UserFavouritesRepository::class),
 
     // Core
     SessionManager::class   => \DI\autowire(SessionManager::class),

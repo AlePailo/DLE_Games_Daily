@@ -80,8 +80,8 @@
     padding: 0;
     margin: 0;
 
-    /*padding-bottom: env(safe-area-inset-bottom, 0px); 
-    height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));*/
+    padding-bottom: env(safe-area-inset-bottom, 0px); 
+    height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
 }
 
 .bottom-nav li {
@@ -173,11 +173,12 @@ aside {
     aside.sidebar {
         --sidebar-pad-x: 0.75rem;
 
+        height: 100%;
         background-color: var(--black-tertiary);
         display: flex;
         flex-direction: column;
         padding: 1rem var(--sidebar-pad-x);
-        overflow: hidden;
+        overflow-y: auto;
     }
 
     .logo-toggle-btn, .sidebar-menu a {

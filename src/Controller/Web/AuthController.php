@@ -1,13 +1,14 @@
 <?php declare(strict_types = 1);
 
-namespace App\Controller;
+namespace App\Controller\Web;
 
+use App\Controller\WebController;
 use App\Service\AuthService;
 use App\Core\SessionManager;
 use App\Exception\AuthException;
 use App\Service\GameSessionService;
 
-class AuthController extends BaseController {
+class AuthController extends WebController {
     public function __construct(
         private AuthService $authService,
         protected SessionManager $sessionManager,
@@ -176,18 +177,6 @@ class AuthController extends BaseController {
     public function logout(array $vars) : void {
         $this->authService->logout();
         $this->redirect('login');
-    }
-
-    public function checkUsername(array $vars) : void {
-        $username = trim($_GET['username'] ?? '');
-
-        $this->renderJson(['available' => !empty($username) && !$this->authService->usernameExists($username)]);
-    }
-
-    public function checkEmail(array $vars) : void {
-        $email = trim($_GET['email'] ?? '');
-
-        $this->renderJson(['available' => !empty($email) && !$this->authService->emailExists($email)]);
     }
 
     private function renderAuthForm(string $view, string $title, array $css = ['auth.css'], array $js = ['formHandler.js']) : void {
