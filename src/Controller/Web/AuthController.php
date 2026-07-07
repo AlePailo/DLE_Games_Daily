@@ -183,12 +183,7 @@ class AuthController extends WebController {
         $this->render("auth/{$view}", [
             'title' => $title,
             'css' => $css,
-            'js' => $js,
-            'error' => $this->sessionManager->getFlash('error'),
-            'success' => $this->sessionManager->getFlash('success'),
-            'info' => $this->sessionManager->getFlash('info'),
-            'csrf_token' => $this->sessionManager->getCsrfToken(),
-            'old' => $this->sessionManager->getFlash('oldInput')
+            'js' => $js
         ], false);
     }
     

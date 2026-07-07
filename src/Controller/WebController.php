@@ -15,6 +15,16 @@ class WebController extends BaseController {
     protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
         $defaultCss = ['base.css', 'layout/app-shell.css'];
 
+        $flashData = [
+            'error'   => $this->sessionManager->getFlash('error'),
+            'success' => $this->sessionManager->getFlash('success'),
+            'info'    => $this->sessionManager->getFlash('info'),
+            'old'     => $this->sessionManager->getFlash('oldInput'),
+            'csrf_token' => $this->sessionManager->getCsrfToken(),
+        ];
+
+        $data = array_merge($flashData, $data);
+
         if($requiresNav) {
             $defaultCss[] = 'layout/navigation.css';
         }

@@ -1,23 +1,27 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleBtn = document.getElementById('sidebar-toggle')
-    const appLayout = document.getElementById('app-layout')
+import { initToastEvents } from "./utils/alerts.js";
 
-    if(toggleBtn && appLayout) {
-        toggleBtn.addEventListener('click', () => {
-            appLayout.classList.toggle('sidebar-collapsed')
+document.querySelectorAll('.toast').forEach(toast => {
+    initToastEvents(toast)
+})
 
-            if(appLayout.classList.contains('sidebar-collapsed')) {
-                localStorage.setItem('sidebar-state', 'collapsed')
-            } else {
-                localStorage.setItem('sidebar-state', 'expanded')
-            }
-        })
-    }
+const toggleBtn = document.getElementById('sidebar-toggle')
+const appLayout = document.getElementById('app-layout')
 
-    // Overflow elements catcher
-    document.querySelectorAll('*').forEach(el => {
-        if (el.offsetWidth > document.documentElement.offsetWidth) {
-            console.log('Culprit found:', el)
+if(toggleBtn && appLayout) {
+    toggleBtn.addEventListener('click', () => {
+        appLayout.classList.toggle('sidebar-collapsed')
+
+        if(appLayout.classList.contains('sidebar-collapsed')) {
+            localStorage.setItem('sidebar-state', 'collapsed')
+        } else {
+            localStorage.setItem('sidebar-state', 'expanded')
         }
     })
+}
+
+// Overflow elements catcher
+document.querySelectorAll('*').forEach(el => {
+    if (el.offsetWidth > document.documentElement.offsetWidth) {
+        console.log('Culprit found:', el)
+    }
 })

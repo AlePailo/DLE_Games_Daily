@@ -121,8 +121,6 @@
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px); /* Effetto vetro sfocato */
     border: none;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1.3rem;
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -133,17 +131,35 @@
     transition: all 0.2s ease;
 }
 
+.btn-favourite span {
+    width: 25px;
+    height: 25px;
+}
+
+.btn-favourite .favourite-icon {
+    stroke: var(--white-main);
+    fill: none;
+}
+
 .btn-favourite:hover {
     transform: scale(1.1);
-    color: #ffcc00; /* Giallo/Oro al passaggio */
     background: rgba(0, 0, 0, 0.8);
 }
 
-/* Quando il franchise è ATTIVAMENTE nei preferiti */
+.btn-favourite:hover .favourite-icon {
+    stroke: #ffcc00;
+}
+
+.btn-favourite.is-favorite .favourite-icon {
+    stroke: #ffcc00;
+    fill: #ffcc00;
+}
+
+/*
 .btn-favourite.is-favorite {
-    color: #ffcc00;
     text-shadow: 0 0 8px rgba(255, 204, 0, 0.6);
 }
+*/
 
 /* Corpo della card */
 .card-content {
