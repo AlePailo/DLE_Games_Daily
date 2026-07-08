@@ -5,6 +5,9 @@
  * @param {string|Array} message - The toast message (string o array of strings)
  */
 
+// Toast duration in ms
+const TOAST_DURATION = 5000
+
 export function showAlert(type, message) {
     const container = document.getElementById('toast-container')
     if(!container) return
@@ -32,7 +35,7 @@ export function showAlert(type, message) {
         <div class="toast-progress"></div>
     `;
 
-    container.appendChild(toast);
+    container.prepend(toast);
     initToastEvents(toast);
 }
 
@@ -42,7 +45,12 @@ export function initToastEvents(toast) {
         closeBtn.onclick = () => dismissToast(toast);
     }
 
-    setTimeout(() => dismissToast(toast), 5000)
+    // Toast duration in seconds for CSS sync
+    const durationInSeconds = `${TOAST_DURATION / 1000}s`
+    toast.style.setProperty('--toast-duration', durationInSeconds)
+
+
+    setTimeout(() => dismissToast(toast), TOAST_DURATION)
 }
 
 export function dismissToast(toast) {

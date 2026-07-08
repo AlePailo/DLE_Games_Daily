@@ -51,6 +51,13 @@ class FranchiseRepository implements IFranchiseRepository {
         return $this->mapFranchise($rows[0], $attributes);
     }
 
+    public function findAllFavouritesByUser(int $userId): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM franchises f INNER JOIN user_favourites uf ON f.id = uf.franchise_id WHERE uf.user_id = :user_id");
+        $stmt->execute(['user_id' => $userId]);
+        return array_map([$this, 'mapFranchise'], $stmt->fetchAll());
+    }
+
 
     public function mapFranchise(array $row, array $attributes = []) : Franchise {
         return new Franchise (

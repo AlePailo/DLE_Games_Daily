@@ -13,7 +13,7 @@ class WebController extends BaseController {
     }
 
     protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
-        $defaultCss = ['base.css', 'layout/app-shell.css'];
+        $defaultCss = ['base.css', 'layout/app-shell.css', 'components/franchise-card.css'];
 
         $flashData = [
             'error'   => $this->sessionManager->getFlash('error'),
@@ -50,7 +50,6 @@ class WebController extends BaseController {
     }
 
     protected function redirect(string $url) : void {
-        //header("Location: /DLE_Games_Daily/{$url}");
         header('Location: ' . BASE_URL . '/' . ltrim($url, '/'));
         exit;
     }

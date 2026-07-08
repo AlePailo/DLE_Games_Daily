@@ -1,7 +1,3 @@
-/* ==========================================
-   🔍 HEADER & SEARCH BAR
-   ========================================== */
-
 .games-page-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -29,7 +25,6 @@
     font-size: 0.95rem;
 }
 
-/* La barra di ricerca in stile moderno e minimal */
 .search-wrapper {
     position: relative;
     width: 100%;
@@ -60,180 +55,17 @@
     outline: none;
     border-color: var(--purple-primary);
     background-color: var(--black-tertiary);
-    box-shadow: 0 0 0 4px rgba(138, 43, 226, 0.15); /* Leggero bagliore viola */
+    box-shadow: 0 0 0 4px rgba(138, 43, 226, 0.15);
 }
 
-/* ==========================================
-   🎮 FRANCHISES GRID
-   ========================================== */
-
-/* La magia di auto-fill: crea colonne da sole in base allo spazio senza media-queries */
 .franchises-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 2rem;
 }
 
-/* ==========================================
-   🃏 LA FRANCHISE CARD (Stile Premium)
-   ========================================== */
 
-.franchise-card {
-    background-color: var(--black-secondary);
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--black-tertiary);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease, box-shadow 0.3s ease;
-}
 
-/* Effetto Hover sulla card */
-.franchise-card:hover {
-    transform: translateY(-6px);
-    border-color: var(--purple-primary);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(138, 43, 226, 0.1);
-}
-
-/* Banner superiore */
-.card-banner {
-    height: 120px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-}
-
-/* Effetto oscurante sul banner per dare profondità */
-.card-banner::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5));
-}
-
-/* Stella dei Preferiti */
-.btn-favourite {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px); /* Effetto vetro sfocato */
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.btn-favourite span {
-    width: 25px;
-    height: 25px;
-}
-
-.btn-favourite .favourite-icon {
-    stroke: var(--white-main);
-    fill: none;
-}
-
-.btn-favourite:hover {
-    transform: scale(1.1);
-    background: rgba(0, 0, 0, 0.8);
-}
-
-.btn-favourite:hover .favourite-icon {
-    stroke: #ffcc00;
-}
-
-.btn-favourite.is-favorite .favourite-icon {
-    stroke: #ffcc00;
-    fill: #ffcc00;
-}
-
-/*
-.btn-favourite.is-favorite {
-    text-shadow: 0 0 8px rgba(255, 204, 0, 0.6);
-}
-*/
-
-/* Corpo della card */
-.card-content {
-    padding: 1.5rem;
-    padding-top: 0; /* Lasciamo spazio all'icona che sale */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    flex: 1;
-}
-
-/* L'icona circolare che "galleggia" tra il banner e il testo */
-.card-icon-wrapper {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 4px solid var(--black-secondary); /* Crea lo stacco col banner */
-    background-color: var(--black-tertiary);
-    overflow: hidden;
-    margin-top: -35px; /* Spinge l'icona verso l'alto a metà del banner */
-    position: relative;
-    z-index: 5;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.card-icon-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.franchise-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 1rem 0 1.5rem 0;
-    color: var(--white-main);
-}
-
-/* Bottone di Azione / Gioca */
-.btn-play {
-    margin-top: auto; /* Spinge il bottone sempre sul fondo della card */
-    width: 100%;
-    padding: 12px;
-    background-color: var(--black-tertiary);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 10px;
-    color: var(--white-main);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-
-.btn-play:hover {
-    background-color: var(--purple-primary);
-    color: var(--white-main);
-}
-
-.btn-arrow {
-    transition: transform 0.2s ease;
-}
-
-.btn-play:hover .btn-arrow {
-    transform: translateX(4px); /* La freccia scatta a destra all'hover */
-}
-
-/* ==========================================
-   📱 RESPONSIVE ADAPTATION (Mobile)
-   ========================================== */
 @media screen and (max-width: 767px) {
     .games-header-section {
         flex-direction: column;
@@ -243,10 +75,10 @@
     }
     
     .search-wrapper {
-        max-width: 100%; /* La barra occupa tutto lo schermo del telefono */
+        max-width: 100%;
     }
     
     .franchises-grid {
-        gap: 1.2rem; /* Card più vicine su mobile per risparmiare spazio */
+        gap: 1.2rem;
     }
 }

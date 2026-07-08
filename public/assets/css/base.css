@@ -51,28 +51,6 @@ a:hover {
     color: var(--purple-primary);
 }
 
-/*.alerts-container {
-    position: fixed;
-    top: 0;
-    right: 0;
-}
-
-.alert {
-    padding: 1rem;
-}
-
-.alert-error {
-    background: red;
-}
-
-.alert-success {
-    background: green;
-}
-
-.alert-info {
-    background: blue;
-}*/
-
 
 .toast-container {
     position: fixed;
@@ -101,7 +79,6 @@ a:hover {
     overflow: hidden;
 }
 
-/* Varianti di colore per il bordo laterale o l'icona */
 .toast-success { border-left: 4px solid #4ade80; }
 .toast-error   { border-left: 4px solid #f87171; }
 
@@ -109,7 +86,6 @@ a:hover {
 .toast-icon { font-weight: bold; font-size: 1.2rem; }
 .toast-close { background: none; border: none; color: #666; cursor: pointer; font-size: 1.5rem; }
 
-/* La barra di progresso che "scade" */
 .toast-progress {
     position: absolute;
     bottom: 0;
@@ -118,7 +94,7 @@ a:hover {
     width: 100%;
     background: rgba(255,255,255,0.2);
     transform-origin: left;
-    animation: progress 5s linear forwards; /* 5 secondi come il timer JS */
+    animation: progress var(--toast-duration, 5s) linear forwards;
 }
 
 @keyframes slideIn {
