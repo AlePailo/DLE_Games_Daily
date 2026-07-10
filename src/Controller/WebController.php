@@ -13,7 +13,10 @@ class WebController extends BaseController {
     }
 
     protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
-        $defaultCss = ['base.css', 'layout/app-shell.css', 'components/franchise-card.css'];
+        $defaultCss = ['base.css', 'layout/app-shell.css'];
+
+        $data['csrfToken']  = $this->sessionManager->getCsrfToken();
+        $data['isGuest'] = !$this->sessionManager->isLoggedIn();
 
         $flashData = [
             'error'   => $this->sessionManager->getFlash('error'),

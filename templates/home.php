@@ -1,3 +1,9 @@
+<?php 
+/**
+ * @var $favourites         Array containing user's favourite franchises objects
+ */
+?>
+
 <section 
     id="favourites-grid"
     class="franchises-grid"

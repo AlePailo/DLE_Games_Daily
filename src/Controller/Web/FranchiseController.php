@@ -27,8 +27,7 @@ class FranchiseController extends WebController {
             'title' => 'Games | DLE Games Daily',
             'franchises' => $franchises,
             'favouriteIds' => $favouriteIds,
-            'isGuest' => $isGuest,
-            'css' => ['games.css'],
+            'css' => ['games.css', 'franchises.css'],
             'js' => ['games.js']
         ]);
     }

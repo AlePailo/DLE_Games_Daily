@@ -29,7 +29,6 @@ if(searchInput) {
 
 const pageContainer = document.querySelector('.games-page-container')
 if(pageContainer) {
-    const isGuest = pageContainer.dataset.isGuest === 'true'
     const favouriteButtons = document.querySelectorAll('.btn-favourite')
 
     const APP_CONFIG = JSON.parse(document.getElementById('app-config').textContent)
@@ -39,7 +38,7 @@ if(pageContainer) {
             e.preventDefault()
             e.stopPropagation()
 
-            if(isGuest) {
+            if(APP_CONFIG.isGuest) {
                 showAlert('error', 'Login is needed to perform this action')
                 return
             }
@@ -53,7 +52,10 @@ if(pageContainer) {
             try {
                 const response = await fetch(`${APP_CONFIG.baseUrl}/api/favourites/toggle`, {
                     method: 'POST',
-                    headers: {'Content-Type' : 'application/json'},
+                    headers: {
+                        'Content-Type' : 'application/json',
+                        'X-CSRF-TOKEN': APP_CONFIG.csrfToken
+                    },
                     body: JSON.stringify({franchise_id: franchiseId})
                 })
 

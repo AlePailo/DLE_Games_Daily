@@ -29,12 +29,15 @@ class AuthController extends WebController {
     public function login(array $vars) : void {
         $this->redirectIfLoggedIn();
 
+        /*
         $submittedToken = $_POST['csrf_token'] ?? '';
         if($submittedToken !== $this->sessionManager->getCsrfToken()) {
             $this->sessionManager->setFlash('error', 'Invalid session. Please try again.');
             $this->redirect('login');
             return;
         }
+        */
+        $this->validateCsrfToken();
 
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -69,12 +72,15 @@ class AuthController extends WebController {
     public function register(array $vars) : void {
         $this->redirectIfLoggedIn();
 
+        /*
         $submittedToken = $_POST['csrf_token'] ?? '';
         if($submittedToken !== $this->sessionManager->getCsrfToken()) {
             $this->sessionManager->setFlash('error', 'Invalid session. Please try again.');
             $this->redirect('register');
             return;
         }
+        */
+        $this->validateCsrfToken();
 
         $username = trim($_POST['username'] ?? '');
         $email = trim($_POST['email'] ?? '');

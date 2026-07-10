@@ -1,12 +1,12 @@
 <?php
 /**
- *  @var array $franchises
- *  @var array $favouriteIds
- *  @var bool $isGuest
+ *  @var array $franchises      Array containing all franchises objects
+ *  @var array $favouriteIds    Array containing user's favourite franchises' ids
+ *  @var bool $isGuest          Indicates if user is logged in or in guest mode
  */
 ?>
 
-<div class="games-page-container" data-is-guest="<?= $isGuest ? 'true' : 'false' ?>">
+<div class="games-page-container">
     
     <div class="games-header-section">
         <div class="header-titles">

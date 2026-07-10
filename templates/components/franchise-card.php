@@ -1,7 +1,7 @@
 <?php
 /**
- * @var object $franchise single franchise data
- * @var bool $isFavourite clarifies if the franchise is part of user's favourites
+ * @var object $franchise       Single franchise object
+ * @var bool $isFavourite       Clarifies if the franchise is part of user's favourites
  */
 ?>
 

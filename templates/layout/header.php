@@ -1,3 +1,10 @@
+<?php
+/**
+ * @var string $csrfToken
+ * @var bool $isGuest
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +20,9 @@
 
     <script id="app-config" type="application/json">
         {
-            "baseUrl": "<?= BASE_URL ?>"
+            "baseUrl": "<?= BASE_URL ?>",
+            "isGuest": <?= $isGuest ? 'true' : 'false' ?>,
+            "csrfToken": "<?= $csrfToken ?>"
         }
     </script>
 </head>
