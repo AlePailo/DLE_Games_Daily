@@ -8,6 +8,7 @@
     id="favourites-grid"
     class="franchises-grid"
     aria-label="Lista dei franchise di gioco"
+    data-empty-message="No favourite franchises yet."
 >
     <?php if (!empty($favourites)): ?>
         <?php foreach ($favourites as $franchise) {
@@ -17,7 +18,7 @@
         }?>
     <?php else: ?>
         <div class="empty-state" role="status">
-            <p>No franchises found</p>
+            <p>No favourite franchises yet.</p>
         </div>
     <?php endif; ?>
 </section>

@@ -16,7 +16,7 @@ class WebController extends BaseController {
         $defaultCss = ['base.css', 'layout/app-shell.css'];
 
         $data['csrfToken']  = $this->sessionManager->getCsrfToken();
-        $data['isGuest'] = !$this->sessionManager->isLoggedIn();
+        $data['isLoggedIn'] = $this->sessionManager->isLoggedIn();
 
         $flashData = [
             'error'   => $this->sessionManager->getFlash('error'),

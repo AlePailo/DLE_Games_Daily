@@ -16,7 +16,7 @@
         <button 
             class="btn-favourite <?= $isFavourite ? 'is-favorite' : '' ?>"
             data-id="<?= $franchise->getId() ?>"
-            aria-label="Inserisci <?= htmlspecialchars($franchise->getName()) ?> nei preferiti"
+            aria-label="Add <?= htmlspecialchars($franchise->getName()) ?> to favourites"
             aria-pressed="<?= $isFavourite ? 'true' : 'false' ?>"
         >
             <span aria-hidden="true">
@@ -36,7 +36,7 @@
         <a 
             href="<?= BASE_URL ?>/play/<?= $franchise->getSlug() ?>" 
             class="btn-play"
-            aria-label="Gioca con il franchise <?= htmlspecialchars($franchise->getName()) ?>"
+            aria-label="Play <?= htmlspecialchars($franchise->getName()) ?>"
         >
             <span>PLAY</span>
             <span class="btn-arrow" aria-hidden="true">→</span>

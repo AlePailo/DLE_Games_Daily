@@ -1,7 +1,7 @@
 <?php
 /**
  * @var string $csrfToken
- * @var bool $isGuest
+ * @var bool $isLoggedIn
  */
 ?>
 
@@ -21,7 +21,7 @@
     <script id="app-config" type="application/json">
         {
             "baseUrl": "<?= BASE_URL ?>",
-            "isGuest": <?= $isGuest ? 'true' : 'false' ?>,
+            "isLoggedIn": <?= $isLoggedIn ? 'true' : 'false' ?>,
             "csrfToken": "<?= $csrfToken ?>"
         }
     </script>

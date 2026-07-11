@@ -2,7 +2,7 @@
 /**
  *  @var array $franchises      Array containing all franchises objects
  *  @var array $favouriteIds    Array containing user's favourite franchises' ids
- *  @var bool $isGuest          Indicates if user is logged in or in guest mode
+ *  @var bool $isLoggedIn        Indicates if user is logged in or in guest mode
  */
 ?>
 
@@ -38,7 +38,7 @@
     >
         <?php if (!empty($franchises)): ?>
             <?php foreach ($franchises as $franchise) {
-                $isFavourite = !$isGuest && in_array($franchise->getId(), $favouriteIds, true);
+                $isFavourite = $isLoggedIn && in_array($franchise->getId(), $favouriteIds, true);
 
                 require BASE_PATH . 'templates/components/franchise-card.php';
             }?>

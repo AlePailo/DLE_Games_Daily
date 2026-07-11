@@ -25,6 +25,7 @@ class HomeController extends WebController {
             'title' => 'Home | DLE Games Daily',
             'favourites' => $favouriteFranchises ?? '',
             'css' => ['home.css', 'franchises.css'],
+            'js' => ['home.js']
         ]);
     }
 }
