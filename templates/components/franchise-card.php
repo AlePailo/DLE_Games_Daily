@@ -6,7 +6,7 @@
 ?>
 
 <div 
-    class="franchise-card" 
+    class="franchise-card section-card" 
     data-id="<?= $franchise->getId() ?>" 
     data-name="<?= strtolower($franchise->getName()) ?>"
     aria-label="Franchise: <?= htmlspecialchars($franchise->getName()) ?>"

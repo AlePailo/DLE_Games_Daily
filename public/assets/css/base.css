@@ -23,6 +23,8 @@
     --boh: #18132E;
 
     --bottom-nav-height: 65px;
+
+    --text-muted: #a0a0b0;
 }
 
 body {
@@ -45,10 +47,6 @@ footer {
 
 a {
     color: inherit;
-}
-
-a:hover {
-    color: var(--purple-primary);
 }
 
 
@@ -119,3 +117,115 @@ a:hover {
 .toast-success .toast-icon::before { content: '✓'; color: #4ade80; }
 .toast-error   .toast-icon::before { content: '✕'; color: #f87171; }
 .toast-info    .toast-icon::before { content: 'ℹ'; color: #60a5fa; }
+
+svg {
+    width: 24px;
+    height: 24px;
+}
+
+
+/* SCROLLBAR STYLING */
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #3e3e3e #121212;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #121212; 
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3e3e3e; 
+    border-radius: 20px;
+    border: 2px solid #121212;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background-color: var(--purple-primary, #8b5cf6);
+    color: var(--white-main);
+    border: 1px solid transparent;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: var(--purple-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.section-card {
+    background: rgba(30, 30, 45, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 16px;
+}
+
+section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 45px;
+    height: 2.5px;
+    background-color: var(--purple-primary);
+    border-radius: 2px;
+}

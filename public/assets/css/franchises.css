@@ -8,8 +8,6 @@
 
 /* Card */
 .franchise-card {
-    background-color: var(--black-secondary);
-    border-radius: 16px;
     overflow: hidden;
     border: 1px solid var(--black-tertiary);
     display: flex;

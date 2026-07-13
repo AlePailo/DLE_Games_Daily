@@ -1,5 +1,124 @@
-.franchises-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
+.home-hero {
+    background: rgba(30, 30, 45, 0.4); 
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 3rem;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+
+
+.onboarding-section {
+    padding: 2rem 0;
+}
+
+.onboarding-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.onboarding-grid .step {
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    
+    flex: 1 1 calc(25% - 1.5rem);
+    min-width: min(100%, 300px);
+    max-width: 350px;
+    
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.onboarding-grid .step:hover {
+    transform: translateY(-8px);
+    border-color: var(--purple-primary);
+    background: var(--black-tertiary);
+    
+    box-shadow: 0 15px 30px rgba(168, 85, 247, 0.1); 
+}
+
+.onboarding-grid .step-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.5rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(168, 85, 247, 0.1); 
+    color: var(--purple-primary, #a855f7);
+    transition: all 0.3s ease;
+}
+
+.onboarding-grid .step-icon-wrapper svg {
+    width: 50px;
+    height: 50px;
+    stroke-width: 2px;
+    fill: var(--purple-primary);
+    stroke: var(--purple-primary);
+}
+
+/* 5. Testi interni */
+.onboarding-grid .step h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.onboarding-grid .step p {
+    font-size: 0.95rem;
+    color: #a0a0b0;
+    line-height: 1.6;
+    margin: 0;
+}
+
+
+.onboarding-grid .step-icon {
+    font-size: 2.5rem;
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+
+
+.cta-contribute .cta-box {
+    padding: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+
+
+.cta-box h2 {
+    font-size: 1.85rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.cta-box p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 1.05rem;
 }
