@@ -27,6 +27,49 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         $current = $this->findByUserAndFranchise($userId, $franchiseId);
 
         if($current === null) {
+            $current = new UserFranchiseStats(id: 0, userId: $userId, franchiseId: $franchiseId, gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0, avgAttempts: 0.0,
+                updatedAt: new \DateTimeImmutable());
+        }
+
+        $wonYesterday = $this->wonYesterday($userId, $franchiseId);
+
+        $current->updateStats($solved, $attempts, $wonYesterday);
+
+        if($current->getId() === 0) {
+            $stmt = $this->pdo->prepare("INSERT INTO user_franchise_stats(user_id, franchise_id, games_played, games_won, current_streak, max_streak, avg_attempts) 
+                VALUES (:user_id, :franchise_id, :games_played, :games_won, :current_streak, :max_streak, :avg_attempts)"
+            );
+        } else {
+            $stmt = $this->pdo->prepare("UPDATE user_franchise_stats SET
+                games_played = :games_played,
+                games_won = :games_won,
+                current_streak = :current_streak,
+                max_streak = :max_streak,
+                avg_attempts = :avg_attempts,
+                updated_at = NOW()
+                WHERE id = :id"
+            );
+        }
+
+        $payload = [
+            'games_played'   => $current->getGamesPlayed(),
+            'games_won'      => $current->getGamesWon(),
+            'current_streak' => $current->getCurrentStreak(),
+            'max_streak'     => $current->getMaxStreak(),
+            'avg_attempts'   => $current->getAvgAttempts(),
+        ];
+
+        if($current->getId() === 0) {
+            $payload['user_id'] = $userId;
+            $payload['franchise_id'] = $franchiseId;
+        } else {
+            $payload['id'] = $current->getId();
+        }
+
+        $stmt->execute($payload);
+
+        /*
+        if($current === null) {
             $stmt = $this->pdo->prepare("INSERT INTO user_franchise_stats(user_id, franchise_id, games_played, games_won, current_streak, max_streak, avg_attempts) 
                 VALUES (:user_id, :franchise_id, 1, :games_won, :current_streak, :max_streak, :avg_attempts)");
             $stmt->execute([
@@ -78,6 +121,7 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
             'user_id'             => $userId,
             'franchise_id'        => $franchiseId,
         ]);
+        */
     }
 
     private function wonYesterday(int $userId, int $franchiseId) : bool {

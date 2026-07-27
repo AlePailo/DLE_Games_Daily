@@ -5,8 +5,9 @@
     justify-content: space-between;
     align-items: center;
     height: var(--headbar-height, 60px);
-    background-color: var(--black-main);
+    background: transparent;
     padding: 0 1.5rem;
+    z-index: 999;
 }
 
 .site-logo {

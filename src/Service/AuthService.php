@@ -73,7 +73,23 @@ class AuthService {
             return null;
         }
 
+        $this->sessionManager->regenerateAndSet(
+            $user->getId(), 
+            $user->getUsername(), 
+            $user->getUserIconUrl()
+        );
+
+        // ROTATE TOKEN: deletes old token and creates a new one for the current device
+        $this->rotateRememberToken($user->getId(), $hashedToken);
+
         return $user;
+    }
+
+        public function rotateRememberToken(int $userId, string $oldHashedToken): void 
+    {
+        $this->userRepository->deleteRememberToken($oldHashedToken);
+
+        $this->createRememberToken($userId);
     }
 
 

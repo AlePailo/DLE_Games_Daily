@@ -27,6 +27,20 @@ class Application {
 
         $router = new Router($container, $dispatcher);
         $router->dispatch();
+        foreach (headers_list() as $header) {
+            if (stripos($header, 'Location:') !== false) {
+                // TROVATO! Qualcuno ha impostato un redirect. 
+                // Stampiamo lo Stack Trace per vedere CHI è stato!
+                http_response_code(200); // Forziamo 200 per leggere l'output in JS
+                header('Content-Type: text/plain');
+                
+                echo "=== REDIRECT INTERCETTATO ===\n";
+                echo "Header: " . $header . "\n\n";
+                echo "=== STACK TRACE (Chi ha generato il redirect) ===\n";
+                debug_print_backtrace();
+                exit;
+            }
+        }
     }
 
     private static function guardRoutes(?object $currentUser) : void {

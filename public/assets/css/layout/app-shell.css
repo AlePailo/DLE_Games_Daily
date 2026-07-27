@@ -1,5 +1,6 @@
 footer {
     display: none;
+    z-index: 999;
 }
 
 .app-layout {

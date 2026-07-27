@@ -6,7 +6,7 @@ class SessionManager {
     public function __construct() {
         if(session_status() === PHP_SESSION_NONE) {
             session_set_cookie_params([
-            'path' => '/DLE_Games_Daily/public/', // Adatta al tuo BASE_URL
+            'path' => '/',
             'httponly' => true,
             'samesite' => 'Lax'
             ]);

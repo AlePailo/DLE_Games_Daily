@@ -10,11 +10,16 @@ class CharacterComparisonService {
         $result = [];
 
         foreach($solution->getAttributes() as $key => $correctValue) {
-            $guessedValue = $guessed->getAttribute($key);
+            $guessedValue = $guessed->getAttribute($key) ?? '';
 
-            ($guessedValue === $correctValue) ? $result[$key] = ResultStatus::CORRECT : $result[$key] = ResultStatus::WRONG;
+            $status = ($guessedValue === $correctValue) ? ResultStatus::CORRECT : ResultStatus::WRONG;
 
             //TODO: implement partially correct check (future update)
+
+            $result[$key] = [
+                'value' => $guessedValue,
+                'status' => $status instanceof ResultStatus ? $status->value : $status
+            ];
         }
 
         return $result;

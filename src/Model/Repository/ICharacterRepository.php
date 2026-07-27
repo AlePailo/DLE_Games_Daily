@@ -8,4 +8,5 @@ interface ICharacterRepository {
     public function findByFranchiseId(int $franchiseId) : array;
     public function findRandomIdByFranchise(int $franchiseId, array $excludedIds): ?int;
     public function findByIdWithAttributes(int $id) : ?Character;
+    public function findForSearchByFranchise(int $franchiseId): array;
 }

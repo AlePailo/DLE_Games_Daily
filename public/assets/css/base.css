@@ -219,7 +219,7 @@ section {
     position: relative;
 }
 
-.section-title::after {
+.section-title.underlined::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -229,3 +229,4 @@ section {
     background-color: var(--purple-primary);
     border-radius: 2px;
 }
+

@@ -50,7 +50,7 @@
         </section>
     <?php else: ?>
         <section class="favourites-section" aria-labelledby="favourites-title">
-            <h2 id="favourites-title" class="section-title">Your Favourites</h2>
+            <h2 id="favourites-title" class="section-title underlined">Your Favourites</h2>
             
             <div 
                 id="favourites-grid"

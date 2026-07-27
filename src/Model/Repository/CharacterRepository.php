@@ -56,6 +56,20 @@ class CharacterRepository implements ICharacterRepository {
         ]);
     }
 
+    public function findForSearchByFranchise(int $franchiseId): array {
+        $stmt = $this->pdo->prepare("
+            SELECT id, name, image_url 
+            FROM characters 
+            WHERE franchise_id = :franchise_id 
+            ORDER BY name ASC
+        ");
+        $stmt->execute(['franchise_id' => $franchiseId]);
+
+        // fetchAll(PDO::FETCH_ASSOC) restituisce array associativi semplici.
+        // Usiamo array_values() per garantire indici [0, 1, 2...] -> Array JSON pulito []
+        return array_values($stmt->fetchAll(\PDO::FETCH_ASSOC));
+    }
+
     private function mapCharacters(array $rows) : array {
         $grouped = [];
         foreach($rows as $row) {

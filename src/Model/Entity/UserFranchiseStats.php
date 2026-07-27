@@ -59,4 +59,27 @@ final class UserFranchiseStats {
         
         return round(($this->gamesWon / $this->gamesPlayed) * 100, 1);
     }
+
+    public function updateStats(bool $solved, int $attempts, bool $wonYesterday) : void {
+        $this->gamesPlayed++;
+
+        if(!$solved) {
+            $this->currentStreak = 0;
+            return;
+        }
+
+        if($wonYesterday) {
+            $this->currentStreak++;
+        } else {
+            $this->currentStreak = 1;
+        }
+
+        if($this->currentStreak > $this->maxStreak) {
+            $this->maxStreak = $this->currentStreak;
+        }
+
+        $this->avgAttempts = (($this->avgAttempts * $this->gamesWon) + $attempts) / ($this->gamesWon + 1);
+
+        $this->gamesWon++;
+    }
 }

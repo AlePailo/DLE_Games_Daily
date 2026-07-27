@@ -4,25 +4,19 @@ namespace App\Controller\Api;
 
 use App\Controller\ApiController;
 use App\Core\SessionManager;
+use App\Model\Entity\DailyChallenge;
+use App\Model\Entity\Franchise;
+use App\Model\Entity\GameSession;
 use App\Model\Repository\ICharacterRepository;
 use App\Model\Repository\IDailyChallengeRepository;
 use App\Model\Repository\IFranchiseRepository;
-use App\Model\Repository\IGameAttemptRepository;
-use App\Model\Repository\IGameAttemptResultRepository;
-use App\Model\Repository\IGameSessionRepository;
 use App\Service\CharacterComparisonService;
 use App\Service\GameSessionService;
-use App\Model\Entity\Franchise;
-use App\Model\Entity\DailyChallenge;
-use App\Model\Entity\GameSession;
 
 class GameApiController extends ApiController {
     public function __construct(
         private ICharacterRepository $characterRepository,
         private CharacterComparisonService $comparisonService,
-        private IGameAttemptRepository $gameAttemptRepository,
-        private IGameAttemptResultRepository $gameAttemptResultRepository,
-        private IGameSessionRepository $gameSessionRepository,
         private GameSessionService $gameSessionService,
         private IFranchiseRepository $franchiseRepository,
         private IDailyChallengeRepository $dailyChallengeRepository,
@@ -32,73 +26,61 @@ class GameApiController extends ApiController {
     }
 
     public function attempt(array $vars) : void {
-        $slug = $vars['slug'] ?? '';
         $body = $this->getJsonBody();
-        $guessedCharId = isset($body['character_id']) ? (int)$body['character_id'] : null;
+        $guessedCharId = filter_var($body['character_id'] ?? null, FILTER_VALIDATE_INT);
 
-        if($guessedCharId === null) {
+        if(!$guessedCharId) {
             $this->renderJson(['success' => false, 'message' => 'Invalid input'], 400);
             return;
         }
 
+        $slug = $vars['slug'] ?? '';
         [$franchise, $dailyChallenge, $gameSession] = $this->resolveGameContext($slug);
         if(!$this->validateActiveGameSession($franchise, $dailyChallenge, $gameSession)) return;
 
-        $guessedChar = $this->characterRepository->findByIdWithAttributes($guessedCharId);
-        $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
+        $correctCharId = $dailyChallenge->getCharacterId();
+        $solved = $guessedCharId === $correctCharId;
 
+        $guessedChar = $this->characterRepository->findByIdWithAttributes($guessedCharId);
         if($guessedChar === null) {
             $this->renderJson(['success' => false, 'message' => 'Character not found'], 404);
             return;
         }
 
-        $attributeDefs = $franchise->getAttributeDefinitions();
-        $compareResults = $this->comparisonService->compare($guessedChar, $correctChar);
+        $correctChar = $solved 
+            ? $guessedChar
+            : $this->characterRepository->findByIdWithAttributes($correctCharId);
 
-        $defsByKey = [];
-        foreach($attributeDefs as $def) {
-            $defsByKey[$def->getKey()] = $def;
-        }
-
-        $resultsWithIds = [];
-        foreach($compareResults as $key => $status) {
-            if(isset($defsByKey[$key])) {
-                $resultsWithIds[$defsByKey[$key]->getId()] = $status;
-            }
-        }
-
+        $comparedResults = $this->comparisonService->compare($guessedChar, $correctChar);
         $attemptNumber = $gameSession->getAttemptsCount() + 1;
-        $attemptId = $this->gameAttemptRepository->create($gameSession->getId(), $guessedCharId, $attemptNumber);
-        $this->gameAttemptResultRepository->createMany($attemptId, $resultsWithIds);
-        $this->gameSessionRepository->incrementAttempts($gameSession->getId());
 
-        $solved = $guessedCharId === $dailyChallenge->getCharacterId();
+        $this->gameSessionService->registerAttempt($gameSession->getId(), $franchise->getId(), $guessedCharId, $attemptNumber, $comparedResults, $solved);
+
         $response = [
             'success' => true,
             'solved' => $solved,
             'attempt' => [
                 'character' => [
-                    'name' => $guessedChar->getName(),
+                    'name'      => $guessedChar->getName(),
                     'image_url' => $guessedChar->getImageUrl(),
+                    'status'    => $solved ? 'Correct' : 'Wrong'
                 ],
-                'results' => array_map(fn($r) => $r->value, $compareResults)
-            ]];
+                'attributes' => $comparedResults
+            ]
+        ];
 
         if($solved) {
-            $this->gameSessionRepository->markAsSolved($gameSession->getId());
-
-            if($userId = $this->sessionManager->getUserId()) {
+            $userId = $this->sessionManager->getUserId();
+            if($userId !== null) {
                 $this->gameSessionService->updateStatsOnComplete($userId, $franchise->getId(), $attemptNumber, true);
             }
 
-            $response = array_merge($response, [
-                'correct_char' => [
-                    'name' => $correctChar->getName(),
-                    'image_url' => $correctChar->getImageUrl(),
-                    'attributes' => $correctChar->getAttributes()
-                ],
-                'attempts_count' => $attemptNumber
-            ]);
+            $response['correct_char'] = [
+                'name' => $correctChar->getName(),
+                'image_url' => $correctChar->getImageUrl(),
+                'attributes' => $correctChar->getAttributes()
+            ];
+            $response['attempts_count'] = $attemptNumber;
         }
 
         $this->renderJson($response);
@@ -110,11 +92,7 @@ class GameApiController extends ApiController {
         [$franchise, $dailyChallenge, $gameSession] = $this->resolveGameContext($slug);
         if(!$this->validateActiveGameSession($franchise, $dailyChallenge, $gameSession)) return;
 
-        $this->gameSessionRepository->markAsCompleted($gameSession->getId());
-
-        if($userId = $this->sessionManager->getUserId()) {
-            $this->gameSessionService->updateStatsOnComplete($userId, $franchise->getId(), $gameSession->getAttemptsCount(), false);
-        }
+        $this->gameSessionService->surrender($gameSession->getId(), $this->sessionManager->getUserId(), $franchise->getId(), $gameSession->getAttemptsCount());
 
         $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
 
@@ -127,12 +105,12 @@ class GameApiController extends ApiController {
         if($franchise === null) return [null, null, null];
 
         $dailyChallenge = $this->dailyChallengeRepository->findByFranchiseAndDate($franchise->getId(), new \DateTimeImmutable());
-        if($dailyChallenge === null) return [null, null, null];
+        if($dailyChallenge === null) return [$franchise, null, null];
 
         $userId = $this->sessionManager->getUserId();
-        $guestToken = $userId === null ? $this->sessionManager->getGuestToken() : null;
+        $guestToken = ($userId === null) ? $this->sessionManager->getGuestToken() : null;
 
-        $gameSession = $userId !== null ? $this->gameSessionRepository->findByUserAndChallenge($userId, $dailyChallenge->getId()) : $this->gameSessionRepository->findByGuestTokenAndChallenge($guestToken, $dailyChallenge->getId());
+        $gameSession = $this->gameSessionService->findSessionContext($dailyChallenge->getId(), $userId, $guestToken);
     
         return [$franchise, $dailyChallenge, $gameSession];
     }

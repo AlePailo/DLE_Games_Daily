@@ -10,4 +10,6 @@ interface IFranchiseRepository {
     public function findBySlug(string $slug) : ?Franchise;
     public function findBySlugWithAttributes(string $slug) : ?Franchise;
     public function findAllFavouritesByUser(int $userId) : array;
+
+    public function getAttributeDefinitionMapByFranchiseId(int $id) : array;
 }

@@ -23,15 +23,13 @@ return function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/verify', [AuthController::class, 'verifyEmail']);
 
     /*
-    $r->addRoute('GET', '/verify', [AuthController::class, 'verifyEmail']);
     $r->addRoute('GET', '/check/username', [AuthController::class, 'checkUsername']);
     $r->addRoute('GET', '/check/email', [AuthController::class, 'checkEmail']);
     */
 
     $r->addRoute('POST', '/api/favourites/toggle', [FavouriteApiController::class, 'toggle']);
     
-
-    $r->addRoute('GET', '/{slug}', [GameController::class, 'start']);
-    $r->addRoute('POST', '/{slug}/attempt', [GameController::class, 'attempt']);
-    $r->addRoute('POST', '/{slug}/surrender', [GameController::class, 'surrender']);
+    $r->addRoute('POST', '/api/play/{slug}/attempt', [GameApiController::class, 'attempt']);
+    $r->addRoute('POST', '/api/play/{slug}/surrender', [GameApiController::class, 'surrender']);
+    $r->addRoute('GET', '/play/{slug}', [GameController::class, 'start']);
 };

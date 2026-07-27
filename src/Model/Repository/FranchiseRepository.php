@@ -59,6 +59,14 @@ class FranchiseRepository implements IFranchiseRepository {
     }
 
 
+    public function getAttributeDefinitionMapByFranchiseId(int $id) : array {
+        $stmt = $this->pdo->prepare("SELECT attribute_key, id FROM attribute_definitions WHERE franchise_id = :id");
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+    }
+
+
     public function mapFranchise(array $row, array $attributes = []) : Franchise {
         return new Franchise (
             id: (int) $row['id'],

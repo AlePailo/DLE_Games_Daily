@@ -46,10 +46,20 @@ class Router {
     private function resolveUri() : string {
         $uri = $_SERVER['REQUEST_URI'];
 
-        // Rimuove base path e query string
-        if (str_starts_with($uri, $this->basePath)) {
-            $uri = '/' . ltrim(substr($uri, strlen($this->basePath)), '/');
+        # 1. Rimuoviamo prima di tutto i parametri GET (?foo=bar)
+        $uri = strtok($uri, '?');
+
+        # 2. Decodifichiamo eventuali caratteri speciali (%20, ecc.)
+        $uri = rawurldecode($uri);
+
+        # 3. Rimuoviamo il basePath se presente all'inizio
+        if (!empty($this->basePath) && str_starts_with($uri, $this->basePath)) {
+            $uri = substr($uri, strlen($this->basePath));
         }
-        return strtok($uri, '?');
+
+        # 4. Assicuriamoci che l'URI inizi SEMPRE con un solo '/'
+        $uri = '/' . ltrim($uri, '/');
+
+        return $uri;
     }
 }

@@ -61,6 +61,8 @@ class WebController extends BaseController {
         http_response_code(404);
         View::render('404', [
             'title' => 'Page not found | DLE Games Daily',
+            'isLoggedIn' => $this->sessionManager->isLoggedIn(),
+            'csrfToken'  => $this->sessionManager->getCsrfToken() ?? '',
             'css' => [],
             'js' => []
         ]);

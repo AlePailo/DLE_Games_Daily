@@ -29,7 +29,7 @@ class GameSessionRepository implements IGameSessionRepository {
     public function findByGuestTokenAndChallenge(string $guestToken, int $challengeId): ?GameSession
     {
         $stmt = $this->pdo->prepare("SELECT * FROM game_sessions WHERE guest_token = :guest_token AND challenge_id = :challenge_id AND DATE(created_at) = CURDATE()");
-        $stmt->execute(['guestToken' => $guestToken, 'challenge_id' => $challengeId]);
+        $stmt->execute(['guest_token' => $guestToken, 'challenge_id' => $challengeId]);
         $res = $stmt->fetch();
 
         return $res ? $this->mapGameSession($res) : null;
@@ -55,6 +55,7 @@ class GameSessionRepository implements IGameSessionRepository {
         $stmt->execute(['user_id' => $userId, 'guest_token' => $guestToken]);        
     }
 
+    /*
     public function incrementAttempts(int $id): void
     {
         $stmt = $this->pdo->prepare("UPDATE game_sessions SET attempts_count = attempts_count + 1 WHERE id = :id");
@@ -72,6 +73,25 @@ class GameSessionRepository implements IGameSessionRepository {
         $stmt = $this->pdo->prepare("UPDATE game_sessions SET completed_at = CURDATE() WHERE id = :id");
         $stmt->execute(['id' => $id]);
     }
+    */
+
+
+    public function updateSessionState(int $id, bool $solved) : void
+    {
+        if($solved) {
+            $stmt = $this->pdo->prepare("UPDATE game_sessions SET attempts_count = attempts_count + 1, solved = 1, completed_at = NOW() WHERE id = :id");
+        } else {
+            $stmt = $this->pdo->prepare("UPDATE game_sessions SET attempts_count = attempts_count + 1 WHERE id = :id");
+        }
+        $stmt->execute(['id' => $id]);
+    }
+
+    public function markAsCompleted(int $id) : void {
+        $stmt = $this->pdo->prepare("UPDATE game_sessions SET completed_at = NOW() WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+    }
+
+
 
     private function mapGameSession(array $row) : GameSession {
         return new GameSession(

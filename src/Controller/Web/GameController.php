@@ -4,29 +4,20 @@ namespace App\Controller\Web;
 
 use App\Controller\WebController;
 use App\Core\SessionManager;
-use App\Model\Entity\DailyChallenge;
-use App\Model\Entity\GameSession;
-use App\Model\Entity\Franchise;
 use App\Model\Repository\IFranchiseRepository;
 use App\Model\Repository\ICharacterRepository;
 use App\Model\Repository\IDailyChallengeRepository;
 use App\Service\GameSessionService;
 use App\Model\Repository\IGameAttemptRepository;
-use App\Model\Repository\IGameAttemptResultRepository;
-use App\Service\CharacterComparisonService;
-use App\Model\Repository\IGameSessionRepository;
 
 class GameController extends WebController {
     public function __construct(
-        SessionManager $sessionManager,
+        protected SessionManager $sessionManager,
         private IFranchiseRepository $franchiseRepository,
         private ICharacterRepository $characterRepository,
         private IDailyChallengeRepository $dailyChallengeRepository,
         private GameSessionService $gameSessionService,
         private IGameAttemptRepository $gameAttemptRepository,
-        private CharacterComparisonService $comparisonService,
-        private IGameSessionRepository $gameSessionRepository,
-        private IGameAttemptResultRepository $gameAttemptResultRepository
     ) {
         parent::__construct($sessionManager);
     }
@@ -42,16 +33,23 @@ class GameController extends WebController {
 
         $dailyChallenge = $this->dailyChallengeRepository->findByFranchiseAndDate($franchise->getId(), new \DateTimeImmutable());
         if($dailyChallenge === null) {
-            //...
+            $this->render("game_unavailable", [
+                'title' => "{$franchise->getName()} | DLE Games Daily",
+                'css' => ['game.css'],
+                'js' => ['game.js'],
+                'franchise' => $franchise
+            ]);
+            return;
         }
 
-        $userId = $this->sessionManager->getUserId();
+        $userId = $this->sessionManager->getUserId() ?? null;
         $guestToken = $userId === null ? $this->sessionManager->getOrCreateGuestToken() : null;
         $gameSession = $this->gameSessionService->getOrCreateSession($dailyChallenge->getId(), $userId, $guestToken);
 
-        $attempts = $this->gameAttemptRepository->findByGameSessionWithResults($gameSession->getId());
+        $previousGuesses = $this->gameAttemptRepository->findAllBySessionId($gameSession->getId());
+        $guessedCharactersIds = $this->gameAttemptRepository->findAllGuessedCharactersBySession($gameSession->getId());
 
-        $characters = $this->characterRepository->findByFranchiseId($franchise->getId());
+        $characters = $this->characterRepository->findForSearchByFranchise($franchise->getId());
 
         $correctChar = null;
         if($gameSession->isSolved() || $gameSession->isCompleted()) {
@@ -59,15 +57,16 @@ class GameController extends WebController {
         }
 
         $this->render("game", [
-            'title' => "{$slug} | DLE Games Daily",
-            /*'css' => ['game.css'],
-            'js' => ['game.js']*/
+            'title' => "{$franchise->getName()} | DLE Games Daily",
+            'css' => ['game.css'],
+            'js' => ['game.js'],
             'franchise' => $franchise,
             'gameSession' => $gameSession,
             'characters' => $characters,
-            'show_recap' => $gameSession->isSolved() || $gameSession->isCompleted(),
+            'guessed_chars_ids' => $guessedCharactersIds,
+            'is_completed' => $gameSession->isCompleted(),
             'correct_char' => $correctChar,
-            'attempts' => $attempts
+            'previous_guesses' => $previousGuesses
         ]);
     }
 }
