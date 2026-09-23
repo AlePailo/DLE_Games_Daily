@@ -1,11 +1,11 @@
 <?php
-/** @var string $csrf_token */
+/** @var string $csrfToken */
 ?>
 <div class="auth-wrapper">
     <section class="form-container">
         <h1>Login</h1>
         <form action="<?= BASE_URL ?>/login" method="POST" novalidate>
-            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" name="email" id="email" value="<?= htmlspecialchars($old['email'] ?? '') ?>" required aria-required="true">

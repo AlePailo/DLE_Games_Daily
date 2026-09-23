@@ -2,10 +2,10 @@
 
 namespace App\Core;
 
+use App\Exception\NotFoundException;
 use App\Service\AuthService;
 use Dotenv\Dotenv;
 use App\View\View;
-use DI\NotFoundException;
 
 class Application {
     public static function run() : void {
@@ -70,8 +70,7 @@ class Application {
     /* ----- Handles errors and exceptions that are not handled already somewhere else ----- */
     private static function registerErrorHandlers() : void {
         set_exception_handler(function (\Throwable $e) {
-            // Future possible cases
-            /*
+            
             if ($e instanceof NotFoundException) {
                 http_response_code(404);
                 if ($_ENV['APP_ENV'] === 'development') {
@@ -82,6 +81,7 @@ class Application {
                 return;
             }
 
+            /*
             if ($e instanceof DatabaseException) {
                 error_log($e->getMessage()); // log su file
                 http_response_code(500);

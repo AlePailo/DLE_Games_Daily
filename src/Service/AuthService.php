@@ -121,7 +121,7 @@ class AuthService {
     public function logout() : void {
         $token = $this->sessionManager->getRememberToken();
         if($token !== null) {
-            $this->userRepository->deleteRememberToken(hash('sha256,', $token));
+            $this->userRepository->deleteRememberToken(hash('sha256', $token));
             $this->sessionManager->clearRememberCookie();
         }
         

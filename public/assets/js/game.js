@@ -1,3 +1,5 @@
+import { showAlert } from "./utils/alerts.js";
+
 class Game {
     constructor(config) {
         const appConfigElement = document.getElementById('app-config');
@@ -6,6 +8,9 @@ class Game {
         this.characters = config.characters
         this.guessedIds = new Set(config.guessedIds)
         this.isCompleted = config.isCompleted || false
+        this.isDropdownOpen = false
+
+        this.isSubmitting = false
 
         //DOM elements
         this.input = document.getElementById('character-search')
@@ -36,17 +41,25 @@ class Game {
     }
 
     handleKeyboardNavigation(e) {
+        //if (this.dropdown.style.display === 'none' || this.dropdown.style.display === '') return
+        if(!this.isDropdownOpen) return
+
+        if(this.isSubmitting || this.isCompleted) {
+            if(e.key === 'Enter') e.preventDefault()
+            return
+        }
+
         const items = this.dropdown.querySelectorAll('.autocomplete-item')
         if(items.length < 1) return
 
         if(e.key === 'ArrowDown') {
-            //e.preventDefault()
+            e.preventDefault();
 
             (this.currentFocus === items.length - 1) ? this.currentFocus = 0 : this.currentFocus++
 
             this.setActiveItem(items)
         } else if(e.key === 'ArrowUp') {
-            //e.preventDefault()
+            e.preventDefault();
 
             (this.currentFocus === 0) ? this.currentFocus = items.length - 1 : this.currentFocus--
 
@@ -58,7 +71,9 @@ class Game {
                 ? items[this.currentFocus]
                 : items[0]
             
-            if(itemToSelect) itemToSelect.click()
+            if(itemToSelect) {
+                itemToSelect.click()
+            }
         }
     }
 
@@ -121,21 +136,34 @@ class Game {
             this.dropdown.appendChild(item)
         })
 
-        this.dropdown.style.display = 'block'
+        //this.dropdown.style.display = 'block'
+        this.isDropdownOpen = true
+        this.dropdown.classList.add('is-open')
     }
 
     hideDropdown() {
+        /*
         this.dropdown.style.display = 'none'
+        this.dropdown.innerHTML = ''
+        */
+        this.isDropdownOpen = false
+        this.dropdown.classList.remove('is-open')
+        this.dropdown.innerHTML = ''
         this.currentFocus = -1
     }
 
     selectCharacter(char) {
+        if (this.isSubmitting) return
+
         this.input.value = ''
         this.hideDropdown()
         this.submitGuess(char.id)
     }
 
     async submitGuess(characterId) {
+        if(this.isSubmitting) return
+
+        this.isSubmitting = true
         this.input.disabled = true
 
         try {
@@ -173,10 +201,10 @@ class Game {
                     alert('Character guessed!')
                 }                         //TODO: Victory modal
             } else {
-                alert(data.message || 'Something went wrong')           //TODO: integrate showAlerts() from module
+                showAlert(data.message || 'Something went wrong')
             }
         } catch(e) {
-            console.error('Error submitting guess', e)              //TODO: integrate showAlerts() from module
+            showAlert('Error submitting guess', e)
         } finally {
             if(!this.isCompleted) {
                 this.input.disabled = false
@@ -229,7 +257,20 @@ class Game {
         const activeItem = items[this.currentFocus]
         if(activeItem) {
             activeItem.classList.add('active')
+
             activeItem.scrollIntoView({block: 'nearest'})
+            /* safer scroll
+            const dropdownTop = this.dropdown.scrollTop
+            const dropdownBottom = dropdownTop + this.dropdown.clientHeight
+            const itemTop = activeItem.offsetTop
+            const itemBottom = itemTop + activeItem.offsetHeight
+
+            if (itemBottom > dropdownBottom) {
+                this.dropdown.scrollTop = itemBottom - this.dropdown.clientHeight
+            } else if (itemTop < dropdownTop) {
+                this.dropdown.scrollTop = itemTop
+            }
+            */
         }
     }
 }

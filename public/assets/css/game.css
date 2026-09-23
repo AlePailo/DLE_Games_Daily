@@ -102,6 +102,9 @@
     max-height: 400px;
     overflow-y: auto;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.autocomplete-dropdown:not(.is-open) {
     display: none;
 }
 

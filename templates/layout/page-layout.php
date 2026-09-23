@@ -55,3 +55,6 @@ if(!function_exists('checkActive')) {
         <?php require BASE_PATH . 'templates/layout/footer.php'; ?>
     </div>
 <?php endif; ?>
+
+</body>
+</html>

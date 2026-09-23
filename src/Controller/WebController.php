@@ -13,41 +13,36 @@ class WebController extends BaseController {
     }
 
     protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
-        $defaultCss = ['base.css', 'layout/app-shell.css'];
-
+        
+        // Structural data
         $data['csrfToken']  = $this->sessionManager->getCsrfToken();
         $data['isLoggedIn'] = $this->sessionManager->isLoggedIn();
 
+        // Flash data
         $flashData = [
             'error'   => $this->sessionManager->getFlash('error'),
             'success' => $this->sessionManager->getFlash('success'),
             'info'    => $this->sessionManager->getFlash('info'),
-            'old'     => $this->sessionManager->getFlash('oldInput'),
-            'csrf_token' => $this->sessionManager->getCsrfToken(),
+            'old'     => $this->sessionManager->getFlash('oldInput')
         ];
 
-        $data = array_merge($flashData, $data);
-
+        // CSS
+        $defaultCss = ['base.css', 'layout/app-shell.css'];
         if($requiresNav) {
             $defaultCss[] = 'layout/navigation.css';
         }
+        $data['css'] = array_merge($defaultCss, $data['css']) ?? [];
 
-        if(isset($data['css'])) {
-            $data['css'] = array_merge($defaultCss, $data['css']);
-        } else {
-            $data['css'] = $defaultCss;
-        }
+        // JS
+        $defaultJs = ['base.js'];
+        $data['js'] = array_merge($defaultJs, $data['js']) ?? [];
 
-
-        $defaultJs = ['base.js', 'utils/alerts.js'];
-
-        if(isset($data['js'])) {
-            $data['js'] = array_merge($defaultJs, $data['js']);
-        } else {
-            $data['js'] = $defaultJs;
-        }
-
-        $data = array_merge($this->sessionManager->getSessionData(), $data);
+        // Final merge
+        $data = array_merge(
+            $this->sessionManager->getSessionData(),
+            $flashData,
+            $data
+        );
 
         View::render($template, $data, $requiresNav);
     }
