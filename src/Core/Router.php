@@ -32,7 +32,7 @@ class Router {
                 */
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new \App\Exception\NotFoundException('Route not allowed');
+                throw new \App\Exception\NotFoundException('Route not allowed');    
                 /*
                 http_response_code(405);
                 echo '405 - Metodo non consentito';
@@ -52,18 +52,18 @@ class Router {
     private function resolveUri() : string {
         $uri = $_SERVER['REQUEST_URI'];
 
-        # 1. Rimuoviamo prima di tutto i parametri GET (?foo=bar)
+        // Remove GET parameters
         $uri = strtok($uri, '?');
 
-        # 2. Decodifichiamo eventuali caratteri speciali (%20, ecc.)
+        // Decode special characters
         $uri = rawurldecode($uri);
 
-        # 3. Rimuoviamo il basePath se presente all'inizio
+        // Remove base path
         if (!empty($this->basePath) && str_starts_with($uri, $this->basePath)) {
             $uri = substr($uri, strlen($this->basePath));
         }
 
-        # 4. Assicuriamoci che l'URI inizi SEMPRE con un solo '/'
+        // Make sure Uri starts with just one '/'
         $uri = '/' . ltrim($uri, '/');
 
         return $uri;

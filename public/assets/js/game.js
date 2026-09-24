@@ -14,6 +14,7 @@ class Game {
 
         //DOM elements
         this.input = document.getElementById('character-search')
+        this.clearBtn = document.getElementById('clear-character-search')
         this.dropdown = document.getElementById('autocomplete-results')
         this.tableBody = document.getElementById('guesses-body')
 
@@ -26,6 +27,8 @@ class Game {
                 this.appendGuessRow(guess, true)
             })
         }
+
+        if(this.isCompleted) this.input.disabled = true
     }
 
     initEvents() {
@@ -33,15 +36,26 @@ class Game {
 
         this.input.addEventListener('input', (e) => this.handleInput(e.target.value))
 
-        document.addEventListener('click', (e) => {
-            if(!this.input.contains(e.target) && !this.dropdown.contains(e.target)) {
+        this.input.addEventListener('blur', () => {
+            setTimeout(() => this.hideDropdown(), 150)
+        })
+
+        this.clearBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault()
+            this.input.value = ''
+            this.hideDropdown()
+            this.input.focus()
+            this.clearBtn.hidden = true
+        })
+
+        document.addEventListener('visibilitychange', () => {
+            if(document.hidden) {
                 this.hideDropdown()
             }
         })
     }
 
     handleKeyboardNavigation(e) {
-        //if (this.dropdown.style.display === 'none' || this.dropdown.style.display === '') return
         if(!this.isDropdownOpen) return
 
         if(this.isSubmitting || this.isCompleted) {
@@ -85,6 +99,9 @@ class Game {
             this.hideDropdown()
             return
         }
+
+        console.log(value.length)
+        this.clearBtn.hidden = value.length === 0
 
         const availableCharacters = this.characters.filter(char => !this.guessedIds.has(char.id))
 
@@ -188,8 +205,6 @@ class Game {
 
             const data = await response.json()
 
-            console.log(data)
-
             if(data.success) {
                 this.guessedIds.add(characterId)
                 this.input.value = ''
@@ -201,10 +216,10 @@ class Game {
                     alert('Character guessed!')
                 }                         //TODO: Victory modal
             } else {
-                showAlert(data.message || 'Something went wrong')
+                showAlert('error', data.message || 'Something went wrong')
             }
         } catch(e) {
-            showAlert('Error submitting guess', e)
+            showAlert('error', 'Error submitting guess')
         } finally {
             if(!this.isCompleted) {
                 this.input.disabled = false
@@ -258,8 +273,9 @@ class Game {
         if(activeItem) {
             activeItem.classList.add('active')
 
-            activeItem.scrollIntoView({block: 'nearest'})
-            /* safer scroll
+            //activeItem.scrollIntoView({block: 'nearest'})
+            
+            // Safer scroll
             const dropdownTop = this.dropdown.scrollTop
             const dropdownBottom = dropdownTop + this.dropdown.clientHeight
             const itemTop = activeItem.offsetTop
@@ -270,7 +286,6 @@ class Game {
             } else if (itemTop < dropdownTop) {
                 this.dropdown.scrollTop = itemTop
             }
-            */
         }
     }
 }
@@ -290,8 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. (Opzionale) Congeliamo l'oggetto config per sicurezza extra
             const config = Object.freeze(rawConfig);
 
-            // 4. Istanziamo la classe Game
-            window.gameInstance = new Game(config);
+            new Game(config);
 
         } catch (e) {
             console.error('Errore nel parsing della configurazione del gioco:', e);
