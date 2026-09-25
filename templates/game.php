@@ -41,7 +41,7 @@
                 autocomplete="off"
             >
             <button type="button" id="clear-character-search" class="search-input-clear" aria-label="Clear search input" aria-controls="character-search" hidden>
-                <svg aria-hidden='true' focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="m8 8l4 4m0 0l4 4m-4-4l4-4m-4 4l-4 4"/></svg>
+                <svg aria-hidden='true' focusable="false" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="m8 8l4 4m0 0l4 4m-4-4l4-4m-4 4l-4 4"/></svg>
             </button>
             <div id="autocomplete-results" class="autocomplete-dropdown" role="listbox" aria-label="Suggestions"></div>
         </div>

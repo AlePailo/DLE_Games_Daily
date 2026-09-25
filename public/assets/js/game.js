@@ -32,6 +32,7 @@ class Game {
     }
 
     initEvents() {
+
         this.input.addEventListener('keydown', (e) => this.handleKeyboardNavigation(e))
 
         this.input.addEventListener('input', (e) => this.handleInput(e.target.value))
@@ -40,25 +41,14 @@ class Game {
             setTimeout(() => this.hideDropdown(), 150)
         })
 
-        this.clearBtn.addEventListener('mousedown', (e) => {
-            e.preventDefault()
-            this.input.value = ''
-            this.hideDropdown()
-            this.input.focus()
-            this.clearBtn.hidden = true
-        })
-
-        document.addEventListener('visibilitychange', () => {
-            if(document.hidden) {
-                this.hideDropdown()
-            }
-        })
+        this.clearBtn.addEventListener('mousedown', this.clearInput)
     }
 
     handleKeyboardNavigation(e) {
         if(!this.isDropdownOpen) return
 
         if(this.isSubmitting || this.isCompleted) {
+            console.log(this)
             if(e.key === 'Enter') e.preventDefault()
             return
         }
@@ -96,12 +86,12 @@ class Game {
 
         const query = value.toLowerCase().trim()
         if(query.length < 1) {
+            this.clearBtn.hidden = true
             this.hideDropdown()
             return
         }
 
-        console.log(value.length)
-        this.clearBtn.hidden = value.length === 0
+        this.clearBtn.hidden = false
 
         const availableCharacters = this.characters.filter(char => !this.guessedIds.has(char.id))
 
@@ -116,11 +106,11 @@ class Game {
             const aStartsWithFirst = nameA.startsWith(query);
             const bStartsWithFirst = nameB.startsWith(query);
 
-            // Priorità 1: Chi inizia col NOME va prima di chi inizia col COGNOME
+            // 1st priority: First name match first, then last name match
             if (aStartsWithFirst && !bStartsWithFirst) return -1;
             if (!aStartsWithFirst && bStartsWithFirst) return 1;
 
-            // Priorità 2: A parità di tipo di match, ordine alfabetico classico
+            // 2nd priority: When there are more matches on same criteria, sort by alphabetical order
             return nameA.localeCompare(nameB);
         })
 
@@ -134,11 +124,14 @@ class Game {
             return
         }
 
+        this.input.setAttribute('aria-expanded', 'true')
+
         const baseUrl = this.appConfig?.baseUrl || '';
 
         list.forEach(char => {
             const item = document.createElement('div')
             item.className = 'autocomplete-item'
+            item.setAttribute('role', 'option')
 
             const imgSrc = char.image_url 
                 ? `${baseUrl}/assets/img/characters_icons/${this.slug}/${char.image_url}`
@@ -153,19 +146,15 @@ class Game {
             this.dropdown.appendChild(item)
         })
 
-        //this.dropdown.style.display = 'block'
         this.isDropdownOpen = true
         this.dropdown.classList.add('is-open')
     }
 
     hideDropdown() {
-        /*
-        this.dropdown.style.display = 'none'
-        this.dropdown.innerHTML = ''
-        */
         this.isDropdownOpen = false
         this.dropdown.classList.remove('is-open')
         this.dropdown.innerHTML = ''
+        this.input.setAttribute('aria-expanded', 'false')
         this.currentFocus = -1
     }
 
@@ -208,6 +197,7 @@ class Game {
             if(data.success) {
                 this.guessedIds.add(characterId)
                 this.input.value = ''
+                this.clearBtn.hidden = true
 
                 this.appendGuessRow(data);
 
@@ -221,6 +211,7 @@ class Game {
         } catch(e) {
             showAlert('error', 'Error submitting guess')
         } finally {
+            this.isSubmitting = false
             if(!this.isCompleted) {
                 this.input.disabled = false
                 this.input.focus()
@@ -252,7 +243,7 @@ class Game {
             </td>
         `
 
-        // Generazione DINAMICA delle celle degli attributi
+        // Dynamic attributes cells generation
         for (const [key, attrData] of Object.entries(attributes)) {
             const statusClass = (attrData.status || '').toLowerCase()
             const val = attrData.value ?? ''
@@ -262,7 +253,7 @@ class Game {
 
         row.innerHTML = cellsHtml
 
-        // Inserisce il tentativo in cima alla tabella
+        // Last attempt pushed to top of the table
         this.tableBody.prepend(row)
     }
 
@@ -287,6 +278,13 @@ class Game {
                 this.dropdown.scrollTop = itemTop
             }
         }
+    }
+
+    clearInput() {
+        this.hideDropdown()
+        this.clearBtn.hidden = true
+        this.input.value = ''
+        this.input.focus()
     }
 }
 
