@@ -72,15 +72,21 @@ class GameApiController extends ApiController {
         if($solved) {
             $userId = $this->sessionManager->getUserId();
             if($userId !== null) {
-                $this->gameSessionService->updateStatsOnComplete($userId, $franchise->getId(), $attemptNumber, true);
+                $stats = $this->gameSessionService->updateStatsOnComplete($userId, $franchise->getId(), $attemptNumber, true);
+                $response['completed_data']['stats'] = [
+                    'games_played'   => $stats->getGamesPlayed(),
+                    'win_rate'       => $stats->getCompletionRate(),
+                    'current_streak' => $stats->getCurrentStreak(),
+                    'max_streak'     => $stats->getMaxStreak(),
+                ];
             }
 
-            $response['correct_char'] = [
+            $response['completed_data']['correct_char'] = [
                 'name' => $correctChar->getName(),
                 'image_url' => $correctChar->getImageUrl(),
                 'attributes' => $correctChar->getAttributes()
             ];
-            $response['attempts_count'] = $attemptNumber;
+            $response['completed_data']['attempts_count'] = $attemptNumber;
         }
 
         $this->renderJson($response);

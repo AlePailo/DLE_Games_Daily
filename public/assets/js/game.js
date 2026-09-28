@@ -2,9 +2,12 @@ import { showAlert } from "./utils/alerts.js";
 
 class Game {
     constructor(config) {
+        console.log(config)
+
         const appConfigElement = document.getElementById('app-config');
         this.appConfig = appConfigElement ? JSON.parse(appConfigElement.textContent) : {};
 
+        this.completedData = config.completedData || null
         this.characters = config.characters
         this.guessedIds = new Set(config.guessedIds)
         this.isCompleted = config.isCompleted || false
@@ -20,6 +23,27 @@ class Game {
 
         this.slug = config.slug
         this.currentFocus = -1
+
+
+        //Game recap modal
+        this.modal = document.getElementById('result-modal')
+        this.modalTitle = document.getElementById('modal-title')
+        this.modalImg = document.getElementById('modal-character-img')
+        this.modalAttempts = document.getElementById('modal-attempts')
+        this.modalStats = document.getElementById('modal-stats')
+        this.modalGuest = document.getElementById('modal-guest')
+        this.modalCloseBtn = document.querySelector('.modal-close')
+        this.modalOverlay = document.querySelector('.modal-overlay')
+        this.modalOpenBtn = document.getElementById('open-result-modal')
+
+        this.statPlayed = document.getElementById('stat-played')
+        this.statWinrate = document.getElementById('stat-winrate')
+        this.statCurrentStreak = document.getElementById('stat-current-streak')
+        this.statMaxStreak = document.getElementById('stat-max-streak')
+
+        this.previouslyFocused = null
+
+
         this.initEvents()
 
         if (config.previousGuesses && config.previousGuesses.length > 0) {
@@ -29,6 +53,10 @@ class Game {
         }
 
         if(this.isCompleted) this.input.disabled = true
+
+        if(this.isCompleted && config.completedData) {
+            this.openModal(config.completedData)
+        }
     }
 
     initEvents() {
@@ -41,14 +69,23 @@ class Game {
             setTimeout(() => this.hideDropdown(), 150)
         })
 
-        this.clearBtn.addEventListener('mousedown', this.clearInput)
+        this.clearBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault()
+            this.clearInput()
+        })
+
+        this.modalCloseBtn.addEventListener('click', () => this.closeModal())
+        this.modalOverlay.addEventListener('click', () => this.closeModal())
+        this.modalOpenBtn.addEventListener('click', () => this.openModal(this.completedData))
+        this.modal.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') this.closeModal()
+        })
     }
 
     handleKeyboardNavigation(e) {
         if(!this.isDropdownOpen) return
 
         if(this.isSubmitting || this.isCompleted) {
-            console.log(this)
             if(e.key === 'Enter') e.preventDefault()
             return
         }
@@ -202,13 +239,15 @@ class Game {
                 this.appendGuessRow(data);
 
                 if (data.solved) {
-                    this.isCompleted = true;
-                    alert('Character guessed!')
-                }                         //TODO: Victory modal
+                    this.isCompleted = true
+                    this.completedData = data.completed_data
+                    this.openModal(this.completedData)
+                }
             } else {
                 showAlert('error', data.message || 'Something went wrong')
             }
         } catch(e) {
+            console.error('Errore completo:', e)
             showAlert('error', 'Error submitting guess')
         } finally {
             this.isSubmitting = false
@@ -286,6 +325,60 @@ class Game {
         this.input.value = ''
         this.input.focus()
     }
+
+    openModal(completedData) {
+        const baseUrl = this.appConfig?.baseUrl || ''
+        const char = completedData.correct_char
+
+        this.modalImg.src = char.image_url
+            ? `${baseUrl}/assets/img/characters_icons/${this.slug}/${char.image_url}`
+            : `${baseUrl}/assets/img/default-avatar.png`
+        this.modalImg.alt = char.name
+        this.modalTitle.textContent = char.name
+        this.modalAttempts.textContent = completedData.attempts_count
+
+        if(completedData.stats) {
+            this.statPlayed.textContent = completedData.stats.games_played
+            this.statWinrate.textContent = `${completedData.stats.win_rate}%`
+            this.statCurrentStreak.textContent = completedData.stats.current_streak
+            this.statMaxStreak.textContent = completedData.stats.max_streak
+            this.modalStats.hidden = false
+            this.modalGuest.hidden = true
+        } else {
+            this.modalStats.hidden = true
+            this.modalGuest.hidden = false
+        }
+
+        this.modal.classList.add('is-open')
+        this.previouslyFocused = document.activeElement
+        this.modal.focus()
+        this.modal.addEventListener('keydown', this.trapFocus)
+    }
+
+    closeModal() {
+        this.modal.classList.remove('is-open')
+        this.modal.removeEventListener('keydown', this.trapFocus)
+        this.previouslyFocused?.focus()
+        this.modalOpenBtn.hidden = false
+    }
+
+    trapFocus = (e) => {
+        if(e.key !== 'Tab') return
+
+        const focusable = this.modal.querySelectorAll(
+            'button, a, input, [tabindex]:not([tabindex="-1"])'
+        )
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+
+        if(e.shiftKey && document.activeElement === first) {
+            e.preventDefault()
+            last.focus()
+        } else if(!e.shiftKey && document.activeElement === last) {
+            e.preventDefault()
+            first.focus()
+        }
+    }
 }
 
 
@@ -294,6 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (configElement) {
         try {
+
             // 1. Parsing del JSON contenuto nel tag <script>
             const rawConfig = JSON.parse(configElement.textContent);
 

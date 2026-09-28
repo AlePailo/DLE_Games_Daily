@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Model\Entity\GameSession;
+use App\Model\Entity\UserFranchiseStats;
 use App\Model\Repository\IFranchiseRepository;
 use App\Model\Repository\IGameSessionRepository;
 use App\Model\Repository\IGameAttemptRepository;
@@ -45,8 +46,8 @@ class GameSessionService {
         }
     }
 
-    public function updateStatsOnComplete(int $userId, int $franchiseId, int $attempts, bool $solved) : void {
-        $this->statsRepository->upsertOnGameCompletion($userId, $franchiseId, $attempts, $solved);
+    public function updateStatsOnComplete(int $userId, int $franchiseId, int $attempts, bool $solved) : UserFranchiseStats {
+        return $this->statsRepository->upsertOnGameCompletion($userId, $franchiseId, $attempts, $solved);
     }
 
 

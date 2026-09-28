@@ -5,6 +5,7 @@
  * @var array $guessed_chars_ids
  * @var array $previous_guesses
  * @var bool $is_completed
+ * @var array $completed_data
  */
 ?>
 
@@ -14,7 +15,8 @@
         "characters": <?= json_encode($characters) ?>,
         "guessedIds": <?= json_encode($guessed_chars_ids) ?>,
         "previousGuesses": <?= json_encode($previous_guesses) ?>,
-        "isCompleted": <?= $is_completed ? 'true' : 'false' ?>
+        "isCompleted": <?= $is_completed ? 'true' : 'false' ?>,
+        "completedData": <?= json_encode($completed_data) ?>
     }
 </script>
 
@@ -48,6 +50,7 @@
     </section>
 
     <section class="guesses-section" aria-label="Your Guesses">
+        <button type="button" id="open-result-modal" aria-label="Open results popup" aria-controls="result-modal" hidden>Show results</button>
         <div class="table-responsive-wrapper">
             <table class="guesses-table">
                 <thead>
@@ -64,5 +67,39 @@
             </table>
         </div>
     </section>
+
+    <div id="result-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button type="button" class="modal-close" aria-label="Close result popup">
+                <svg aria-hidden='true' focusable="false" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="m8 8l4 4m0 0l4 4m-4-4l4-4m-4 4l-4 4"/></svg>
+            </button>
+
+            <!-- Game recap -->
+            <div class="modal-header">
+                <img id="modal-character-img" alt="">
+                <h2 id="modal-title"></h2>
+                <p>Guessed in <span id="modal-attempts"></span> attempts</p>
+            </div>
+
+            <!-- Player section -->
+            <div class="modal-body">
+                <!-- Player stats if user has an account -->
+                <div id="modal-stats" hidden>
+                    <div>Games played <span id="stat-played"></span></div>
+                    <div>Win rate <span id="stat-winrate"></span></div>
+                    <div>Current streak <span id="stat-current-streak"></span></div>
+                    <div>Max streak <span id="stat-max-streak"></span></div>
+                </div>
+
+                <!-- CTA to register if user is guest -->
+                <div id="modal-guest" hidden>
+                    <p>Create an account to save your progress</p>
+                    <a href="<?= BASE_URL ?>/register">Register</a>
+                    <a href="<?= BASE_URL ?>/login">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>

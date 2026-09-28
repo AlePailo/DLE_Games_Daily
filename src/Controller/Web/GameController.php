@@ -9,6 +9,7 @@ use App\Model\Repository\ICharacterRepository;
 use App\Model\Repository\IDailyChallengeRepository;
 use App\Service\GameSessionService;
 use App\Model\Repository\IGameAttemptRepository;
+use App\Model\Repository\IUserFranchiseStatsRepository;
 
 class GameController extends WebController {
     public function __construct(
@@ -18,6 +19,7 @@ class GameController extends WebController {
         private IDailyChallengeRepository $dailyChallengeRepository,
         private GameSessionService $gameSessionService,
         private IGameAttemptRepository $gameAttemptRepository,
+        private IUserFranchiseStatsRepository $statsRepository
     ) {
         parent::__construct($sessionManager);
     }
@@ -51,22 +53,40 @@ class GameController extends WebController {
 
         $characters = $this->characterRepository->findForSearchByFranchise($franchise->getId());
 
+        $stats = null;
         $correctChar = null;
-        if($gameSession->isSolved() || $gameSession->isCompleted()) {
+        $isCompleted = $gameSession->isCompleted();
+        if($gameSession->isSolved() || $isCompleted) {
             $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
+            if($userId !== null) {
+                $stats = $this->statsRepository->findByUserAndFranchise($userId, $franchise->getId());
+            }
         }
 
         $this->render("game", [
             'title' => "{$franchise->getName()} | DLE Games Daily",
             'css' => ['game.css'],
             'js' => ['game.js'],
-            'franchise' => $franchise,
-            'gameSession' => $gameSession,
-            'characters' => $characters,
+            'franchise'         => $franchise,
+            'gameSession'       => $gameSession,
+            'characters'        => $characters,
             'guessed_chars_ids' => $guessedCharactersIds,
-            'is_completed' => $gameSession->isCompleted(),
-            'correct_char' => $correctChar,
-            'previous_guesses' => $previousGuesses
+            'is_completed'      => $isCompleted,
+            'completed_data'    => $isCompleted ? [
+                'correct_char'  => [
+                    'name' => $correctChar->getName(),
+                    'image_url' => $correctChar->getImageUrl(),
+                    'attributes' => $correctChar->getAttributes()
+                ],
+                'attempts_count' => $gameSession->getAttemptsCount(),
+                'stats'         => $userId ? [
+                    'games_played'   => $stats->getGamesPlayed(),
+                    'win_rate'       => $stats->getCompletionRate(),
+                    'current_streak' => $stats->getCurrentStreak(),
+                    'max_streak'     => $stats->getMaxStreak()
+                ] : null
+            ] : null,
+            'previous_guesses'  => $previousGuesses
         ]);
     }
 }

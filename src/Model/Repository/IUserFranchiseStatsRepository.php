@@ -6,6 +6,6 @@ use App\Model\Entity\UserFranchiseStats;
 
 interface IUserFranchiseStatsRepository {
     public function insertFromMigratedSessions(int $userId) : void;
-    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved) : void;
+    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved) : ?UserFranchiseStats;
     public function findByUserAndFranchise(int $userId, int $franchiseId) : ?UserFranchiseStats;
 }

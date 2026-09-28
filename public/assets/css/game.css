@@ -205,3 +205,32 @@ img.character-icon, .autocomplete-img {
     height: 100px;
     border-radius: 8px;
 }
+
+
+
+
+
+#result-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#result-modal.is-open {
+    display: flex;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative; /* sopra l'overlay */
+    z-index: 1;
+}

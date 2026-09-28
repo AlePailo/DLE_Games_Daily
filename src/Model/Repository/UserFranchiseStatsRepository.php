@@ -21,7 +21,7 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         $stmt->execute(['user_id' => $userId]);
     }
 
-    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved): void
+    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved): UserFranchiseStats
     {
         
         $current = $this->findByUserAndFranchise($userId, $franchiseId);
@@ -68,60 +68,7 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
 
         $stmt->execute($payload);
 
-        /*
-        if($current === null) {
-            $stmt = $this->pdo->prepare("INSERT INTO user_franchise_stats(user_id, franchise_id, games_played, games_won, current_streak, max_streak, avg_attempts) 
-                VALUES (:user_id, :franchise_id, 1, :games_won, :current_streak, :max_streak, :avg_attempts)");
-            $stmt->execute([
-                'user_id'        => $userId,
-                'franchise_id'   => $franchiseId,
-                'games_won'      => $solved ? 1 : 0,
-                'current_streak' => $solved ? 1 : 0,
-                'max_streak'     => $solved ? 1 : 0,
-                'avg_attempts'   => $solved ? $attempts : 0
-            ]);
-            return;
-        }
-
-        $wonYesterday = $this->wonYesterday($userId, $franchiseId);
-
-        $updatedCurrentStreak = match(true) {
-            !$solved          => 0,
-            $wonYesterday     => $current->getCurrentStreak() + 1,
-            default           => 1
-        };
-
-        $updatedMaxStreak = max($current->getMaxStreak(), $updatedCurrentStreak);
-
-        
-        if($solved) {
-            $newAvg = (($current->getAvgAttempts() * $current->getGamesWon()) + $attempts)
-                    / ($current->getGamesWon() + 1);
-        } else {
-            $newAvg = $current->getAvgAttempts();
-        }
-
-        // Update
-        $stmt = $this->pdo->prepare("
-            UPDATE user_franchise_stats SET
-                games_played    = games_played + 1,
-                games_won       = games_won + :games_won_increment,
-                current_streak  = :current_streak,
-                max_streak      = :max_streak,
-                avg_attempts    = :avg_attempts,
-                updated_at      = NOW()
-            WHERE user_id = :user_id
-            AND franchise_id = :franchise_id
-        ");
-        $stmt->execute([
-            'games_won_increment' => $solved ? 1 : 0,
-            'current_streak'      => $updatedCurrentStreak,
-            'max_streak'          => $updatedMaxStreak,
-            'avg_attempts'        => $newAvg,
-            'user_id'             => $userId,
-            'franchise_id'        => $franchiseId,
-        ]);
-        */
+        return $current;
     }
 
     private function wonYesterday(int $userId, int $franchiseId) : bool {
