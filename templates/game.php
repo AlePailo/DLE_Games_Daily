@@ -68,7 +68,7 @@
         </div>
     </section>
 
-    <div id="result-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div id="result-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-overlay"></div>
         <div class="modal-content">
             <button type="button" class="modal-close" aria-label="Close result popup">
