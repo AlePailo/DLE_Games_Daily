@@ -47,6 +47,7 @@
             </button>
             <div id="autocomplete-results" class="autocomplete-dropdown" role="listbox" aria-label="Suggestions"></div>
         </div>
+        <button type="button" id="surrender-btn" aria-label="Give up" hidden>Give up</button>
     </section>
 
     <section class="guesses-section" aria-label="Your Guesses">
@@ -79,7 +80,7 @@
             <div class="modal-header">
                 <img id="modal-character-img" alt="">
                 <h2 id="modal-title"></h2>
-                <p>Guessed in <span id="modal-attempts"></span> attempts</p>
+                <p id="modal-attempts"></p>
             </div>
 
             <!-- Player section -->

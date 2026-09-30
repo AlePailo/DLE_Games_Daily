@@ -56,10 +56,25 @@ class GameController extends WebController {
         $stats = null;
         $correctChar = null;
         $isCompleted = $gameSession->isCompleted();
-        if($gameSession->isSolved() || $isCompleted) {
+        $isSolved = $gameSession->isSolved();
+        if($isCompleted) {
             $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
+            $completedData['correct_char'] = [
+                'name' => $correctChar->getName(),
+                'image_url' => $correctChar->getImageUrl(),
+                'attributes' => $correctChar->getAttributes()
+            ];
             if($userId !== null) {
                 $stats = $this->statsRepository->findByUserAndFranchise($userId, $franchise->getId());
+                $completedData['stats'] = [
+                    'games_played'   => $stats->getGamesPlayed(),
+                    'win_rate'       => $stats->getCompletionRate(),
+                    'current_streak' => $stats->getCurrentStreak(),
+                    'max_streak'     => $stats->getMaxStreak()
+                ];
+            }
+            if($isSolved) {
+                $completedData['attempts_count'] = $gameSession->getAttemptsCount();
             }
         }
 
@@ -72,20 +87,7 @@ class GameController extends WebController {
             'characters'        => $characters,
             'guessed_chars_ids' => $guessedCharactersIds,
             'is_completed'      => $isCompleted,
-            'completed_data'    => $isCompleted ? [
-                'correct_char'  => [
-                    'name' => $correctChar->getName(),
-                    'image_url' => $correctChar->getImageUrl(),
-                    'attributes' => $correctChar->getAttributes()
-                ],
-                'attempts_count' => $gameSession->getAttemptsCount(),
-                'stats'         => $userId ? [
-                    'games_played'   => $stats->getGamesPlayed(),
-                    'win_rate'       => $stats->getCompletionRate(),
-                    'current_streak' => $stats->getCurrentStreak(),
-                    'max_streak'     => $stats->getMaxStreak()
-                ] : null
-            ] : null,
+            'completed_data'    => $completedData ?? null,
             'previous_guesses'  => $previousGuesses
         ]);
     }

@@ -12,6 +12,7 @@ use App\Model\Repository\IDailyChallengeRepository;
 use App\Model\Repository\IFranchiseRepository;
 use App\Service\CharacterComparisonService;
 use App\Service\GameSessionService;
+use App\Model\Entity\Character;
 
 class GameApiController extends ApiController {
     public function __construct(
@@ -70,6 +71,7 @@ class GameApiController extends ApiController {
         ];
 
         if($solved) {
+            /*
             $userId = $this->sessionManager->getUserId();
             if($userId !== null) {
                 $stats = $this->gameSessionService->updateStatsOnComplete($userId, $franchise->getId(), $attemptNumber, true);
@@ -87,6 +89,8 @@ class GameApiController extends ApiController {
                 'attributes' => $correctChar->getAttributes()
             ];
             $response['completed_data']['attempts_count'] = $attemptNumber;
+            */
+            $response['completed_data'] = $this->formatCompletedData($correctChar, $franchise->getId(), $attemptNumber);
         }
 
         $this->renderJson($response);
@@ -102,8 +106,41 @@ class GameApiController extends ApiController {
 
         $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
 
-        $this->renderJson(['success' => true, 'surrender' => true, 'character' => ['name' => $correctChar->getName(), 'imageUrl' => $correctChar->getImageUrl()]]);
+        $response = [
+            'success' => true,
+            'surrender' => true,
+            'completed_data' => $this->formatCompletedData($correctChar, $franchise->getId())
+        ];
+
+        $this->renderJson($response);
         
+    }
+
+    private function formatCompletedData(Character $correctChar, int $franchiseId, ?int $attemptNumber = null) : array {
+        $response = [];
+
+        $response['correct_char'] = [
+            'name' => $correctChar->getName(),
+            'image_url' => $correctChar->getImageUrl(),
+            'attributes' => $correctChar->getAttributes()
+        ];
+
+        $userId = $this->sessionManager->getUserId();
+        if($userId !== null) {
+            $stats = $this->gameSessionService->updateStatsOnComplete($userId, $franchiseId, $attemptNumber, true);
+            $response['stats'] = [
+                'games_played'   => $stats->getGamesPlayed(),
+                'win_rate'       => $stats->getCompletionRate(),
+                'current_streak' => $stats->getCurrentStreak(),
+                'max_streak'     => $stats->getMaxStreak(),
+            ];
+        }
+
+        if($attemptNumber !== null) {
+            $response['attempts_count'] = $attemptNumber;
+        }
+
+        return $response;
     }
 
     private function resolveGameContext(string $slug) : array {

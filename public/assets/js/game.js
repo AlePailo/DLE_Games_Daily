@@ -20,6 +20,7 @@ class Game {
         this.clearBtn = document.getElementById('clear-character-search')
         this.dropdown = document.getElementById('autocomplete-results')
         this.tableBody = document.getElementById('guesses-body')
+        this.surrenderBtn = document.getElementById('surrender-btn')
 
         this.slug = config.slug
         this.currentFocus = -1
@@ -57,6 +58,8 @@ class Game {
         if(this.isCompleted && config.completedData) {
             this.openModal(config.completedData)
         }
+
+        this.enableSurrenderCheck()
     }
 
     initEvents() {
@@ -80,6 +83,7 @@ class Game {
         this.modal.addEventListener('keydown', (e) => {
             if(e.key === 'Escape') this.closeModal()
         })
+        this.surrenderBtn.addEventListener('click', () => this.surrender())
     }
 
     handleKeyboardNavigation(e) {
@@ -123,7 +127,6 @@ class Game {
 
         const query = value.toLowerCase().trim()
         if(query.length < 1) {
-            this.clearBtn.hidden = true
             this.hideDropdown()
             return
         }
@@ -235,11 +238,13 @@ class Game {
                 this.guessedIds.add(characterId)
                 this.input.value = ''
                 this.clearBtn.hidden = true
+                this.enableSurrenderCheck()
 
                 this.appendGuessRow(data);
 
                 if (data.solved) {
                     this.isCompleted = true
+                    this.surrenderBtn.hidden = true
                     this.completedData = data.completed_data
                     this.openModal(this.completedData)
                 }
@@ -326,7 +331,7 @@ class Game {
         this.input.focus()
     }
 
-    openModal(completedData) {
+    openModal(completedData, surrendered = false) {
         const baseUrl = this.appConfig?.baseUrl || ''
         const char = completedData.correct_char
 
@@ -335,7 +340,9 @@ class Game {
             : `${baseUrl}/assets/img/default-avatar.png`
         this.modalImg.alt = char.name
         this.modalTitle.textContent = char.name
-        this.modalAttempts.textContent = completedData.attempts_count
+        this.modalAttempts.textContent = typeof completedData['attempts_count'] !== undefined
+            ? 'You gave up'
+            : `Guessed in ${completedData.attempts_count} attempts`
 
         if(completedData.stats) {
             this.statPlayed.textContent = completedData.stats.games_played
@@ -377,6 +384,54 @@ class Game {
         } else if(!e.shiftKey && document.activeElement === last) {
             e.preventDefault()
             first.focus()
+        }
+    }
+
+    async surrender() {
+        if(this.isSubmitting) return
+
+        this.isSubmitting = true
+        this.input.disabled = true
+
+        try {
+            const response = await fetch(`${this.appConfig?.baseUrl}/api/play/${this.slug}/surrender`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.appConfig?.csrfToken
+                }
+            })
+
+            if (!response.ok) {
+                const errorHtml = await response.text();
+                console.error("PHP Error Response:", errorHtml);
+                return;
+            }
+
+            const data = await response.json()
+
+            if(data.success) {
+                this.isCompleted = true
+                this.surrenderBtn.hidden = true
+                this.completedData = data.completed_data
+                this.openModal(this.completedData, true)
+            }
+
+        } catch(e) {
+            showAlert('Error')
+        } finally {
+            this.isSubmitting = false
+            if(!this.isCompleted) {
+                this.input.disabled = false
+                this.input.focus()
+            }
+        }
+    }
+
+    enableSurrenderCheck() {
+        if(this.guessedIds.size >= 3 && !this.isCompleted) {
+            this.surrenderBtn.hidden = false
         }
     }
 }
