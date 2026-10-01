@@ -29,8 +29,11 @@
 <div class="game-container">
 
     <header class="game-header">
-        <h1 class="section-title"><?= htmlspecialchars($franchise->getName()) ?></h1>
-        <p class="game-subtitle">Guess today's character.</p>
+        <div class="header-titles">
+            <h1 class="section-title"><?= htmlspecialchars($franchise->getName()) ?></h1>
+            <p class="game-subtitle">Guess today's character.</p>
+        </div>
+        <button type="button" id="surrender-btn" aria-label="Give up" hidden>Give up</button>
     </header>
 
     <section class="search-section" aria-label="Character Selection">
@@ -47,7 +50,6 @@
             </button>
             <div id="autocomplete-results" class="autocomplete-dropdown" role="listbox" aria-label="Suggestions"></div>
         </div>
-        <button type="button" id="surrender-btn" aria-label="Give up" hidden>Give up</button>
     </section>
 
     <section class="guesses-section" aria-label="Your Guesses">

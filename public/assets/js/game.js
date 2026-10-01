@@ -127,6 +127,7 @@ class Game {
 
         const query = value.toLowerCase().trim()
         if(query.length < 1) {
+            this.clearBtn.hidden = true
             this.hideDropdown()
             return
         }
@@ -340,7 +341,7 @@ class Game {
             : `${baseUrl}/assets/img/default-avatar.png`
         this.modalImg.alt = char.name
         this.modalTitle.textContent = char.name
-        this.modalAttempts.textContent = typeof completedData['attempts_count'] !== undefined
+        this.modalAttempts.textContent = completedData.attempts_count === undefined
             ? 'You gave up'
             : `Guessed in ${completedData.attempts_count} attempts`
 

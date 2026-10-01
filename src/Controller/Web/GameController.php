@@ -53,6 +53,7 @@ class GameController extends WebController {
 
         $characters = $this->characterRepository->findForSearchByFranchise($franchise->getId());
 
+        $completedData = null;
         $stats = null;
         $correctChar = null;
         $isCompleted = $gameSession->isCompleted();
@@ -87,7 +88,7 @@ class GameController extends WebController {
             'characters'        => $characters,
             'guessed_chars_ids' => $guessedCharactersIds,
             'is_completed'      => $isCompleted,
-            'completed_data'    => $completedData ?? null,
+            'completed_data'    => $completedData,
             'previous_guesses'  => $previousGuesses
         ]);
     }

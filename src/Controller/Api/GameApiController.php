@@ -71,26 +71,7 @@ class GameApiController extends ApiController {
         ];
 
         if($solved) {
-            /*
-            $userId = $this->sessionManager->getUserId();
-            if($userId !== null) {
-                $stats = $this->gameSessionService->updateStatsOnComplete($userId, $franchise->getId(), $attemptNumber, true);
-                $response['completed_data']['stats'] = [
-                    'games_played'   => $stats->getGamesPlayed(),
-                    'win_rate'       => $stats->getCompletionRate(),
-                    'current_streak' => $stats->getCurrentStreak(),
-                    'max_streak'     => $stats->getMaxStreak(),
-                ];
-            }
-
-            $response['completed_data']['correct_char'] = [
-                'name' => $correctChar->getName(),
-                'image_url' => $correctChar->getImageUrl(),
-                'attributes' => $correctChar->getAttributes()
-            ];
-            $response['completed_data']['attempts_count'] = $attemptNumber;
-            */
-            $response['completed_data'] = $this->formatCompletedData($correctChar, $franchise->getId(), $attemptNumber);
+            $response['completed_data'] = $this->formatCompletedData($correctChar, $franchise->getId(), $attemptNumber, true);
         }
 
         $this->renderJson($response);
@@ -109,14 +90,14 @@ class GameApiController extends ApiController {
         $response = [
             'success' => true,
             'surrender' => true,
-            'completed_data' => $this->formatCompletedData($correctChar, $franchise->getId())
+            'completed_data' => $this->formatCompletedData($correctChar, $franchise->getId(), null, false)
         ];
 
         $this->renderJson($response);
         
     }
 
-    private function formatCompletedData(Character $correctChar, int $franchiseId, ?int $attemptNumber = null) : array {
+    private function formatCompletedData(Character $correctChar, int $franchiseId, ?int $attemptNumber = null, bool $solved = false) : array {
         $response = [];
 
         $response['correct_char'] = [
@@ -127,7 +108,7 @@ class GameApiController extends ApiController {
 
         $userId = $this->sessionManager->getUserId();
         if($userId !== null) {
-            $stats = $this->gameSessionService->updateStatsOnComplete($userId, $franchiseId, $attemptNumber, true);
+            $stats = $this->gameSessionService->updateStatsOnComplete($userId, $franchiseId, $attemptNumber ?? 0, $solved);
             $response['stats'] = [
                 'games_played'   => $stats->getGamesPlayed(),
                 'win_rate'       => $stats->getCompletionRate(),
