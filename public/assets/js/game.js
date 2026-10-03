@@ -2,88 +2,121 @@ import { showAlert } from "./utils/alerts.js";
 
 class Game {
     constructor(config) {
-        console.log(config)
+        this.initState(config)
+        this.initDOMElements()
+        this.initEvents()
+        this.restoreGameState(config)
+    }
+        
+    initState(config) {
+        this.appConfig = this._parseAppConfig()
 
-        const appConfigElement = document.getElementById('app-config');
-        this.appConfig = appConfigElement ? JSON.parse(appConfigElement.textContent) : {};
-
-        this.completedData = config.completedData || null
+        this.slug = config.slug
         this.characters = config.characters
         this.guessedIds = new Set(config.guessedIds)
         this.isCompleted = config.isCompleted || false
+        this.completedData = config.completedData || null
+
         this.isDropdownOpen = false
-
         this.isSubmitting = false
+        this.currentFocus = -1
+        this.previouslyFocused = null
+        this.blurTimeout = null
+    }
 
-        //DOM elements
+    initDOMElements() {
+        // Search
         this.input = document.getElementById('character-search')
         this.clearBtn = document.getElementById('clear-character-search')
         this.dropdown = document.getElementById('autocomplete-results')
+        
+        // Game actions
         this.tableBody = document.getElementById('guesses-body')
         this.surrenderBtn = document.getElementById('surrender-btn')
 
-        this.slug = config.slug
-        this.currentFocus = -1
-
-
-        //Game recap modal
+        // Game recap modal
         this.modal = document.getElementById('result-modal')
         this.modalTitle = document.getElementById('modal-title')
         this.modalImg = document.getElementById('modal-character-img')
         this.modalAttempts = document.getElementById('modal-attempts')
         this.modalStats = document.getElementById('modal-stats')
         this.modalGuest = document.getElementById('modal-guest')
-        this.modalCloseBtn = document.querySelector('.modal-close')
         this.modalOverlay = document.querySelector('.modal-overlay')
+        this.modalCloseBtn = document.querySelector('.modal-close')
         this.modalOpenBtn = document.getElementById('open-result-modal')
 
+        // Game recap modal stats
         this.statPlayed = document.getElementById('stat-played')
         this.statWinrate = document.getElementById('stat-winrate')
         this.statCurrentStreak = document.getElementById('stat-current-streak')
         this.statMaxStreak = document.getElementById('stat-max-streak')
-
-        this.previouslyFocused = null
-
-
-        this.initEvents()
-
-        if (config.previousGuesses && config.previousGuesses.length > 0) {
-            config.previousGuesses.forEach(guess => {
-                this.appendGuessRow(guess, true)
-            })
-        }
-
-        if(this.isCompleted) this.input.disabled = true
-
-        if(this.isCompleted && config.completedData) {
-            this.openModal(config.completedData)
-        }
-
-        this.enableSurrenderCheck()
     }
 
     initEvents() {
-
+        // Search input
         this.input.addEventListener('keydown', (e) => this.handleKeyboardNavigation(e))
-
         this.input.addEventListener('input', (e) => this.handleInput(e.target.value))
-
         this.input.addEventListener('blur', () => {
-            setTimeout(() => this.hideDropdown(), 150)
+            this.blurTimeout = setTimeout(() => this.hideDropdown(), 150)
         })
+        this.input.addEventListener('focus', () => clearTimeout(this.blurTimeout))
 
+        // Clear button
         this.clearBtn.addEventListener('mousedown', (e) => {
             e.preventDefault()
             this.clearInput()
         })
 
-        this.modalCloseBtn.addEventListener('click', () => this.closeModal())
-        this.modalOverlay.addEventListener('click', () => this.closeModal())
-        this.modalOpenBtn.addEventListener('click', () => this.openModal(this.completedData))
+        // Surrender button
+        this.surrenderBtn.addEventListener('click', () => this.surrender())
+
+        // Modal
         this.modal.addEventListener('keydown', (e) => {
             if(e.key === 'Escape') this.closeModal()
         })
-        this.surrenderBtn.addEventListener('click', () => this.surrender())
+        this.modalOverlay.addEventListener('click', () => this.closeModal())
+        this.modalOpenBtn.addEventListener('click', () => this.openModal(this.completedData))
+        this.modalCloseBtn.addEventListener('click', () => this.closeModal())
+    }
+
+    restoreGameState(config) {
+        // Repopulate table with existing guesses
+        if (config.previousGuesses?.length > 0) {
+            config.previousGuesses.forEach(guess => this.appendGuessRow(guess, true))
+        }
+
+        // Restore completed game state (UI)
+        if(this.isCompleted) {
+            this.input.disabled = true
+            if(config.completedData) {
+                this.openModal(config.completedData)
+            }
+        }
+
+        this.enableSurrenderCheck()
+    }
+
+
+    // =========================================================================
+    // SEARCH & AUTOCOMPLETE
+    // =========================================================================
+
+    handleInput(value) {
+        this.currentFocus = -1
+
+        const query = value.toLowerCase().trim()
+        if(query.length < 1) {
+            this.clearBtn.hidden = true
+            this.hideDropdown()
+            return
+        }
+
+        this.clearBtn.hidden = false
+
+        const availableCharacters = this.characters.filter(char => !this.guessedIds.has(char.id))
+        const matches = this._filterAndSortMatches(availableCharacters, query)
+
+        this.renderDropdown(matches)
     }
 
     handleKeyboardNavigation(e) {
@@ -99,63 +132,19 @@ class Game {
 
         if(e.key === 'ArrowDown') {
             e.preventDefault();
-
             (this.currentFocus === items.length - 1) ? this.currentFocus = 0 : this.currentFocus++
-
             this.setActiveItem(items)
         } else if(e.key === 'ArrowUp') {
             e.preventDefault();
-
             (this.currentFocus === 0) ? this.currentFocus = items.length - 1 : this.currentFocus--
-
             this.setActiveItem(items)
         } else if(e.key === 'Enter') {
             e.preventDefault()
-
             const itemToSelect = (this.currentFocus > -1 && items[this.currentFocus]) 
                 ? items[this.currentFocus]
                 : items[0]
-            
-            if(itemToSelect) {
-                itemToSelect.click()
-            }
+            if(itemToSelect) itemToSelect.click()
         }
-    }
-
-    handleInput(value) {
-        this.currentFocus = -1
-
-        const query = value.toLowerCase().trim()
-        if(query.length < 1) {
-            this.clearBtn.hidden = true
-            this.hideDropdown()
-            return
-        }
-
-        this.clearBtn.hidden = false
-
-        const availableCharacters = this.characters.filter(char => !this.guessedIds.has(char.id))
-
-        const matches = availableCharacters.filter(char => {
-            const nameParts = char.name.toLowerCase().split(' ')
-
-            return nameParts.some(part => part.startsWith(query))
-        }).sort((a, b) => {
-            const nameA = a.name.toLowerCase()
-            const nameB = b.name.toLowerCase()
-
-            const aStartsWithFirst = nameA.startsWith(query);
-            const bStartsWithFirst = nameB.startsWith(query);
-
-            // 1st priority: First name match first, then last name match
-            if (aStartsWithFirst && !bStartsWithFirst) return -1;
-            if (!aStartsWithFirst && bStartsWithFirst) return 1;
-
-            // 2nd priority: When there are more matches on same criteria, sort by alphabetical order
-            return nameA.localeCompare(nameB);
-        })
-
-        this.renderDropdown(matches)
     }
 
     renderDropdown(list) {
@@ -165,9 +154,8 @@ class Game {
             return
         }
 
-        this.input.setAttribute('aria-expanded', 'true')
-
-        const baseUrl = this.appConfig?.baseUrl || '';
+        const baseUrl = this.appConfig?.baseUrl || ''
+        const fragment = document.createDocumentFragment()
 
         list.forEach(char => {
             const item = document.createElement('div')
@@ -184,11 +172,13 @@ class Game {
             `
 
             item.addEventListener('click', () => this.selectCharacter(char))
-            this.dropdown.appendChild(item)
+            fragment.appendChild(item)
         })
-
+        
+        this.dropdown.appendChild(fragment)
         this.isDropdownOpen = true
         this.dropdown.classList.add('is-open')
+        this.input.setAttribute('aria-expanded', 'true')
     }
 
     hideDropdown() {
@@ -199,11 +189,42 @@ class Game {
         this.currentFocus = -1
     }
 
+    setActiveItems(items) {
+        items.forEach(item => item.classList.remove('active'))
+
+        const activeItem = items[this.currentFocus]
+        if(!activeItem) return
+
+        activeItem.classList.add('active')
+
+        const dropdownTop = this.dropdown.scrollTop
+        const dropdownBottom = dropdownTop + this.dropdown.clientHeight
+        const itemTop = activeItem.offsetTop
+        const itemBottom = itemTop + activeItem.offsetHeight
+
+        if (itemBottom > dropdownBottom) {
+            this.dropdown.scrollTop = itemBottom - this.dropdown.clientHeight
+        } else if (itemTop < dropdownTop) {
+            this.dropdown.scrollTop = itemTop
+        }
+    }
+
+    clearInput() {
+        this.input.value = ''
+        this.clearBtn.hidden = true
+        this.hideDropdown()
+        this.input.focus()
+    }
+
+
+    // =========================================================================
+    // GAME ACTIONS
+    // =========================================================================
+
     selectCharacter(char) {
         if (this.isSubmitting) return
 
-        this.input.value = ''
-        this.hideDropdown()
+        this.clearInput()
         this.submitGuess(char.id)
     }
 
@@ -214,46 +235,27 @@ class Game {
         this.input.disabled = true
 
         try {
-            const response = await fetch(`${this.appConfig?.baseUrl}/api/play/${this.slug}/attempt`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': this.appConfig?.csrfToken
-                },
-                body: JSON.stringify({
-                    character_id: characterId
-                }),
-                keepalive: true
-            })
+            const data = await this._apiPost(`/api/play/${this.slug}/attempt`, { character_id: characterId })
 
-            if (!response.ok) {
-                const errorHtml = await response.text();
-                console.error("PHP Error Response:", errorHtml);
-                return;
-            }
-
-            const data = await response.json()
+            if(!data) return
 
             if(data.success) {
                 this.guessedIds.add(characterId)
-                this.input.value = ''
+                //this.input.value = ''
                 this.clearBtn.hidden = true
                 this.enableSurrenderCheck()
-
-                this.appendGuessRow(data);
+                this.appendGuessRow(data)
 
                 if (data.solved) {
                     this.isCompleted = true
-                    this.surrenderBtn.hidden = true
                     this.completedData = data.completed_data
+                    this.surrenderBtn.hidden = true
                     this.openModal(this.completedData)
                 }
             } else {
-                showAlert('error', data.message || 'Something went wrong')
+                showAlert('error', data.message || 'Something went wrong')    
             }
         } catch(e) {
-            console.error('Errore completo:', e)
             showAlert('error', 'Error submitting guess')
         } finally {
             this.isSubmitting = false
@@ -264,20 +266,49 @@ class Game {
         }
     }
 
-    appendGuessRow(data, isInitialLoad = false) {
-        const row = document.createElement('tr')
-        row.className = 'guess-row'
+    async surrender() {
+        if(this.isSubmitting) return
 
-        if(!isInitialLoad) {
-            row.classList.add('animate-row-entry')
+        this.isSubmitting = true
+        this.input.disabled = true
+
+        try {
+            const data = await this._apiPost(`/api/play/${this.slug}/surrender`)
+            if(!data) return
+
+            if (data.success) {
+                this.isCompleted   = true
+                this.completedData = data.completed_data
+                this.surrenderBtn.hidden = true
+                this.openModal(this.completedData)
+            }
+        } catch(e) {
+            showAlert('error', 'Error submitting surrender')
+        } finally {
+            this.isSubmitting = false
+            if(!this.isCompleted) {
+                this.input.disabled = false
+                this.input.focus()
+            } 
         }
+    }
 
+    enableSurrenderCheck() {
+        if(this.guessedIds.size >= 3 && !this.isCompleted) {
+            this.surrenderBtn.hidden = false
+        }
+    }
+
+    appendGuessRow(data, isInitialLoad = false) {
         const attemptData = data.attempt || data
-
         const charName = attemptData.character.name
         const nameStatusClass = (attemptData.character.status || 'wrong').toLowerCase()
         const charImage = attemptData.character?.image_url
         const attributes = attemptData.attributes || {}
+
+        const row = document.createElement('tr')
+        row.className = 'guess-row'
+        if(!isInitialLoad) row.classList.add('animate-row-entry')
 
         let cellsHtml = `
             <td class="guess-cell cell-image">
@@ -289,11 +320,9 @@ class Game {
         `
 
         // Dynamic attributes cells generation
-        for (const [key, attrData] of Object.entries(attributes)) {
+        for (const [, attrData] of Object.entries(attributes)) {
             const statusClass = (attrData.status || '').toLowerCase()
-            const val = attrData.value ?? ''
-
-            cellsHtml += `<td class="guess-cell ${statusClass}">${val}</td>`
+            cellsHtml += `<td class="guess-cell ${statusClass}">${attrData.value ?? ''}</td>`
         }
 
         row.innerHTML = cellsHtml
@@ -302,37 +331,12 @@ class Game {
         this.tableBody.prepend(row)
     }
 
-    setActiveItem(items) {
-        items.forEach(item => item.classList.remove('active'))
 
-        const activeItem = items[this.currentFocus]
-        if(activeItem) {
-            activeItem.classList.add('active')
+    // =========================================================================
+    // MODAL
+    // =========================================================================
 
-            //activeItem.scrollIntoView({block: 'nearest'})
-            
-            // Safer scroll
-            const dropdownTop = this.dropdown.scrollTop
-            const dropdownBottom = dropdownTop + this.dropdown.clientHeight
-            const itemTop = activeItem.offsetTop
-            const itemBottom = itemTop + activeItem.offsetHeight
-
-            if (itemBottom > dropdownBottom) {
-                this.dropdown.scrollTop = itemBottom - this.dropdown.clientHeight
-            } else if (itemTop < dropdownTop) {
-                this.dropdown.scrollTop = itemTop
-            }
-        }
-    }
-
-    clearInput() {
-        this.hideDropdown()
-        this.clearBtn.hidden = true
-        this.input.value = ''
-        this.input.focus()
-    }
-
-    openModal(completedData, surrendered = false) {
+    openModal(completedData) {
         const baseUrl = this.appConfig?.baseUrl || ''
         const char = completedData.correct_char
 
@@ -373,9 +377,7 @@ class Game {
     trapFocus = (e) => {
         if(e.key !== 'Tab') return
 
-        const focusable = this.modal.querySelectorAll(
-            'button, a, input, [tabindex]:not([tabindex="-1"])'
-        )
+        const focusable = this.modal.querySelectorAll('button, a, input, [tabindex]:not([tabindex="-1"])')
         const first = focusable[0]
         const last = focusable[focusable.length - 1]
 
@@ -388,75 +390,68 @@ class Game {
         }
     }
 
-    async surrender() {
-        if(this.isSubmitting) return
 
-        this.isSubmitting = true
-        this.input.disabled = true
+    // =========================================================================
+    // PRIVATE HELPERS
+    // =========================================================================
 
-        try {
-            const response = await fetch(`${this.appConfig?.baseUrl}/api/play/${this.slug}/surrender`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': this.appConfig?.csrfToken
-                }
-            })
-
-            if (!response.ok) {
-                const errorHtml = await response.text();
-                console.error("PHP Error Response:", errorHtml);
-                return;
-            }
-
-            const data = await response.json()
-
-            if(data.success) {
-                this.isCompleted = true
-                this.surrenderBtn.hidden = true
-                this.completedData = data.completed_data
-                this.openModal(this.completedData, true)
-            }
-
-        } catch(e) {
-            showAlert('Error')
-        } finally {
-            this.isSubmitting = false
-            if(!this.isCompleted) {
-                this.input.disabled = false
-                this.input.focus()
-            }
-        }
+    _parseAppConfig() {
+        const el = document.getElementById('app-config')
+        return el ? JSON.parse(el.textContent) : {}
     }
 
-    enableSurrenderCheck() {
-        if(this.guessedIds.size >= 3 && !this.isCompleted) {
-            this.surrenderBtn.hidden = false
+    _filterAndSortMatches(characters, query) {
+        return characters
+            .filter(char => {
+                const nameParts = char.name.toLowerCase().split(' ')
+                return nameParts.some(part => part.startsWith(query))
+            })
+            .sort((a, b) => {
+                const nameA = a.name.toLowerCase()
+                const nameB = b.name.toLowerCase()
+                const aFirst = nameA.startsWith(query);
+                const bFirst = nameB.startsWith(query);
+
+                // 1st priority: First name match first, then last name match
+                if (aFirst && !bFirst) return -1;
+                if (!aFirst && bFirst) return 1;
+
+                // 2nd priority: When there are more matches on same criteria, sort by alphabetical order
+                return nameA.localeCompare(nameB);
+            })
+    }
+
+    async _apiPost(endpoint, body = null) {
+        const response = await fetch(`${this.appConfig?.baseUrl}/${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': this.appConfig?.csrfToken
+            },
+            ...(body && { body: JSON.stringify(body) }),
+            keepalive: true
+        })
+
+        if (!response.ok) {
+            console.error('API error:', await response.text())
+            return null
         }
+ 
+        return response.json()
     }
 }
-
-
+ 
+ 
 document.addEventListener('DOMContentLoaded', () => {
-    const configElement = document.getElementById('game-config');
-
-    if (configElement) {
-        try {
-
-            // 1. Parsing del JSON contenuto nel tag <script>
-            const rawConfig = JSON.parse(configElement.textContent);
-
-            // 2. Rimuoviamo immediatamente il tag <script> dal DOM per non lasciare tracce
-            configElement.remove();
-
-            // 3. (Opzionale) Congeliamo l'oggetto config per sicurezza extra
-            const config = Object.freeze(rawConfig);
-
-            new Game(config);
-
-        } catch (e) {
-            console.error('Errore nel parsing della configurazione del gioco:', e);
-        }
+    const configElement = document.getElementById('game-config')
+    if (!configElement) return
+ 
+    try {
+        const config = JSON.parse(configElement.textContent)
+        configElement.remove()
+        new Game(config)
+    } catch (e) {
+        console.error('Error parsing game config:', e)
     }
 })
