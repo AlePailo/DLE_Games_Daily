@@ -189,7 +189,7 @@ class Game {
         this.currentFocus = -1
     }
 
-    setActiveItems(items) {
+    setActiveItem(items) {
         items.forEach(item => item.classList.remove('active'))
 
         const activeItem = items[this.currentFocus]

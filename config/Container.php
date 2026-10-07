@@ -22,6 +22,7 @@ use App\Model\Repository\IUserRepository;
 use App\Model\Repository\UserFavouritesRepository;
 use App\Model\Repository\UserFranchiseStatsRepository;
 use App\Service\CharacterComparisonService;
+use App\Service\GameService;
 use App\Service\GameSessionService;
 
 return [
@@ -56,6 +57,7 @@ return [
 
     // Services
     AuthService::class                  => \DI\autowire(AuthService::class),
+    GameService::class                  => \DI\autowire(GameService::class),
     GameSessionService::class           => \DI\autowire(GameSessionService::class),
     CharacterComparisonService::class   => \DI\autowire(CharacterComparisonService::class)
 ];
