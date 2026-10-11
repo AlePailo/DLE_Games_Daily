@@ -21,7 +21,6 @@ class FranchiseController extends WebController {
 
         $userId = $this->sessionManager->getUserId();
         $favouriteIds = $userId ? $this->userFavourites->findFranchiseIdsByUser($userId) : [];
-        $isGuest = ($userId === null);
 
         $this->render('games', [
             'title' => 'Games | DLE Games Daily',

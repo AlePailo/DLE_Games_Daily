@@ -7,11 +7,14 @@ use App\Model\Repository\IUserRepository;
 use App\Core\SessionManager;
 use App\Core\Mailer;
 use App\Exception\AuthException;
+use App\Model\Repository\IGameSessionRepository;
 
 class AuthService {
     public function __construct(
+        private \PDO $pdo,
         private IUserRepository $userRepository,
         private SessionManager $sessionManager,
+        private IGameSessionRepository $gameSessionRepository,
         private Mailer $mailer
     ) {}
 
@@ -170,9 +173,15 @@ class AuthService {
             throw AuthException::expiredToken();
         }
 
-        $this->userRepository->markAsVerified($userPassword->getUserId());
-
-        $this->userRepository->removeVerificationToken($userPassword->getUserId());
+        try {
+            $this->pdo->beginTransaction();
+            $this->userRepository->markAsVerified($userPassword->getUserId());
+            $this->userRepository->removeVerificationToken($userPassword->getUserId());
+            $this->pdo->commit();
+        } catch (\Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 
 
@@ -203,5 +212,11 @@ class AuthService {
 
     public function emailExists(string $email) : bool {
         return $this->userRepository->findByEmail($email) !== null;
+    }
+
+
+
+    public function hasSessionsToMigrate(string $guestToken) : bool {
+        return count($this->gameSessionRepository->findCompletedByGuestToken($guestToken)) > 0;
     }
 }

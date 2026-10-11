@@ -2,7 +2,6 @@
 
 namespace App\Core;
 
-use App\Exception\NotFoundException;
 use App\Service\AuthService;
 use Dotenv\Dotenv;
 use App\View\View;
@@ -27,20 +26,6 @@ class Application {
 
         $router = new Router($container, $dispatcher);
         $router->dispatch();
-        foreach (headers_list() as $header) {
-            if (stripos($header, 'Location:') !== false) {
-                // TROVATO! Qualcuno ha impostato un redirect. 
-                // Stampiamo lo Stack Trace per vedere CHI è stato!
-                http_response_code(200); // Forziamo 200 per leggere l'output in JS
-                header('Content-Type: text/plain');
-                
-                echo "=== REDIRECT INTERCETTATO ===\n";
-                echo "Header: " . $header . "\n\n";
-                echo "=== STACK TRACE (Chi ha generato il redirect) ===\n";
-                debug_print_backtrace();
-                exit;
-            }
-        }
     }
 
     private static function guardRoutes(?object $currentUser) : void {
@@ -50,19 +35,10 @@ class Application {
             $uri = '/' . ltrim(substr($uri, strlen($basePath)), '/');
         }
 
-        /*
-        $publicRoutes = ['/', '/login', '/register', '/verify', '/auth/google', '/auth/google/callback'];
-
-        if (!in_array($uri, $publicRoutes) && $currentUser === null) {
-            header('Location: ' . $basePath . 'login');
-            exit;
-        }
-        */
-
         $protectedRoutes = ['/profile'];
 
         if(in_array($uri, $protectedRoutes) && $currentUser === null) {
-            header('Location:' . $_ENV['APP_BASE_PATH'] . 'login');
+            header('Location: ' . BASE_URL . '/login');
             exit;
         }
     }
@@ -70,20 +46,23 @@ class Application {
     /* ----- Handles errors and exceptions that are not handled already somewhere else ----- */
     private static function registerErrorHandlers() : void {
         set_exception_handler(function (\Throwable $e) {
-            
-            if ($e instanceof NotFoundException) {
+            if ($e instanceof \App\Exception\NotFoundException) {
                 http_response_code(404);
                 if ($_ENV['APP_ENV'] === 'development') {
-                    echo '<pre>' . $e->getMessage() . '</pre>';
-                } else {
-                    View::render('errors/404', [], false);
+                    echo '<pre>404: ' . $e->getMessage() . '</pre>';
+                    return;
                 }
+                \App\View\View::render('errors/404', [
+                    'title'      => 'Page not found | DLE Games Daily',
+                    'isLoggedIn' => !empty($_SESSION['user_id']),
+                    'css'        => [],
+                    'js'         => []
+                ]);
                 return;
             }
 
-            /*
-            if ($e instanceof DatabaseException) {
-                error_log($e->getMessage()); // log su file
+            if ($e instanceof \App\Exception\DatabaseException) {
+                error_log($e->getMessage());
                 http_response_code(500);
                 if ($_ENV['APP_ENV'] === 'development') {
                     echo '<pre>' . $e->getMessage() . "\n" . $e->getTraceAsString() . '</pre>';
@@ -92,7 +71,6 @@ class Application {
                 }
                 return;
             }
-            */
 
             // Default case
             http_response_code(500);

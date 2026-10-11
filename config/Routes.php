@@ -21,6 +21,7 @@ return function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/register', [AuthController::class, 'register']);
     $r->addRoute('POST', '/logout', [AuthController::class, 'logout']);
     $r->addRoute('GET', '/verify', [AuthController::class, 'verifyEmail']);
+    $r->addRoute('POST', '/resend-verification', [AuthController::class, 'resendVerification']);
 
     /*
     $r->addRoute('GET', '/check/username', [AuthController::class, 'checkUsername']);

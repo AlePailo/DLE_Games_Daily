@@ -37,7 +37,7 @@ class GameSessionRepository implements IGameSessionRepository {
 
     public function findCompletedByGuestToken(string $guestToken): array
     {
-        $stmt = $this->pdo->prepare("SELECT gs.*, dc.franchise_id FROM game_sessions gs INNER JOIN daily_challenges dc WHERE guest_token = :guest_token AND gs.solved = 1 AND DATE(created_at) = CURDATE()");
+        $stmt = $this->pdo->prepare("SELECT gs.*, dc.franchise_id FROM game_sessions gs INNER JOIN daily_challenges dc ON gs.challenge_id = dc.id WHERE guest_token = :guest_token AND gs.solved = 1 AND DATE(created_at) = CURDATE()");
         $stmt->execute(['guest_token' => $guestToken]);
         return array_map(fn($row) => $this->mapGameSession($row), $stmt->fetchAll());
     }

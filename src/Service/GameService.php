@@ -13,6 +13,7 @@ use App\Model\Repository\IUserFranchiseStatsRepository;
 
 class GameService {
     public function __construct(
+        private \PDO $pdo,
         private IFranchiseRepository $franchiseRepository,
         private IDailyChallengeRepository $dailyChallengeRepository,
         private GameSessionService $gameSessionService,
@@ -22,7 +23,7 @@ class GameService {
         private IUserFranchiseStatsRepository $statsRepository
     ) {}
 
-    public function resolveGameContext(string $slug, ?int $userId, ?string $guestToken, bool $createIfMissing = false) {
+    public function resolveGameContext(string $slug, ?int $userId, ?string $guestToken) {
         $franchise = $this->franchiseRepository->findBySlugWithAttributes($slug);
         if($franchise === null) return new GameContext(null, null, null);
 

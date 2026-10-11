@@ -23,7 +23,7 @@ class HomeController extends WebController {
 
         $this->render('home', [
             'title' => 'Home | DLE Games Daily',
-            'favourites' => $favouriteFranchises ?? '',
+            'favourites' => $favouriteFranchises ?? [],
             'css' => ['home.css', 'franchises.css'],
             'js' => ['home.js']
         ]);

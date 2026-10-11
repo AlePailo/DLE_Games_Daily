@@ -22,4 +22,20 @@
         </form>
         <p class="auth-footer">Don't have an account? <a href="<?=  BASE_URL ?>/register">Register now!</a></p>
     </section>
+    <?php if ($show_resend ?? false): ?>
+        <div class="resend-section">
+            <p>Didn't receive the verification email?</p>
+            <form method="POST" action="<?= BASE_URL ?>/resend-verification">
+                <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                <input 
+                    type="email" 
+                    name="email" 
+                    value="<?= htmlspecialchars($old['email'] ?? '') ?>"
+                    placeholder="Your email address"
+                    required
+                >
+                <button type="submit">Resend verification email</button>
+            </form>
+        </div>
+    <?php endif; ?>
 </div>

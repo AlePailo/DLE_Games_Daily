@@ -22,7 +22,7 @@
         {
             "baseUrl": "<?= BASE_URL ?>",
             "isLoggedIn": <?= $isLoggedIn ? 'true' : 'false' ?>,
-            "csrfToken": "<?= $csrfToken ?>"
+            "csrfToken": "<?= $csrfToken ?? ''?>"
         }
     </script>
 </head>

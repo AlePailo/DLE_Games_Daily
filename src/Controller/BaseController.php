@@ -70,8 +70,7 @@ abstract class BaseController {
 
         $this->sessionManager->setFlash('error', 'Invalid or expired session. Try again.');
 
-        $referer = $_SERVER['HTTP_REFERER'] ?? BASE_URL;
-        header("Location: " . $referer);
+        header("Location: " . BASE_URL);
         exit;
     }
 }

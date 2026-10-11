@@ -23,9 +23,8 @@ class Mailer {
 
     public function sendVerification(string $toEmail, string $rawToken) : void {
         $link = sprintf(
-            'http://%s%s/verify?token=%s',
-            $_SERVER['HTTP_HOST'],
-            $_ENV['APP_BASE_PATH'],
+            '%s/verify?token=%s',
+            BASE_URL,
             urlencode($rawToken)
         );
 

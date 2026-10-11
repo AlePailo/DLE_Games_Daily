@@ -25,19 +25,9 @@ class Router {
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 throw new \App\Exception\NotFoundException('Route not found');
-                /*
-                http_response_code(404);
-                echo '404 - Pagina non trovata';
-                break;
-                */
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new \App\Exception\NotFoundException('Route not allowed');    
-                /*
-                http_response_code(405);
-                echo '405 - Metodo non consentito';
-                break;
-                */
+                throw new \App\Exception\NotFoundException('Route not allowed');
 
             case Dispatcher::FOUND:
                 [$controllerClass, $action] = $routeInfo[1];

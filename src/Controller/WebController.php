@@ -19,11 +19,13 @@ class WebController extends BaseController {
         $data['isLoggedIn'] = $this->sessionManager->isLoggedIn();
 
         // Flash data
+        $error = $this->sessionManager->getFlash('error');
         $flashData = [
-            'error'   => $this->sessionManager->getFlash('error'),
+            'error'   => $error != null ? (array) $error : null,
             'success' => $this->sessionManager->getFlash('success'),
             'info'    => $this->sessionManager->getFlash('info'),
-            'old'     => $this->sessionManager->getFlash('oldInput')
+            'old'     => $this->sessionManager->getFlash('oldInput'),
+            'show_resend' => $this->sessionManager->getFlash('show_resend')
         ];
 
         // CSS
@@ -53,14 +55,6 @@ class WebController extends BaseController {
     }
 
     protected function notFound() : void {
-        http_response_code(404);
-        View::render('404', [
-            'title' => 'Page not found | DLE Games Daily',
-            'isLoggedIn' => $this->sessionManager->isLoggedIn(),
-            'csrfToken'  => $this->sessionManager->getCsrfToken() ?? '',
-            'css' => [],
-            'js' => []
-        ]);
-        exit;
+        throw new \App\Exception\NotFoundException('Page not found');
     }
 }

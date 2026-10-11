@@ -19,24 +19,12 @@ class AuthController extends WebController {
 
     public function loginForm(array $vars) : void {
         $this->redirectIfLoggedIn();
-
-        //var_dump($_SESSION['test_manuale'] ?? 'Sessione manuale vuota');
-        //var_dump($_SESSION['_flash'] ?? 'Flash in sessione vuoto');
-
         $this->renderAuthForm('login', 'Login | DLE Games Daily');
     }
 
     public function login(array $vars) : void {
         $this->redirectIfLoggedIn();
 
-        /*
-        $submittedToken = $_POST['csrf_token'] ?? '';
-        if($submittedToken !== $this->sessionManager->getCsrfToken()) {
-            $this->sessionManager->setFlash('error', 'Invalid session. Please try again.');
-            $this->redirect('login');
-            return;
-        }
-        */
         $this->validateCsrfToken();
 
         $email = trim($_POST['email'] ?? '');
@@ -56,6 +44,9 @@ class AuthController extends WebController {
             $this->authService->createSessionForUser($user, $remember);
             $this->redirect('');
         } catch(AuthException $e) {
+            if ($e->getCode() === AuthException::EMAIL_NOT_VERIFIED) {
+                $this->sessionManager->setFlash('show_resend', true);
+            }
             $this->sessionManager->setFlash('error', $e->getMessage());
             $this->sessionManager->setFlash('oldInput', ['email' => $email]);
             $this->redirect('login');
@@ -71,15 +62,7 @@ class AuthController extends WebController {
 
     public function register(array $vars) : void {
         $this->redirectIfLoggedIn();
-
-        /*
-        $submittedToken = $_POST['csrf_token'] ?? '';
-        if($submittedToken !== $this->sessionManager->getCsrfToken()) {
-            $this->sessionManager->setFlash('error', 'Invalid session. Please try again.');
-            $this->redirect('register');
-            return;
-        }
-        */
+        
         $this->validateCsrfToken();
 
         $username = trim($_POST['username'] ?? '');
@@ -121,11 +104,14 @@ class AuthController extends WebController {
             $user = $this->authService->registerLocalUser($username, $email, $password);
 
             if($guestToken !== null) {
-                try {
-                    $this->gameSessionService->migrateGuestSessions($guestToken, $user->getId());     //TO DO: implement logic to migrate guest session to newly created user
-                    $this->sessionManager->clearGuestToken();
-                } catch(\Exception $e) {
-                    //handle catch - user registered but no sessions to migrate
+                $sessionsToMigrate = $this->authService->hasSessionsToMigrate($guestToken);
+                if($sessionsToMigrate) {
+                    try {
+                        $this->gameSessionService->migrateGuestSessions($guestToken, $user->getId());     //TO DO: implement logic to migrate guest session to newly created user
+                        $this->sessionManager->clearGuestToken();
+                    } catch(\Exception $e) {
+                        error_log('Guest session migration failed: ' . $e->getMessage());
+                    }
                 }
             }
 
@@ -162,7 +148,8 @@ class AuthController extends WebController {
     }
 
     public function resendVerification(array $vars) : void {
-        $email = trim($_GET['email'] ?? '');
+        $this->validateCsrfToken();
+        $email = trim($_POST['email'] ?? '');
 
         if(empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->sessionManager->setFlash('error', 'Invalid or missing email address.');
@@ -181,6 +168,7 @@ class AuthController extends WebController {
     }
 
     public function logout(array $vars) : void {
+        $this->validateCsrfToken();
         $this->authService->logout();
         $this->redirect('login');
     }

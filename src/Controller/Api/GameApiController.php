@@ -15,6 +15,7 @@ class GameApiController extends ApiController {
     }
 
     public function attempt(array $vars): void {
+        $this->validateCsrfToken();
         $guessedCharId = filter_var(
             $this->getJsonBody()['character_id'] ?? null,
             FILTER_VALIDATE_INT
@@ -40,6 +41,7 @@ class GameApiController extends ApiController {
     }
  
     public function surrender(array $vars): void {
+        $this->validateCsrfToken();
         $context = $this->resolveActiveContext($vars['slug'] ?? '');
         if ($context === null) return;
  
