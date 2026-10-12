@@ -14,7 +14,9 @@ class LeaderboardsController extends WebController {
 
     public function index(array $vars) : void {
         $this->render('leaderboards', [
-            'title' => 'Leaderboards | DLE Games Daily'
+            'title' => 'Leaderboards | DLE Games Daily',
+            'css' => [],
+            'js' => []
         ]);
     }
 }

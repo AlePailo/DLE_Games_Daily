@@ -14,7 +14,9 @@ class ProfileController extends WebController {
 
     public function index(array $vars) : void {
         $this->render('profile', [
-            'title' => 'Profile | DLE Games Daily'
+            'title' => 'Profile | DLE Games Daily',
+            'css' => [],
+            'js' => []
         ]);
     }
 }

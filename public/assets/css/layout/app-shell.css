@@ -9,6 +9,7 @@ footer {
     height: 100vh;
     overflow: hidden;
     padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+    background: var(--black-tertiary);
 }
 
 .main-wrapper {
@@ -17,6 +18,7 @@ footer {
     min-width: 0;
     height: 100%;
     overflow: hidden;
+    background: var(--black-main);
 }
 
 #main-content {
@@ -47,5 +49,12 @@ footer {
 
     .app-layout.sidebar-collapsed {
         grid-template-columns: 72px 1fr;
+    }
+
+    .main-wrapper {
+        --margin: 1rem;
+        border-radius: 10px;
+        margin: var(--margin) var(--margin) var(--margin) 0;
+        height: calc(100% - var(--margin) * 2);
     }
 }
