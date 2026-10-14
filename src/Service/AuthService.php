@@ -29,14 +29,14 @@ class AuthService {
             throw AuthException::invalidCredentials();
         }
 
-        if(!$user->isVerified()) {
-            throw AuthException::emailNotVerified();
-        }
-
         $userPassword = $this->userRepository->findUserPasswordByUserId($user->getId());
 
         if($userPassword === null || !$userPassword->verifyPassword($password)) {
             throw AuthException::invalidCredentials();
+        }
+
+        if(!$user->isVerified()) {
+            throw AuthException::emailNotVerified();
         }
 
         return $user;
@@ -190,6 +190,20 @@ class AuthService {
 
         if($user === null || $user->isVerified()) {
             return;
+        }
+
+        $userPassword = $this->userRepository->findUserPasswordByUserId($user->getId());
+    
+        if ($userPassword === null) {
+            return;
+        }
+
+        // 2 minutes cooldown before another verification email request
+        if ($userPassword->getVerificationSentAt() !== null) {
+            $cooldown = new \DateTimeImmutable('-2 minutes');
+            if ($userPassword->getVerificationSentAt() > $cooldown) {
+                throw AuthException::resendCooldown();
+            }
         }
 
         $newVerificationToken = bin2hex(random_bytes(32));

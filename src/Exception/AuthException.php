@@ -10,6 +10,7 @@ class AuthException extends \RuntimeException {
     public const INVALID_TOKEN = 105;
     public const EXPIRED_TOKEN = 106;
     public const DUPLICATE_ENTRY = 107;
+    public const RESEND_COOLDOWN = 108;
 
     public static function invalidCredentials() : self {
         return new self('Invalid credentials.', self::INVALID_CREDENTIALS);
@@ -28,14 +29,18 @@ class AuthException extends \RuntimeException {
     }
 
     public static function invalidToken() : self {
-        return new self('Invalid Token', self::INVALID_TOKEN);
+        return new self('Invalid Token.', self::INVALID_TOKEN);
     }
 
     public static function expiredToken() : self {
-        return new self('Token is expired', self::EXPIRED_TOKEN);
+        return new self('Token is expired.', self::EXPIRED_TOKEN);
     }
 
     public static function duplicateEntry() : self {
-        return new self('Entry already exists', self::DUPLICATE_ENTRY);
+        return new self('Entry already exists.', self::DUPLICATE_ENTRY);
+    }
+
+    public static function resendCooldown() : self {
+        return new self('Please wait before requesting a new verification email.', self::RESEND_COOLDOWN);
     }
 }

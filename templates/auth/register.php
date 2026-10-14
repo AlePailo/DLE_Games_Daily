@@ -1,5 +1,8 @@
 <?php
-/** @var string $csrfToken */
+/** 
+ * @var string $csrfToken 
+ * @var array $old
+*/
 ?>
 <div class="auth-wrapper">
     <section class="form-container">
@@ -22,8 +25,11 @@
                 <label for="confirm_password">Confirm Password</label>
                 <input type="password" name="confirm_password" id="confirm_password" required aria-required="true" data-rules="required|match:password">
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" class="btn-auth">Register</button>
         </form>
         <p class="auth-footer">Already got an account? <a href="<?=  BASE_URL ?>/login">Go to login page</a></p>
     </section>
+    <p class="auth-back">
+        <a href="<?= BASE_URL ?>">← Back to home</a>
+    </p>
 </div>

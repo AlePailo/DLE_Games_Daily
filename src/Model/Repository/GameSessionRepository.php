@@ -37,7 +37,7 @@ class GameSessionRepository implements IGameSessionRepository {
 
     public function findCompletedByGuestToken(string $guestToken): array
     {
-        $stmt = $this->pdo->prepare("SELECT gs.*, dc.franchise_id FROM game_sessions gs INNER JOIN daily_challenges dc ON gs.challenge_id = dc.id WHERE guest_token = :guest_token AND gs.solved = 1 AND DATE(created_at) = CURDATE()");
+        $stmt = $this->pdo->prepare("SELECT gs.*, dc.franchise_id FROM game_sessions gs INNER JOIN daily_challenges dc ON gs.challenge_id = dc.id WHERE guest_token = :guest_token AND gs.solved = 1 AND DATE(gs.created_at) = CURDATE()");
         $stmt->execute(['guest_token' => $guestToken]);
         return array_map(fn($row) => $this->mapGameSession($row), $stmt->fetchAll());
     }
@@ -54,27 +54,6 @@ class GameSessionRepository implements IGameSessionRepository {
         $stmt = $this->pdo->prepare("UPDATE game_sessions SET user_id = :user_id, guest_token = null WHERE guest_token = :guest_token AND DATE(created_at) = CURDATE()");
         $stmt->execute(['user_id' => $userId, 'guest_token' => $guestToken]);        
     }
-
-    /*
-    public function incrementAttempts(int $id): void
-    {
-        $stmt = $this->pdo->prepare("UPDATE game_sessions SET attempts_count = attempts_count + 1 WHERE id = :id");
-        $stmt->execute(['id' => $id]);        
-    }
-
-    public function markAsSolved(int $id): void
-    {
-        $stmt = $this->pdo->prepare("UPDATE game_sessions SET solved = 1, completed_at = CURDATE() WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-    }
-
-    public function markAsCompleted(int $id): void
-    {
-        $stmt = $this->pdo->prepare("UPDATE game_sessions SET completed_at = CURDATE() WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-    }
-    */
-
 
     public function updateSessionState(int $id, bool $solved) : void
     {

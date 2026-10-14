@@ -7,7 +7,8 @@ final class UserPassword {
         private int $userId,
         private string $passwordHash,
         private ?string $verificationToken,
-        private ?\DateTimeImmutable $tokenExpiresAt
+        private ?\DateTimeImmutable $tokenExpiresAt,
+        private ?\DateTimeImmutable $verificationSentAt
     ) {
         if(($this->verificationToken === null) !== ($this->tokenExpiresAt === null)) {
             throw new \InvalidArgumentException('verificationToken and tokenExpiresAt must both be present or both null');
@@ -22,12 +23,16 @@ final class UserPassword {
         return password_verify($plainInputPass, $this->passwordHash);
     }
 
-    public function getVerificationToken() : string {
+    public function getVerificationToken() : ?string {
         return $this->verificationToken;
     }
 
-    public function getTokenExpiresAt() : \DateTimeImmutable {
+    public function getTokenExpiresAt() : ?\DateTimeImmutable {
         return $this->tokenExpiresAt;
+    }
+
+    public function getVerificationSentAt() : ?\DateTimeImmutable {
+        return $this->verificationSentAt;
     }
 
     public function isTokenExpired() : bool {

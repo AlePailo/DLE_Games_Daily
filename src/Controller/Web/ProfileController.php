@@ -13,6 +13,12 @@ class ProfileController extends WebController {
     }
 
     public function index(array $vars) : void {
+        $userId = $this->sessionManager->getUserId();
+        if($userId === null) {
+            $this->redirect('login');
+            return;
+        }
+
         $this->render('profile', [
             'title' => 'Profile | DLE Games Daily',
             'css' => [],

@@ -161,6 +161,9 @@ class AuthController extends WebController {
             $this->authService->resendVerification($email);
             $this->sessionManager->setFlash('success', 'If an account exists with this email, a new verification link has been sent.');
             $this->redirect('login');
+        } catch (AuthException $e) {
+            $this->sessionManager->setFlash('error', $e->getMessage());
+            $this->redirect('login');
         } catch(\Exception $e) {
             $this->sessionManager->setFlash('error', 'Could not send the email. Please try again later.');
             $this->redirect('login');

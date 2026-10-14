@@ -114,7 +114,8 @@ class UserRepository implements IUserRepository {
             userId: (int)$row['user_id'],
             passwordHash: $row['password_hash'],
             verificationToken: $row['verification_token'] ?? null,
-            tokenExpiresAt: $row['token_expires_at'] ? new \DateTimeImmutable($row['token_expires_at']) : null
+            tokenExpiresAt: $row['token_expires_at'] ? new \DateTimeImmutable($row['token_expires_at']) : null,
+            verificationSentAt: $row['verification_sent_at'] ? new \DateTimeImmutable($row['verification_sent_at']) : null
         );
     }
 
@@ -124,12 +125,12 @@ class UserRepository implements IUserRepository {
     }
 
     public function updateVerificationToken(int $userId, string $hashedToken, \DateTimeImmutable $expires) : void {
-        $stmt = $this->pdo->prepare("UPDATE users_passwords SET verification_token = :verification_token, token_expires_at = :token_expires_at WHERE user_id = :user_id");
+        $stmt = $this->pdo->prepare("UPDATE users_passwords SET verification_token = :verification_token, token_expires_at = :token_expires_at, verification_sent_at = NOW() WHERE user_id = :user_id");
         $stmt->execute(['user_id' => $userId, 'verification_token' => $hashedToken, 'token_expires_at' => $expires->format('Y-m-d H:i:s')]);
     }
 
     public function removeVerificationToken(int $userId) : void {
-        $stmt = $this->pdo->prepare("UPDATE users_passwords SET verification_token = null, token_expires_at = null WHERE user_id = :user_id");
+        $stmt = $this->pdo->prepare("UPDATE users_passwords SET verification_token = null, token_expires_at = null, verification_sent_at = null WHERE user_id = :user_id");
         $stmt->execute(['user_id' => $userId]);
     }
 

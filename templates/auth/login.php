@@ -1,5 +1,9 @@
 <?php
-/** @var string $csrfToken */
+/**
+ * @var string $csrfToken
+ * @var array $old
+ * @var bool $show_resend 
+ */
 ?>
 <div class="auth-wrapper">
     <section class="form-container">
@@ -18,7 +22,7 @@
                 <input type="checkbox" name="remember" id="remember">
                 <label for="remember">Remember this device</label>
             </div>
-            <button type="submit">Login</button>
+            <button type="submit" class="btn-resend">Login</button>
         </form>
         <p class="auth-footer">Don't have an account? <a href="<?=  BASE_URL ?>/register">Register now!</a></p>
     </section>
@@ -34,8 +38,14 @@
                     placeholder="Your email address"
                     required
                 >
-                <button type="submit">Resend verification email</button>
+                <button type="submit" class="btn-resend">Resend verification email</button>
             </form>
         </div>
+        <script>
+            document.getElementById('resend-section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        </script>
     <?php endif; ?>
+    <p class="auth-back">
+        <a href="<?= BASE_URL ?>">← Back to home</a>
+    </p>
 </div>
