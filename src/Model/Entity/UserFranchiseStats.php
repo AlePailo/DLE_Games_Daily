@@ -60,6 +60,10 @@ final class UserFranchiseStats {
         return round(($this->gamesWon / $this->gamesPlayed) * 100, 1);
     }
 
+    public function getSurrenders(): int {
+        return $this->gamesPlayed - $this->gamesWon;
+    }
+
     public function updateStats(bool $solved, int $attempts, bool $wonYesterday) : void {
         $this->gamesPlayed++;
 

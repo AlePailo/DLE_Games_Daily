@@ -3,11 +3,9 @@
 namespace App\Service;
 
 use App\Model\Entity\GameSession;
-use App\Model\Entity\UserFranchiseStats;
 use App\Model\Repository\IFranchiseRepository;
 use App\Model\Repository\IGameSessionRepository;
 use App\Model\Repository\IGameAttemptRepository;
-use App\Model\Repository\IUserFranchiseStatsRepository;
 
 class GameSessionService {
     public function __construct(
@@ -15,7 +13,6 @@ class GameSessionService {
         private IFranchiseRepository $franchiseRepository,
         private IGameSessionRepository $gameSessionRepository,
         private IGameAttemptRepository $gameAttemptRepository,
-        private IUserFranchiseStatsRepository $statsRepository
     ) {}
 
     public function getOrCreateSession(int $challengeId, ?int $userId, ?string $guestToken) : GameSession {
@@ -34,22 +31,9 @@ class GameSessionService {
         return $this->gameSessionRepository->findById($id);
     }
 
-    public function migrateGuestSessions(string $guestToken, int $userId) : void {
-        try {
-            $this->pdo->beginTransaction();
-            $this->gameSessionRepository->migrateGuestSessions($guestToken, $userId);
-            $this->statsRepository->insertFromMigratedSessions($userId);
-            $this->pdo->commit();
-        } catch(\Exception $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+    public function migrateGuestSessions(string $guestToken, int $userId): void {
+        $this->gameSessionRepository->migrateGuestSessions($guestToken, $userId);
     }
-
-    public function updateStatsOnComplete(int $userId, int $franchiseId, int $attempts, bool $solved) : UserFranchiseStats {
-        return $this->statsRepository->upsertOnGameCompletion($userId, $franchiseId, $attempts, $solved);
-    }
-
 
     public function registerAttempt(int $sessionId, int $franchiseId, int $guessedCharacterId, int $attemptNumber, array $comparedResults, bool $solved) : void {
         try {
@@ -70,9 +54,10 @@ class GameSessionService {
                     $resultsWithIds[$attrId] = $statusValue;
                 }
             }
-            $this->gameAttemptRepository->createWithResults($sessionId, $guessedCharacterId, $attemptNumber, $resultsWithIds);
 
+            $this->gameAttemptRepository->createWithResults($sessionId, $guessedCharacterId, $attemptNumber, $resultsWithIds);
             $this->gameSessionRepository->updateSessionState($sessionId, $solved);
+            
             $this->pdo->commit();
         } catch(\Throwable $e) {
             $this->pdo->rollBack();
@@ -81,16 +66,10 @@ class GameSessionService {
     }
 
 
-    public function surrender(int $sessionId, ?int $userId, int $franchiseId, int $attempts) : void {
+    public function surrender(int $sessionId) : void {
         try {
             $this->pdo->beginTransaction();
-
             $this->gameSessionRepository->markAsCompleted($sessionId);
-
-            if($userId !== null) {
-                $this->updateStatsOnComplete($userId, $franchiseId, $attempts, false);
-            }
-
             $this->pdo->commit();
         } catch(\Throwable $e) {
             $this->pdo->rollBack();
@@ -108,5 +87,9 @@ class GameSessionService {
         }
 
         return null;
+    }
+
+    public function hasSessionsToMigrate(string $guestToken) : bool {
+        return count($this->gameSessionRepository->findCompletedByGuestToken($guestToken)) > 0;
     }
 }

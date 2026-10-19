@@ -12,6 +12,8 @@ use App\Model\Repository\IGameSessionRepository;
 class AuthService {
     public function __construct(
         private \PDO $pdo,
+        private GameSessionService $gameSessionService,
+        private UserFranchiseStatsService $statsService,
         private IUserRepository $userRepository,
         private SessionManager $sessionManager,
         private IGameSessionRepository $gameSessionRepository,
@@ -22,7 +24,7 @@ class AuthService {
 
     // ----- Login Methods -----
 
-    public function loginLocal(string $email, string $password, /*bool $remember*/) : User {
+    public function loginLocal(string $email, string $password) : User {
         $user = $this->userRepository->findByEmail($email);
 
         if($user === null) {
@@ -213,6 +215,22 @@ class AuthService {
         $this->userRepository->updateVerificationToken($user->getId(), $hashedToken, $expiresAt);
 
         $this->mailer->sendVerification($email, $newVerificationToken);
+    }
+
+
+
+    // ----- Guest data migration -----
+
+    public function migrateGuestData(string $guestToken, int $userId): void {
+        try {
+            $this->pdo->beginTransaction();
+            $this->gameSessionService->migrateGuestSessions($guestToken, $userId);
+            $this->statsService->insertFromMigratedSessions($userId);
+            $this->pdo->commit();
+        } catch (\Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 
 

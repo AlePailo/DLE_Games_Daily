@@ -62,7 +62,6 @@ class AuthController extends WebController {
 
     public function register(array $vars) : void {
         $this->redirectIfLoggedIn();
-        
         $this->validateCsrfToken();
 
         $username = trim($_POST['username'] ?? '');
@@ -93,7 +92,7 @@ class AuthController extends WebController {
         }
 
         if(!empty($errors)) {
-            $this->sessionManager->setFlash('error', implode('<br>', $errors));
+            $this->sessionManager->setFlash('error', $errors);
             $this->sessionManager->setFlash('oldInput', ['username' => $username, 'email' => $email]);
             $this->redirect('register');
             return;
@@ -103,19 +102,16 @@ class AuthController extends WebController {
             $guestToken = $this->sessionManager->getGuestToken();
             $user = $this->authService->registerLocalUser($username, $email, $password);
 
-            if($guestToken !== null) {
-                $sessionsToMigrate = $this->authService->hasSessionsToMigrate($guestToken);
-                if($sessionsToMigrate) {
-                    try {
-                        $this->gameSessionService->migrateGuestSessions($guestToken, $user->getId());     //TO DO: implement logic to migrate guest session to newly created user
-                        $this->sessionManager->clearGuestToken();
-                    } catch(\Exception $e) {
-                        error_log('Guest session migration failed: ' . $e->getMessage());
-                    }
+            if($guestToken !== null && $this->gameSessionService->hasSessionsToMigrate($guestToken)) {
+                try {
+                    $this->authService->migrateGuestData($guestToken, $user->getId());
+                    $this->sessionManager->clearGuestToken();
+                } catch(\Exception $e) {
+                    error_log('Guest session migration failed: ' . $e->getMessage());
                 }
             }
 
-            $this->sessionManager->setFlash('success', 'Registration completed! Check Your email box.');
+            $this->sessionManager->setFlash('success', 'Registration completed! Check your email box.');
             $this->redirect('login');
         } catch(AuthException $e) {
             $this->sessionManager->setFlash('error', $e->getMessage());

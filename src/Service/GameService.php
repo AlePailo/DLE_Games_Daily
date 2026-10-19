@@ -13,14 +13,14 @@ use App\Model\Repository\IUserFranchiseStatsRepository;
 
 class GameService {
     public function __construct(
-        private \PDO $pdo,
         private IFranchiseRepository $franchiseRepository,
         private IDailyChallengeRepository $dailyChallengeRepository,
         private GameSessionService $gameSessionService,
         private ICharacterRepository $characterRepository,
         private CharacterComparisonService $comparisonService,
         private IGameAttemptRepository $gameAttemptRepository,
-        private IUserFranchiseStatsRepository $statsRepository
+        private IUserFranchiseStatsRepository $statsRepository,
+        private UserFranchiseStatsService $statsService
     ) {}
 
     public function resolveGameContext(string $slug, ?int $userId, ?string $guestToken) {
@@ -52,7 +52,7 @@ class GameService {
         if($isCompleted) {
             $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
             $stats = $userId !== null
-                ? $this->buildUserStatsData($userId, $franchise->getId())
+                ? $this->statsService->buildUserStatsData($userId, $franchise->getId())
                 : null;
             $attemptsCount = $gameSession->isSolved() ? $gameSession->getAttemptsCount() : null;
             $completeData = new CompletedGameData($correctChar, $stats, $attemptsCount);
@@ -109,7 +109,7 @@ class GameService {
 
         if($solved) {
             if($userId !== null) {
-                $this->gameSessionService->updateStatsOnComplete(
+                $this->statsService->upsertOnGameCompletion(
                     $userId,
                     $franchise->getId(),
                     $attemptNumber,
@@ -118,7 +118,7 @@ class GameService {
             }
 
             $stats = $userId !== null
-                ? $this->buildUserStatsData($userId, $franchise->getId())
+                ? $this->statsService->buildUserStatsData($userId, $franchise->getId())
                 : null;
             
             $response['completed_data'] = new CompletedGameData($correctChar, $stats, $attemptNumber);
@@ -132,16 +132,20 @@ class GameService {
         $gameSession = $context->gameSession;
         $dailyChallenge = $context->dailyChallenge;
  
-        $this->gameSessionService->surrender(
-            $gameSession->getId(),
-            $userId,
-            $franchise->getId(),
-            $gameSession->getAttemptsCount()
-        );
+        $this->gameSessionService->surrender($gameSession->getId());
+
+        if($userId !== null) {
+            $this->statsService->upsertOnGameCompletion(
+                $userId,
+                $franchise->getId(),
+                $gameSession->getAttemptsCount(),
+                false
+            );
+        }
 
         $correctChar = $this->characterRepository->findByIdWithAttributes($dailyChallenge->getCharacterId());
         $stats = $userId !== null
-            ? $this->buildUserStatsData($userId, $franchise->getId())
+            ? $this->statsService->buildUserStatsData($userId, $franchise->getId())
             : null;
 
         return [
@@ -151,6 +155,7 @@ class GameService {
         ];
     }
 
+    /*
     private function buildUserStatsData(int $userId, int $franchiseId) : ?UserStatsData {
         $stats = $this->statsRepository->findByUserAndFranchise($userId, $franchiseId);
         if($stats === null) return null;
@@ -162,4 +167,5 @@ class GameService {
             maxStreak: $stats->getMaxStreak()
         );
     }
+    */
 }

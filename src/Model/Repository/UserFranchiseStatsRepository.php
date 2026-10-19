@@ -3,6 +3,7 @@
 namespace App\Model\Repository;
 
 use App\Model\Entity\UserFranchiseStats;
+use Override;
 
 class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
     public function __construct(
@@ -89,6 +90,39 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         $res = $stmt->fetch();
 
         return $res ? $this->mapUserFranchiseStats($res) : null;
+    }
+
+    public function findAllByUser(int $userId): array {
+        $stmt = $this->pdo->prepare("
+            SELECT * FROM user_franchise_stats 
+            WHERE user_id = :user_id 
+            ORDER BY games_played DESC
+        ");
+        $stmt->execute(['user_id' => $userId]);
+        
+        return array_map(
+            fn($row) => $this->mapUserFranchiseStats($row),
+            $stmt->fetchAll()
+        );
+    }
+
+    public function findLeaderboardByFranchise(int $franchiseId, array $metricConfig, int $limit): array {
+        $col   = $metricConfig['column'];
+        $order = $metricConfig['order'];
+
+        $stmt = $this->pdo->prepare("SELECT ufs.*, u.username, u.user_icon_url
+            FROM user_franchise_stats ufs INNER JOIN users u ON ufs.user_id = u.id
+            WHERE ufs.franchise_id = :franchise_id
+            AND ufs.games_played > 0
+            ORDER BY {$col} {$order}
+            LIMIT :limit
+        ");
+        
+        $stmt->bindValue(':franchise_id', $franchiseId, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
     }
 
     private function mapUserFranchiseStats(array $row) : UserFranchiseStats {
