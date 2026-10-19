@@ -47,9 +47,10 @@ class Game {
 
         // Game recap modal stats
         this.statPlayed = document.getElementById('stat-played')
-        this.statWinrate = document.getElementById('stat-winrate')
         this.statCurrentStreak = document.getElementById('stat-current-streak')
         this.statMaxStreak = document.getElementById('stat-max-streak')
+        this.statSurrenders = document.getElementById('stat-surrenders')
+        this.statAvgAttempts = document.getElementById('stat-avg-attempts')
     }
 
     initEvents() {
@@ -350,10 +351,11 @@ class Game {
             : `Guessed in ${completedData.attempts_count} attempts`
 
         if(completedData.stats) {
-            this.statPlayed.textContent = completedData.stats.games_played
-            this.statWinrate.textContent = `${completedData.stats.win_rate}%`
+            this.statPlayed.textContent        = completedData.stats.games_played
+            this.statAvgAttempts.textContent   = completedData.stats.avg_attempts
             this.statCurrentStreak.textContent = completedData.stats.current_streak
-            this.statMaxStreak.textContent = completedData.stats.max_streak
+            this.statMaxStreak.textContent     = completedData.stats.max_streak
+            this.statSurrenders.textContent    = completedData.stats.surrenders
             this.modalStats.hidden = false
             this.modalGuest.hidden = true
         } else {

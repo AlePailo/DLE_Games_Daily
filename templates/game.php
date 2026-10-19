@@ -90,9 +90,10 @@
                 <!-- Player stats if user has an account -->
                 <div id="modal-stats" hidden>
                     <div>Games played <span id="stat-played"></span></div>
-                    <div>Win rate <span id="stat-winrate"></span></div>
+                    <div>Avg attempts <span id="stat-avg-attempts"></span></div>
                     <div>Current streak <span id="stat-current-streak"></span></div>
                     <div>Max streak <span id="stat-max-streak"></span></div>
+                    <div>Surrenders <span id="stat-surrenders"></span></div>
                 </div>
 
                 <!-- CTA to register if user is guest -->

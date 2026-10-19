@@ -21,16 +21,13 @@ class UserFranchiseStatsService {
         if(empty($allStats)) {
             return [
                 'games_played' => 0,
-                'surrenders'   => 0,
-                //'games_won'    => 0,
-                //'win_rate'     => 0.0,
                 'max_streak'   => 0,
-                'avg_attempts' => 0.0
+                'avg_attempts' => 0.0,
+                'surrenders'   => 0,
             ];
         }
 
         $gamesPlayed  = array_sum(array_map(fn($s) => $s->getGamesPlayed(), $allStats));
-        $surrenders   = array_sum(array_map(fn($s) => $s->getSurrenders(), $allStats));
         $gamesWon     = array_sum(array_map(fn($s) => $s->getGamesWon(), $allStats));
         $maxStreak    = max(array_map(fn($s) => $s->getMaxStreak(), $allStats));
  
@@ -40,10 +37,9 @@ class UserFranchiseStatsService {
  
         return [
             'games_played' => $gamesPlayed,
-            //'games_won'    => $gamesWon,
-            //'win_rate'     => $gamesPlayed > 0 ? round(($gamesWon / $gamesPlayed) * 100, 1) : 0.0,
             'max_streak'   => $maxStreak,
             'avg_attempts' => round($avgAttempts, 1),
+            'surrenders'   => $gamesPlayed - $gamesWon
         ];
     }
 
@@ -61,9 +57,10 @@ class UserFranchiseStatsService {
  
         return new UserStatsData(
             gamesPlayed:   $stats->getGamesPlayed(),
-            winRate:       $stats->getCompletionRate(),
+            avgAttempts:   $stats->getAvgAttempts(),
             currentStreak: $stats->getCurrentStreak(),
-            maxStreak:     $stats->getMaxStreak()
+            maxStreak:     $stats->getMaxStreak(),
+            surrenders:    $stats->getSurrenders()
         );
     }
 

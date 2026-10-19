@@ -5,17 +5,19 @@ namespace App\Model\DTO;
 readonly class UserStatsData implements \JsonSerializable {
     public function __construct(
         public int $gamesPlayed,
-        public float $winRate,
+        public float $avgAttempts,
         public int $currentStreak,
-        public int $maxStreak
+        public int $maxStreak,
+        public int $surrenders
     ){}
 
     public function jsonSerialize(): array {
         return [
             'games_played' => $this->gamesPlayed,
-            'win_rate' => $this->winRate,
+            'avg_attempts' => $this->avgAttempts,
             'current_streak' => $this->currentStreak,
-            'max_streak' => $this->maxStreak
+            'max_streak' => $this->maxStreak,
+            'surrenders' => $this->surrenders
         ];
     }
 }
