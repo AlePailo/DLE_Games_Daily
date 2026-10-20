@@ -35,7 +35,7 @@ class Application {
             $uri = '/' . ltrim(substr($uri, strlen($basePath)), '/');
         }
 
-        $protectedRoutes = ['/profile'];
+        $protectedRoutes = ['/profile', '/profile/update'];
 
         if(in_array($uri, $protectedRoutes) && $currentUser === null) {
             header('Location: ' . BASE_URL . '/login');

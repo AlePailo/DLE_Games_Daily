@@ -3,58 +3,32 @@
 namespace App\Service;
 
 use App\Model\Repository\IUserRepository;
-use App\Service\UserFranchiseStatsService;
+use App\Model\Entity\User;
 
 class ProfileService {
     public function __construct(
-        private UserFranchiseStatsService $statsService,
         private IUserRepository $userRepository
     ){}
 
-    /*
-    public function formatUserData(array $sessionData) : array {
-        $username = $sessionData['username'];
-        $userIconUrl = $sessionData['user_icon_url'];
-        
-        $user = $this->userRepository->findByUsername($username);
-        if($user === null) {
-            return [];
+    public function getUserData(int $userId) : ?User {
+        return $this->userRepository->findById($userId);
+    }
+
+    public function updateProfile(int $userId, string $username, string $userIconUrl, User $currentUser): void {
+        if ($username === $currentUser->getUsername() && $userIconUrl === $currentUser->getUserIconUrl()) {
+            return;
         }
 
-        $registrationDate = $user->getCreatedAt();
-
-        return [
-            'username' => $username,
-            'user_icon_url' => $userIconUrl,
-            'registration_date' => $registrationDate
-        ];
-    }
-    */
-
-    public function formatUserData(int $userId) : array {
-        $user = $this->userRepository->findById($userId);
-        if($user === null) {
-            return [];
+        if ($username !== $currentUser->getUsername()) {
+            if (!$this->checkUsernameAvailability($username)) {
+                throw \App\Exception\AuthException::usernameAlreadyTaken();
+            }
         }
 
-        return [
-            'username' => $user->getId(),
-            'user_icon_url' => $user->getUserIconUrl(),
-            'registration_date' => $user->getCreatedAt()
-        ];
+        $this->userRepository->updateProfile($userId, $username, $userIconUrl);
     }
 
-
-
-    public function getProfileData(int $userId) {
-
-    }
-
-    public function updateProfile(int $userId, string $username, string $userIconUrl) {
-
-    }
-
-    public function checkUsernameAvailability(string $username, int $currentUserId) {
-
+    public function checkUsernameAvailability(string $username) : bool {
+        return $this->userRepository->findByUsername($username) === null;
     }
 }

@@ -163,4 +163,9 @@ class UserRepository implements IUserRepository {
         $stmt = $this->pdo->prepare("UPDATE users SET user_icon_url = :user_icon_url WHERE id = :id");
         $stmt->execute(['id' => $id, 'user_icon_url' => $newUrl]);
     }
+
+    public function updateProfile(int $id, string $newUsername, string $newUrl) : void {
+        $stmt = $this->pdo->prepare("UPDATE users SET user_icon_url = :user_icon_url, username = :username WHERE id = :id");
+        $stmt->execute(['id' => $id, 'username' => $newUsername, 'user_icon_url' => $newUrl]);
+    }
 }

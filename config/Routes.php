@@ -14,6 +14,7 @@ return function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/games', [FranchiseController::class, 'index']);
     $r->addRoute('GET', '/leaderboards', [LeaderboardsController::class, 'index']);
     $r->addRoute('GET', '/profile', [ProfileController::class, 'index']);
+    $r->addRoute('POST', '/profile/update', [ProfileController::class, 'update']);
     
     $r->addRoute('GET', '/login', [AuthController::class, 'loginForm']);
     $r->addRoute('POST', '/login', [AuthController::class, 'login']);

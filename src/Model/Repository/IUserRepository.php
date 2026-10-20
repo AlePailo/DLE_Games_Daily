@@ -30,4 +30,5 @@ interface IUserRepository {
 
     public function updateUsername(int $id, string $newUsername) : void;
     public function updateUserIconUrl(int $id, string $newUrl) : void;
+    public function updateProfile(int $id, string $newUsername, string $newUrl) : void;
 }
