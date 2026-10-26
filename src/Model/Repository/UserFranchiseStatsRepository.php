@@ -3,7 +3,6 @@
 namespace App\Model\Repository;
 
 use App\Model\Entity\UserFranchiseStats;
-use Override;
 
 class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
     public function __construct(
@@ -93,17 +92,28 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
     }
 
     public function findAllByUser(int $userId): array {
-        $stmt = $this->pdo->prepare("
-            SELECT * FROM user_franchise_stats 
-            WHERE user_id = :user_id 
-            ORDER BY games_played DESC
+        $stmt = $this->pdo->prepare("SELECT f.name as franchise_name, ufs.*
+            FROM user_franchise_stats ufs
+            INNER JOIN franchises f on ufs.franchise_id = f.id
+            WHERE ufs.user_id = :user_id
+            ORDER BY ufs.games_played DESC
         ");
         $stmt->execute(['user_id' => $userId]);
+
+        $statsByFranchise = [];
+    
+        foreach ($stmt->fetchAll() as $row) {
+            $statsByFranchise[$row['franchise_name']] = $this->mapUserFranchiseStats($row);
+
+            /* MORE ROBUST SOLUTION (requires changes in profile view, current implementation shouldn't be a problem since user_id and franchise_id pair should always be unique in db)
+            $statsByFranchise[$row['franchise_id']] = [
+                'name'  => $row['franchise_name'],
+                'stats' => $this->mapUserFranchiseStats($row)
+            ];
+            */
+        }
         
-        return array_map(
-            fn($row) => $this->mapUserFranchiseStats($row),
-            $stmt->fetchAll()
-        );
+        return $statsByFranchise;
     }
 
     public function findLeaderboardByFranchise(int $franchiseId, array $metricConfig, int $limit): array {

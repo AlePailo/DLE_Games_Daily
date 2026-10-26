@@ -14,9 +14,9 @@ class ProfileService {
         return $this->userRepository->findById($userId);
     }
 
-    public function updateProfile(int $userId, string $username, string $userIconUrl, User $currentUser): void {
+    public function updateProfile(int $userId, string $username, string $userIconUrl, User $currentUser): bool {
         if ($username === $currentUser->getUsername() && $userIconUrl === $currentUser->getUserIconUrl()) {
-            return;
+            return false;       // no updates
         }
 
         if ($username !== $currentUser->getUsername()) {
@@ -26,6 +26,7 @@ class ProfileService {
         }
 
         $this->userRepository->updateProfile($userId, $username, $userIconUrl);
+        return true;
     }
 
     public function checkUsernameAvailability(string $username) : bool {

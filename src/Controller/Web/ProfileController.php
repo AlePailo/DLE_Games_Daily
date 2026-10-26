@@ -36,13 +36,18 @@ class ProfileController extends WebController {
         $aggregatedStats = $this->statsService->getAggregatedStatsByUser($userId);
         $franchiseStats = $this->statsService->getStatsByUser($userId);
 
+        $avatarFiles = glob(BASE_PATH . 'public/assets/img/avatars/*.{png,jpg,webp,svg}', GLOB_BRACE);
+        sort($avatarFiles);
+        $avatars = array_map(fn($file) => basename($file), $avatarFiles);
+
         $this->render('profile', [
             'title' => 'Profile | DLE Games Daily',
-            'user_data' => $userData,
-            'aggregated_stats' => $aggregatedStats,
+            'user' => $userData,
+            'globalStats' => $aggregatedStats,
             'franchise_stats'  => $franchiseStats,
-            'css' => [],
-            'js' => []
+            'avatars' => $avatars,
+            'css' => ['profile.css'],
+            'js' => ['profile.js']
         ]);
     }
 
@@ -56,7 +61,7 @@ class ProfileController extends WebController {
         $this->validateCsrfToken();
 
         $username = trim($_POST['username'] ?? '');
-        $userIconUrl = $_POST['user_icon_url'] ?? '';
+        $userIconUrl = $_POST['avatar'] ?? '';
 
         $user = $this->profileService->getUserData($userId);
         if ($user === null) {
@@ -66,11 +71,14 @@ class ProfileController extends WebController {
         }
 
         try {
-            $this->profileService->updateProfile($userId, $username, $userIconUrl, $user);
+            $updated = $this->profileService->updateProfile($userId, $username, $userIconUrl, $user);
 
-            $this->sessionManager->updateUserSession($username, $userIconUrl);
-
-            $this->sessionManager->setFlash('success', 'Profile updated successfully.');
+            if($updated) {
+                $this->sessionManager->updateUserSession($username, $userIconUrl);
+                $this->sessionManager->setFlash('success', 'Profile updated successfully.');
+            } else {
+                $this->sessionManager->setFlash('info', 'No changes were made.');
+            }
         } catch(AuthException $e) {
             $this->sessionManager->setFlash('error', $e->getMessage());
         }

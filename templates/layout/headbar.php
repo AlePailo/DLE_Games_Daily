@@ -25,7 +25,7 @@ $isLoggedIn = !empty($username);
             <?php
                 $avatarFile = !empty($user_icon_url) ? htmlspecialchars($user_icon_url) : 'default-avatar.svg';
             ?>
-            <img src="<?= BASE_URL ?>/assets/img/<?= $avatarFile ?>" class="user-img" alt="Your avatar">
+            <img src="<?= BASE_URL ?>/assets/img/avatars/<?= $avatarFile ?>" class="user-img" alt="Your avatar">
         </a>
     <?php else: ?>
         <div class="auth-actions">
