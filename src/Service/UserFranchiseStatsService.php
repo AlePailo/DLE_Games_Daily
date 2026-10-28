@@ -74,4 +74,21 @@ class UserFranchiseStatsService {
         $metricConfig = self::LEADERBOARD_METRICS[$metric] ?? self::LEADERBOARD_METRICS['max_streak'];
         return $this->statsRepository->findLeaderboardByFranchise($franchiseId, $metricConfig, $limit);
     }
+
+    public function getGlobalLeaderboard(string $metric, int $limit = 10) : array {
+        $metricConfig = self::LEADERBOARD_METRICS[$metric] ?? self::LEADERBOARD_METRICS['avg_attempts'];
+        return $this->statsRepository->findGlobalLeaderboard($metricConfig, $limit);
+    }
+
+    public function getLeaderboard(string $franchise, string $metric, int $limit = 10) : array {
+        if($franchise === 'global') {
+            return $this->getGlobalLeaderboard($metric, $limit);
+        }
+
+        if (!is_numeric($franchise)) {
+            return $this->getGlobalLeaderboard($metric, $limit);
+        }
+
+        return $this->getLeaderboardByFranchise((int)$franchise, $metric, $limit);
+    }
 }

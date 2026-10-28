@@ -116,7 +116,7 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         return $statsByFranchise;
     }
 
-    public function findLeaderboardByFranchise(int $franchiseId, array $metricConfig, int $limit): array {
+    public function findLeaderboardByFranchise(int $franchiseId, array $metricConfig, int $limit) : array {
         $col   = $metricConfig['column'];
         $order = $metricConfig['order'];
 
@@ -129,6 +129,30 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         ");
         
         $stmt->bindValue(':franchise_id', $franchiseId, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function findGlobalLeaderboard(array $metricConfig, int $limit) : array {
+        $col   = $metricConfig['column'];
+        $order = $metricConfig['order'];
+
+        $stmt = $this->pdo->prepare("SELECT u.username,
+                u.user_icon_url,
+                SUM(ufs.games_played) AS games_played,
+                SUM(ufs.games_won) AS games_won,
+                MAX(ufs.max_streak) AS max_streak,
+                SUM(ufs.avg_attempts * ufs.games_won) / NULLIF(SUM(ufs.games_won), 0) AS avg_attempts
+            FROM user_franchise_stats ufs
+            INNER JOIN users u ON ufs.user_id = u.id
+            GROUP BY ufs.user_id, u.username, u.user_icon_url
+            HAVING SUM(ufs.games_played) > 0
+            ORDER BY {$col} {$order}
+            LIMIT :limit
+        ");
+
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
 

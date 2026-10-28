@@ -8,6 +8,7 @@ use App\Controller\Web\HomeController;
 use App\Controller\Web\GameController;
 use App\Controller\Web\LeaderboardsController;
 use App\Controller\Web\ProfileController;
+use App\Controller\Api\LeaderboardsApiController;
 
 return function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/', [HomeController::class, 'index']);
@@ -29,6 +30,7 @@ return function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/check/email', [AuthController::class, 'checkEmail']);
     */
 
+    $r->addRoute('GET', '/api/leaderboards', [LeaderboardsApiController::class, 'fetch']);
     $r->addRoute('POST', '/api/favourites/toggle', [FavouriteApiController::class, 'toggle']);
     
     $r->addRoute('POST', '/api/play/{slug}/attempt', [GameApiController::class, 'attempt']);

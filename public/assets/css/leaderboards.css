@@ -1,0 +1,195 @@
+/* ==========================================================================
+   LEADERBOARDS LAYOUT
+   ========================================================================== */
+
+.leaderboards-container {
+    max-width: 700px;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+.leaderboards-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.leaderboards-header .section-title {
+    margin: 0;
+}
+
+/* ==========================================================================
+   METRIC TABS
+   ========================================================================== */
+
+.metric-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.metric-tab {
+    padding: 0.5rem 1.25rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    color: var(--gray-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.metric-tab:hover {
+    border-color: rgba(124, 134, 255, 0.4);
+    color: var(--white-main);
+}
+
+.metric-tab.active {
+    background: var(--purple-active-bg);
+    border-color: var(--purple-primary);
+    color: var(--purple-primary);
+}
+
+/* ==========================================================================
+   LEADERBOARD TABLE
+   ========================================================================== */
+
+.leaderboard-wrap {
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    min-height: 200px;
+    transition: opacity 0.2s ease;
+}
+
+.leaderboard-wrap.leaderboard-loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard-table th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-table th:last-child {
+    text-align: right;
+}
+
+.leaderboard-row {
+    transition: background 0.15s ease;
+}
+
+.leaderboard-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.leaderboard-row td {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--white-main);
+    font-size: 0.95rem;
+}
+
+.leaderboard-row:last-child td {
+    border-bottom: none;
+}
+
+/* Rank */
+.leaderboard-rank {
+    width: 48px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.leaderboard-top-1 .leaderboard-rank,
+.leaderboard-top-2 .leaderboard-rank,
+.leaderboard-top-3 .leaderboard-rank {
+    font-size: 1.3rem;
+}
+
+/* Player */
+.leaderboard-player {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.leaderboard-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--black-secondary);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.leaderboard-top-1 .leaderboard-avatar {
+    border-color: #FFD700;
+}
+
+.leaderboard-top-2 .leaderboard-avatar {
+    border-color: #C0C0C0;
+}
+
+.leaderboard-top-3 .leaderboard-avatar {
+    border-color: #CD7F32;
+}
+
+/* Value */
+.leaderboard-value {
+    text-align: right;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--purple-primary);
+}
+
+/* Empty state */
+.leaderboard-empty {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 480px) {
+    .leaderboards-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .franchise-select {
+        width: 100%;
+    }
+
+    .metric-tabs {
+        width: 100%;
+    }
+
+    .metric-tab {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}

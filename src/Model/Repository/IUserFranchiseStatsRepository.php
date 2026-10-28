@@ -10,4 +10,5 @@ interface IUserFranchiseStatsRepository {
     public function findByUserAndFranchise(int $userId, int $franchiseId) : ?UserFranchiseStats;
     public function findAllByUser(int $userId) : array;
     public function findLeaderboardByFranchise(int $franchiseId, array $metricConfig, int $limit) : array;
+    public function findGlobalLeaderboard(array $metricConfig, int $limit) : array;
 }
