@@ -6,6 +6,7 @@ use App\Controller\WebController;
 use App\Core\SessionManager;
 use App\Exception\AuthException;
 use App\Service\AuthService;
+use App\Service\AvatarService;
 use App\Service\ProfileService;
 use App\Service\UserFranchiseStatsService;
 
@@ -14,7 +15,8 @@ class ProfileController extends WebController {
         protected SessionManager $sessionManager,
         private ProfileService $profileService,
         private UserFranchiseStatsService $statsService,
-        private AuthService $authService
+        private AuthService $authService,
+        private AvatarService $avatarService
     ) {
         parent::__construct($sessionManager);
     }
@@ -36,16 +38,12 @@ class ProfileController extends WebController {
         $aggregatedStats = $this->statsService->getAggregatedStatsByUser($userId);
         $franchiseStats = $this->statsService->getStatsByUser($userId);
 
-        $avatarFiles = glob(BASE_PATH . 'public/assets/img/avatars/*.{png,jpg,webp,svg}', GLOB_BRACE);
-        sort($avatarFiles);
-        $avatars = array_map(fn($file) => basename($file), $avatarFiles);
-
         $this->render('profile', [
             'title' => 'Profile | DLE Games Daily',
             'user' => $userData,
             'globalStats' => $aggregatedStats,
             'franchise_stats'  => $franchiseStats,
-            'avatars' => $avatars,
+            'avatars' => $this->avatarService->getAvailableAvatars(),
             'css' => ['profile.css'],
             'js' => ['profile.js']
         ]);

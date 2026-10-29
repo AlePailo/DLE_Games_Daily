@@ -17,6 +17,7 @@ class AuthService {
         private IUserRepository $userRepository,
         private SessionManager $sessionManager,
         private IGameSessionRepository $gameSessionRepository,
+        private AvatarService $avatarService,
         private Mailer $mailer
     ) {}
 
@@ -49,7 +50,8 @@ class AuthService {
         $user = $this->userRepository->findByOAuthProvider($provider, $providerId);
 
         if($user === null) {
-            $user = $this->userRepository->createOAuthUser($username, $email, $provider, $providerId);
+            $avatar = $this->avatarService->getRandomAvatar();
+            $user = $this->userRepository->createOAuthUser($username, $email, $provider, $providerId, $avatar);
         }
 
         return $user;
@@ -152,7 +154,9 @@ class AuthService {
         $hashedToken = hash('sha256', $verificationToken);
         $expiresAt = new \DateTimeImmutable('+1 day');
 
-        $createdUserId = $this->userRepository->createLocalUser($username, $email, $hashedPassword, $hashedToken, $expiresAt);
+        $avatar = $this->avatarService->getRandomAvatar();
+
+        $createdUserId = $this->userRepository->createLocalUser($username, $email, $hashedPassword, $hashedToken, $expiresAt, $avatar);
 
         $this->mailer->sendVerification($email, $verificationToken);
 

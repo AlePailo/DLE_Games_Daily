@@ -18,8 +18,8 @@ interface IUserRepository {
     //OAuthLogin
     public function findByOAuthProvider(string $provider, string $provider_id) : ?User;
 
-    public function createLocalUser(string $username, string $email, string $passwordHash, string $token, \DateTimeImmutable $expiresAt) : int;
-    public function createOAuthUser(string $username, string $email, string $provider, string $providerId) : int;
+    public function createLocalUser(string $username, string $email, string $passwordHash, string $token, \DateTimeImmutable $expiresAt, string $avatar) : int;
+    public function createOAuthUser(string $username, string $email, string $provider, string $providerId, string $avatar) : int;
 
     public function markAsVerified(int $id) : void;
     public function updateVerificationToken(int $userId, string $hashedToken, \DateTimeImmutable $expiresAt) : void;

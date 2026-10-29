@@ -7,7 +7,8 @@ use App\Model\Entity\User;
 
 class ProfileService {
     public function __construct(
-        private IUserRepository $userRepository
+        private IUserRepository $userRepository,
+        private AvatarService $avatarService
     ){}
 
     public function getUserData(int $userId) : ?User {
@@ -15,14 +16,19 @@ class ProfileService {
     }
 
     public function updateProfile(int $userId, string $username, string $userIconUrl, User $currentUser): bool {
-        if ($username === $currentUser->getUsername() && $userIconUrl === $currentUser->getUserIconUrl()) {
-            return false;       // no updates
+        $usernameChanged = $username !== $currentUser->getUsername();
+        $avatarChanged   = $userIconUrl !== $currentUser->getUserIconUrl();
+
+        if (!$usernameChanged && !$avatarChanged) {
+            return false;
         }
 
-        if ($username !== $currentUser->getUsername()) {
-            if (!$this->checkUsernameAvailability($username)) {
-                throw \App\Exception\AuthException::usernameAlreadyTaken();
-            }
+        if ($usernameChanged && !$this->checkUsernameAvailability($username)) {
+            throw \App\Exception\AuthException::usernameAlreadyTaken();
+        }
+
+        if ($avatarChanged && !$this->avatarService->isValid($userIconUrl)) {
+            throw \App\Exception\AuthException::invalidAvatar();
         }
 
         $this->userRepository->updateProfile($userId, $username, $userIconUrl);

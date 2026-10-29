@@ -11,6 +11,7 @@ class AuthException extends \RuntimeException {
     public const EXPIRED_TOKEN = 106;
     public const DUPLICATE_ENTRY = 107;
     public const RESEND_COOLDOWN = 108;
+    public const INVALID_AVATAR = 109;
 
     public static function invalidCredentials() : self {
         return new self('Invalid credentials.', self::INVALID_CREDENTIALS);
@@ -42,5 +43,9 @@ class AuthException extends \RuntimeException {
 
     public static function resendCooldown() : self {
         return new self('Please wait before requesting a new verification email.', self::RESEND_COOLDOWN);
+    }
+
+    public static function invalidAvatar() : self {
+        return new self('Selected avatar is not valid.', self::INVALID_AVATAR);
     }
 }
