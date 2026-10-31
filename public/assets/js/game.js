@@ -29,6 +29,7 @@ class Game {
         this.input = document.getElementById('character-search')
         this.clearBtn = document.getElementById('clear-character-search')
         this.dropdown = document.getElementById('autocomplete-results')
+        this.status = document.getElementById('autocomplete-status')
         
         // Game actions
         this.tableBody = document.getElementById('guesses-body')
@@ -60,7 +61,16 @@ class Game {
         this.input.addEventListener('blur', () => {
             this.blurTimeout = setTimeout(() => this.hideDropdown(), 150)
         })
-        this.input.addEventListener('focus', () => clearTimeout(this.blurTimeout))
+        this.input.addEventListener('focus', () => {
+            clearTimeout(this.blurTimeout)   
+            if(this.input.value.trim()) this.handleInput(this.input.value)
+        })
+        this.input.addEventListener('click', () => {                                // Reopen suggestions on click when the list is closed but the input still has text
+            if (!this.isDropdownOpen && this.input.value.trim()) {                  // Needed because 'focus' doesn't fire if the input never lost focus (e.g. after Escape)
+                this.handleInput(this.input.value)
+            }
+        })
+        this.dropdown.addEventListener('mousedown', (e) => e.preventDefault())      // Clicking a suggestion mustn't remove focus from input
 
         // Clear button
         this.clearBtn.addEventListener('mousedown', (e) => {
@@ -123,6 +133,11 @@ class Game {
     handleKeyboardNavigation(e) {
         if(!this.isDropdownOpen) return
 
+        if(e.key === 'Escape') {
+            this.hideDropdown()
+            return
+        }
+
         if(this.isSubmitting || this.isCompleted) {
             if(e.key === 'Enter') e.preventDefault()
             return
@@ -132,12 +147,12 @@ class Game {
         if(items.length < 1) return
 
         if(e.key === 'ArrowDown') {
-            e.preventDefault();
-            (this.currentFocus === items.length - 1) ? this.currentFocus = 0 : this.currentFocus++
+            e.preventDefault()
+            this.currentFocus = (this.currentFocus + 1) % items.length
             this.setActiveItem(items)
         } else if(e.key === 'ArrowUp') {
-            e.preventDefault();
-            (this.currentFocus === 0) ? this.currentFocus = items.length - 1 : this.currentFocus--
+            e.preventDefault()
+            this.currentFocus = this.currentFocus <= 0 ? items.length - 1 : this.currentFocus - 1
             this.setActiveItem(items)
         } else if(e.key === 'Enter') {
             e.preventDefault()
@@ -150,18 +165,23 @@ class Game {
 
     renderDropdown(list) {
         this.dropdown.innerHTML = ''
+        this.input.removeAttribute('aria-activedescendant')
+
         if(list.length < 1) {
             this.hideDropdown()
+            this.status.textContent = 'No results found'
             return
         }
 
         const baseUrl = this.appConfig?.baseUrl || ''
         const fragment = document.createDocumentFragment()
 
-        list.forEach(char => {
+        list.forEach((char, index) => {
             const item = document.createElement('div')
             item.className = 'autocomplete-item'
+            item.id = `autocomplete-item-${index}`
             item.setAttribute('role', 'option')
+            item.setAttribute('aria-selected', 'false')
 
             const imgSrc = char.image_url 
                 ? `${baseUrl}/assets/img/characters_icons/${this.slug}/${char.image_url}`
@@ -180,6 +200,9 @@ class Game {
         this.isDropdownOpen = true
         this.dropdown.classList.add('is-open')
         this.input.setAttribute('aria-expanded', 'true')
+        this.status.textContent = list.length === 1
+        ? '1 result available'
+        : `${list.length} results available`
     }
 
     hideDropdown() {
@@ -187,16 +210,23 @@ class Game {
         this.dropdown.classList.remove('is-open')
         this.dropdown.innerHTML = ''
         this.input.setAttribute('aria-expanded', 'false')
+        this.input.removeAttribute('aria-activedescendant')
+        this.status.textContent = ''
         this.currentFocus = -1
     }
 
     setActiveItem(items) {
-        items.forEach(item => item.classList.remove('active'))
+        items.forEach(item => {
+            item.classList.remove('active')
+            item.setAttribute('aria-selected', 'false')
+        })
 
         const activeItem = items[this.currentFocus]
         if(!activeItem) return
 
         activeItem.classList.add('active')
+        activeItem.setAttribute('aria-selected', 'true')
+        this.input.setAttribute('aria-activedescendant', activeItem.id)
 
         const dropdownTop = this.dropdown.scrollTop
         const dropdownBottom = dropdownTop + this.dropdown.clientHeight

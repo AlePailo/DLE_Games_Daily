@@ -14,7 +14,7 @@ readonly class UserStatsData implements \JsonSerializable {
     public function jsonSerialize(): array {
         return [
             'games_played' => $this->gamesPlayed,
-            'avg_attempts' => $this->avgAttempts,
+            'avg_attempts' => round($this->avgAttempts, 2),
             'current_streak' => $this->currentStreak,
             'max_streak' => $this->maxStreak,
             'surrenders' => $this->surrenders
