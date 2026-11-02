@@ -42,13 +42,7 @@ $metricLabel = $metricLabels[$metric] ?? $metric;
                         >
                         <span><?= htmlspecialchars($entry['username']) ?></span>
                     </td>
-                    <td class="leaderboard-value">
-                        <?php if ($metric === 'avg_attempts'): ?>
-                            <?= number_format((float)($entry['avg_attempts'] ?? 0), 2) ?>
-                        <?php else: ?>
-                            <?= (int)($entry[$metric] ?? 0) ?>
-                        <?php endif; ?>
-                    </td>
+                    <td class="leaderboard-value"><?= htmlspecialchars($entry['value']) ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

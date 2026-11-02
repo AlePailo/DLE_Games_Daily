@@ -70,25 +70,39 @@ class UserFranchiseStatsService {
         'games_played' => ['column' => 'games_played', 'order' => 'DESC'],
     ];
 
-    public function getLeaderboardByFranchise(int $franchiseId, string $metric, int $limit): array {
-        $metricConfig = self::LEADERBOARD_METRICS[$metric] ?? self::LEADERBOARD_METRICS['max_streak'];
-        return $this->statsRepository->findLeaderboardByFranchise($franchiseId, $metricConfig, $limit);
-    }
-
-    public function getGlobalLeaderboard(string $metric, int $limit = 10) : array {
-        $metricConfig = self::LEADERBOARD_METRICS[$metric] ?? self::LEADERBOARD_METRICS['avg_attempts'];
-        return $this->statsRepository->findGlobalLeaderboard($metricConfig, $limit);
-    }
-
     public function getLeaderboard(string $franchise, string $metric, int $limit = 10) : array {
-        if($franchise === 'global') {
-            return $this->getGlobalLeaderboard($metric, $limit);
+        $metric = $this->resolveMetric($metric);
+        
+        if (!array_key_exists($metric, self::LEADERBOARD_METRICS)) {
+            $metric = 'avg_attempts';
         }
 
-        if (!is_numeric($franchise)) {
-            return $this->getGlobalLeaderboard($metric, $limit);
-        }
+        $rows = ($franchise === 'global' || !is_numeric($franchise))
+            ? $this->getGlobalLeaderboard($metric, $limit)
+            : $this->getLeaderboardByFranchise((int)$franchise, $metric, $limit);
 
-        return $this->getLeaderboardByFranchise((int)$franchise, $metric, $limit);
+        return array_map(fn($row) => [
+            'username'      => $row['username'],
+            'user_icon_url' => $row['user_icon_url'],
+            'value'         => $this->formatLeaderboardValue($row, $metric),
+        ], $rows);
+    }
+
+    private function formatLeaderboardValue(array $row, string $metric): string {
+        return $metric === 'avg_attempts'
+            ? number_format((float)$row['avg_attempts'], 2)
+            : (string)(int)$row[$metric];
+    }
+
+    public function resolveMetric(string $metric): string {
+        return array_key_exists($metric, self::LEADERBOARD_METRICS) ? $metric : 'avg_attempts';
+    }
+
+    private function getLeaderboardByFranchise(int $franchiseId, string $metric, int $limit): array {
+        return $this->statsRepository->findLeaderboardByFranchise($franchiseId, self::LEADERBOARD_METRICS[$metric], $limit);
+    }
+
+    private function getGlobalLeaderboard(string $metric, int $limit): array {
+        return $this->statsRepository->findGlobalLeaderboard(self::LEADERBOARD_METRICS[$metric], $limit);
     }
 }

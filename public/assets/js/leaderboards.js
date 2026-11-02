@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${avatarUrl}" alt="${escapeHtml(entry.username)}" class="leaderboard-avatar">
                         <span>${escapeHtml(entry.username)}</span>
                     </td>
-                    <td class="leaderboard-value">${value}</td>
+                    <td class="leaderboard-value">${entry.value}</td>
                 </tr>
             `
         }).join('')

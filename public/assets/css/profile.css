@@ -265,28 +265,6 @@
     flex-shrink: 0;
 }
 
-.franchise-select {
-    background: var(--black-tertiary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    color: var(--white-main);
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.2s ease;
-    font-family: inherit;
-}
-
-.franchise-select:focus {
-    border-color: var(--purple-primary);
-}
-
-.franchise-select:disabled {
-    opacity: 0.7;
-    cursor: default;
-}
-
 .franchise-stats-panel {
     animation: fadeIn 0.2s ease;
 }
