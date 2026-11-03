@@ -230,6 +230,8 @@ section {
     border-radius: 2px;
 }
 
+
+
 .franchise-select {
     background: var(--black-tertiary);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -251,6 +253,20 @@ section {
     opacity: 0.7;
     cursor: default;
 }
+
+
+
+/* Non supported browsers basic styling */
+
+.franchise-select {
+    color-scheme: dark;
+}
+
+.franchise-select option {
+    background: var(--black-tertiary);
+    color: var(--white-main);
+}
+
 
 
 [hidden] {

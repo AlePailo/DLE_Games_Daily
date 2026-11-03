@@ -357,6 +357,7 @@ class Game {
         }
 
         row.innerHTML = cellsHtml
+        row.querySelectorAll('.guess-cell').forEach((cell, i) => cell.style.setProperty('--i', i))
 
         // Last attempt pushed to top of the table
         this.tableBody.prepend(row)
