@@ -21,7 +21,7 @@ class Application {
 
         self::guardRoutes($currentUser);
 
-        $routes = require BASE_PATH . 'config/routes.php';
+        $routes = require BASE_PATH . 'config/Routes.php';
         $dispatcher = \FastRoute\simpleDispatcher($routes);
 
         $router = new Router($container, $dispatcher);

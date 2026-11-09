@@ -4,9 +4,9 @@ namespace App\Service;
 
 use App\Model\DTO\CompletedGameData;
 use App\Model\DTO\GameContext;
-use App\Model\DTO\UserStatsData;
 use App\Model\Repository\ICharacterRepository;
-use App\Model\Repository\IDailyChallengeRepository;
+//use App\Model\Repository\IDailyChallengeRepository;
+use App\Service\DailyChallengeService;
 use App\Model\Repository\IFranchiseRepository;
 use App\Model\Repository\IGameAttemptRepository;
 use App\Model\Repository\IUserFranchiseStatsRepository;
@@ -14,12 +14,12 @@ use App\Model\Repository\IUserFranchiseStatsRepository;
 class GameService {
     public function __construct(
         private IFranchiseRepository $franchiseRepository,
-        private IDailyChallengeRepository $dailyChallengeRepository,
+        //private IDailyChallengeRepository $dailyChallengeRepository,
+        private DailyChallengeService $dailyChallengeService,
         private GameSessionService $gameSessionService,
         private ICharacterRepository $characterRepository,
         private CharacterComparisonService $comparisonService,
         private IGameAttemptRepository $gameAttemptRepository,
-        private IUserFranchiseStatsRepository $statsRepository,
         private UserFranchiseStatsService $statsService
     ) {}
 
@@ -27,7 +27,8 @@ class GameService {
         $franchise = $this->franchiseRepository->findBySlugWithAttributes($slug);
         if($franchise === null) return new GameContext(null, null, null);
 
-        $dailyChallenge = $this->dailyChallengeRepository->findByFranchiseAndDate($franchise->getId(), new \DateTimeImmutable());
+        //$dailyChallenge = $this->dailyChallengeRepository->findByFranchiseAndDate($franchise->getId(), new \DateTimeImmutable());
+        $dailyChallenge = $this->dailyChallengeService->getForDate($franchise->getId(), new \DateTimeImmutable());
         if($dailyChallenge === null) return new GameContext($franchise, null, null);
 
         $gameSession = $this->gameSessionService->findSessionContext($dailyChallenge->getId(), $userId, $guestToken);

@@ -15,8 +15,8 @@ class LeaderboardsApiController extends ApiController {
     }
 
     public function fetch(array $vars) : void {
-        $metric = $_GET['metric'];
-        $franchise = $_GET['franchise'];
+        $metric = $_GET['metric'] ?? 'avg_attempts';
+        $franchise = $_GET['franchise'] ?? 'global';
 
         $leaderboard =  $this->statsService->getLeaderboard($franchise, $metric);
 

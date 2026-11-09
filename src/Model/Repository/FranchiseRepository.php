@@ -11,29 +11,32 @@ class FranchiseRepository implements IFranchiseRepository {
     ) {}
 
     public function findAll(): array {
-        $stmt = $this->pdo->prepare("SELECT * FROM franchises ORDER BY name");
+        $stmt = $this->pdo->prepare("SELECT * FROM franchises ORDER BY is_active DESC, name");
         $stmt->execute();
         return array_map([$this, 'mapFranchise'], $stmt->fetchAll());
     }
 
     public function findAllActive() : array {
-        $stmt = $this->pdo->prepare("SELECT * FROM franchises WHERE is_active = true");
+        $stmt = $this->pdo->prepare("SELECT * FROM franchises WHERE is_active = 1 ORDER BY name");
         $stmt->execute();
         return array_map([$this, 'mapFranchise'], $stmt->fetchAll());
     }
 
+    /*
     public function findBySlug(string $slug): ?Franchise {
         $stmt = $this->pdo->prepare("SELECT * FROM franchises WHERE slug = ?");
         $stmt->execute([$slug]);
         $row = $stmt->fetch();
         return $row ? $this->mapFranchise($row) : null;
     }
+    */
 
     public function findBySlugWithAttributes(string $slug) : ?Franchise {
         $stmt = $this->pdo->prepare("
         SELECT f.*, ad.id as def_id, ad.attribute_key, ad.attribute_label, ad.display_order
         FROM franchises f LEFT JOIN attribute_definitions ad ON ad.franchise_id = f.id
         WHERE f.slug = :slug
+        AND f.is_active = 1
         AND (ad.is_active = 1 OR ad.id IS NULL)
         ORDER BY ad.display_order");
         $stmt->execute(['slug' => $slug]);
@@ -53,7 +56,10 @@ class FranchiseRepository implements IFranchiseRepository {
 
     public function findAllFavouritesByUser(int $userId): array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM franchises f INNER JOIN user_favourites uf ON f.id = uf.franchise_id WHERE uf.user_id = :user_id");
+        $stmt = $this->pdo->prepare("SELECT f.* FROM franchises f
+            INNER JOIN user_favourites uf ON f.id = uf.franchise_id
+            WHERE uf.user_id = :user_id
+            ORDER BY f.is_active DESC, f.name");
         $stmt->execute(['user_id' => $userId]);
         return array_map([$this, 'mapFranchise'], $stmt->fetchAll());
     }

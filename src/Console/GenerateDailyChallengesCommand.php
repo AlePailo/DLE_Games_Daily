@@ -2,45 +2,32 @@
 
 namespace App\Console;
 
-use App\Model\Repository\ICharacterRepository;
-use App\Model\Repository\IDailyChallengeRepository;
 use App\Model\Repository\IFranchiseRepository;
+use App\Service\ChallengeCreation;
+use App\Service\DailyChallengeService;
 
 class GenerateDailyChallengesCommand {
     public function __construct(
         private IFranchiseRepository $franchiseRepository,
-        private ICharacterRepository $characterRepository,
-        private IDailyChallengeRepository $dailyChallengeRepository
+        private DailyChallengeService $dailyChallengeService
     ) {}
 
-    public function execute() : void {
+    public function execute(int $days = 1) : void {
         $franchises = $this->franchiseRepository->findAllActive();
-        $today = new \DateTimeImmutable();
+        $start = new \DateTimeImmutable('today');
 
-        foreach($franchises as $franchise) {
-            // Checks if there's already a challenge for today
-            $existing = $this->dailyChallengeRepository->findByFranchiseAndDate($franchise->getId(), $today);
+        for($i = 0; $i < $days; $i++) {
+            $date = $start->modify("+{$i} days");
 
-            if($existing !== null) {
-                echo "Daily challenge already exists for {$franchise->getName()} franchise\n";
-                continue;
+            foreach($franchises as $franchise) {
+                $label = "[{$date->format('Y-m-d')}] {$franchise->getName()}";
+
+                echo match($this->dailyChallengeService->createIfMissing($franchise->getId(), $date)) {
+                    ChallengeCreation::Created          => "$label: created\n",
+                    ChallengeCreation::AlreadyExists    => "$label: already exists\n",
+                    ChallengeCreation::NoCharacters     => "$label: No characters available\n"
+                };
             }
-
-            $recentIds = $this->dailyChallengeRepository->findRecentCharactersIds($franchise->getId(), 10);
-            $characterId = $this->characterRepository->findRandomIdByFranchise($franchise->getId(), $recentIds);
-
-            if($characterId === null) {
-                // Fallback: if no characters are available when excluding last 10, try without restrictions (maybe franchise shouldn't exist :/)
-                $characterId = $this->characterRepository->findRandomIdByFranchise($franchise->getId(), []);
-
-                if($characterId) {
-                    echo "No characters found for {$franchise->getName()}\n";
-                    continue;
-                }
-            }
-
-            $this->dailyChallengeRepository->create($franchise->getId(), $characterId);
-            echo "Challenge created for {$franchise->getName()}\n";
         }
     }
 }

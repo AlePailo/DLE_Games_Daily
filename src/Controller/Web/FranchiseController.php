@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace App\Controller\web;
+namespace App\Controller\Web;
 
 use App\Controller\WebController;
 use App\Core\SessionManager;

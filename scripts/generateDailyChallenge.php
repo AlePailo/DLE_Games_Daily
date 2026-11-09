@@ -11,4 +11,5 @@ $dotenv->load();
 
 $container = ContainerFactory::build();
 $command = $container->get(GenerateDailyChallengesCommand::class);
-$command->execute();
+$days = max(1, (int)(getopt('', ['days::'])['days'] ?? 1));
+$command->execute($days);

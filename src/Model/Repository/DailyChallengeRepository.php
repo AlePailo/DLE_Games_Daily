@@ -26,9 +26,11 @@ class DailyChallengeRepository implements IDailyChallengeRepository {
         return $res;
     }
 
-    public function create(int $franchiseId, int $characterId) : void {
-        $stmt = $this->pdo->prepare("INSERT INTO daily_challenges(franchise_id, character_id, challenge_date) VALUES (:franchise_id, :character_id, CURDATE())");
-        $stmt->execute(['franchise_id' => $franchiseId, 'character_id' => $characterId]);
+    public function create(int $franchiseId, int $characterId, \DateTimeImmutable $date) : bool {
+        $stmt = $this->pdo->prepare("INSERT IGNORE INTO daily_challenges(franchise_id, character_id, challenge_date) VALUES (:franchise_id, :character_id, :challenge_date)");
+        $stmt->execute(['franchise_id' => $franchiseId, 'character_id' => $characterId, 'challenge_date' => $date->format('Y-m-d')]);
+        
+        return $stmt->rowCount() === 1;
     }
 
     private function mapDailyChallenge(array $row) : DailyChallenge {

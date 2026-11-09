@@ -26,7 +26,6 @@ class FavouriteApiController extends ApiController {
         }
 
         $body = $this->getJsonBody();
-        var_dump($body);
         $franchiseId = (int)($body['franchise_id'] ?? 0);
 
         if($franchiseId <= 0) {

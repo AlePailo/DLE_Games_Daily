@@ -124,11 +124,13 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
             FROM user_franchise_stats ufs INNER JOIN users u ON ufs.user_id = u.id
             WHERE ufs.franchise_id = :franchise_id
             AND ufs.games_played > 0
-            ORDER BY {$col} {$order}
+            AND ufs.games_won >= :min_wins
+            ORDER BY {$col} {$order}, ufs.games_won DESC, u.username ASC
             LIMIT :limit
         ");
         
         $stmt->bindValue(':franchise_id', $franchiseId, \PDO::PARAM_INT);
+        $stmt->bindValue(':min_wins', (int)$metricConfig['min_wins'], \PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
 
@@ -149,10 +151,12 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
             INNER JOIN users u ON ufs.user_id = u.id
             GROUP BY ufs.user_id, u.username, u.user_icon_url
             HAVING SUM(ufs.games_played) > 0
-            ORDER BY {$col} {$order}
+            AND SUM(ufs.games_won) >= :min_wins
+            ORDER BY {$col} {$order}, ufs.games_won DESC, u.username ASC
             LIMIT :limit
         ");
 
+        $stmt->bindValue(':min_wins', (int)$metricConfig['min_wins'], \PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
 

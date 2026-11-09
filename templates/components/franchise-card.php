@@ -5,18 +5,23 @@
  */
 ?>
 
+<?php
+    $isActive = $franchise->getIsActive();
+    $name = htmlspecialchars($franchise->getName());
+?>
+
 <div 
-    class="franchise-card section-card" 
+    class="franchise-card section-card <?= $isActive ? '' : 'is-disabled' ?>" 
     data-id="<?= $franchise->getId() ?>" 
-    data-name="<?= strtolower($franchise->getName()) ?>"
-    aria-label="Franchise: <?= htmlspecialchars($franchise->getName()) ?>"
+    data-name="<?= strtolower($name) ?>"
+    aria-label="Franchise: <?= $name ?> <?= $isActive ? '' : '(currently unavailable)' ?>"
 >
     
     <div class="card-banner" style="background-image: url('<?= BASE_URL ?>/assets/img/backgrounds/<?= $franchise->getBgImageUrl() ?>');">
         <button 
             class="btn-favourite <?= $isFavourite ? 'is-favorite' : '' ?>"
             data-id="<?= $franchise->getId() ?>"
-            aria-label="Add <?= htmlspecialchars($franchise->getName()) ?> to favourites"
+            aria-label="Add <?= $name ?> to favourites"
             aria-pressed="<?= $isFavourite ? 'true' : 'false' ?>"
         >
             <span aria-hidden="true">
@@ -31,16 +36,22 @@
             <img src="<?= BASE_URL ?>/assets/img/games_icons/<?= $franchise->getIconUrl() ?>" alt="">
         </div>
         
-        <h3 class="franchise-title"><?= htmlspecialchars($franchise->getName()) ?></h3>
+        <h3 class="franchise-title"><?= $name ?></h3>
         
-        <a 
-            href="<?= BASE_URL ?>/play/<?= $franchise->getSlug() ?>" 
-            class="btn-play"
-            aria-label="Play <?= htmlspecialchars($franchise->getName()) ?>"
-        >
-            <span>PLAY</span>
-            <span class="btn-arrow" aria-hidden="true">→</span>
-        </a>
+        <?php if ($isActive) : ?>
+            <a 
+                href="<?= BASE_URL ?>/play/<?= htmlspecialchars($franchise->getSlug()) ?>" 
+                class="btn-play"
+                aria-label="Play <?= $name ?>"
+            >
+                <span>PLAY</span>
+                <span class="btn-arrow" aria-hidden="true">→</span>
+            </a>
+        <?php else: ?>
+            <span class="btn-play is-disabled" role="note" aria-disabled="true">
+                Currently unavailable
+            </span>
+        <?php endif; ?>
     </div>
 
 </div>

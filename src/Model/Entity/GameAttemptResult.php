@@ -2,7 +2,7 @@
 
 namespace App\Model\Entity;
 
-//use LDAP\Result;
+use App\Model\Enum\ResultStatus;
 
 final class GameAttemptResult {
     public function __construct(
@@ -27,18 +27,4 @@ final class GameAttemptResult {
     public function getResultStatus() : ResultStatus {
         return $this->resultStatus;
     }
-    
-    /*
-    public function isCorrect() : bool {
-        return $this->resultStatus === ResultStatus::Correct;
-    }
-
-    public function isPartial() : bool {
-        return $this->resulStatus === ResultStatus::Partial;
-    }
-
-    public function isWrong() : bool {
-        return $this->resultStatus === ResultStatus::Wrong;
-    }
-    */
 }

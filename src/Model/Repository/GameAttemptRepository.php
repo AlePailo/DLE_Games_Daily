@@ -3,7 +3,7 @@
 namespace App\Model\Repository;
 
 use App\Model\Entity\GameAttempt;
-use App\Model\Entity\ResultStatus;
+use App\Model\Enum\ResultStatus;
 
 class GameAttemptRepository implements IGameAttemptRepository {
     public function __construct(

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace App\Model\Entity;
+namespace App\Model\Enum;
 
 enum ResultStatus : string {
     case CORRECT = "Correct";

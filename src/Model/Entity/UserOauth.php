@@ -2,6 +2,8 @@
 
 namespace App\Model\Entity;
 
+use App\Model\Enum\Provider;
+
 final class UserOauth {
     public function __construct(
         private int $id,

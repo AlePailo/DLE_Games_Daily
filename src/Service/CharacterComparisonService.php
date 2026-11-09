@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Model\Entity\Character;
-use App\Model\Entity\ResultStatus;
+use App\Model\Enum\ResultStatus;
 
 class CharacterComparisonService {
     public function compare(Character $guessed, Character $solution) : array {

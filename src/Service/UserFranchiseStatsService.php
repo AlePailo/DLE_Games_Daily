@@ -64,22 +64,20 @@ class UserFranchiseStatsService {
         );
     }
 
+    private const MIN_WINS_FOR_AVERAGE = 3;
+
     private const LEADERBOARD_METRICS = [
-        'avg_attempts' => ['column' => 'avg_attempts', 'order' => 'ASC'],
-        'max_streak'   => ['column' => 'max_streak',   'order' => 'DESC'],
-        'games_played' => ['column' => 'games_played', 'order' => 'DESC'],
+        'avg_attempts' => ['column' => 'avg_attempts', 'order' => 'ASC', 'min_wins' => self::MIN_WINS_FOR_AVERAGE],
+        'max_streak'   => ['column' => 'max_streak',   'order' => 'DESC', 'min_wins' => 1],
+        'games_played' => ['column' => 'games_played', 'order' => 'DESC', 'min_wins' => 1],
     ];
 
     public function getLeaderboard(string $franchise, string $metric, int $limit = 10) : array {
         $metric = $this->resolveMetric($metric);
-        
-        if (!array_key_exists($metric, self::LEADERBOARD_METRICS)) {
-            $metric = 'avg_attempts';
-        }
 
-        $rows = ($franchise === 'global' || !is_numeric($franchise))
-            ? $this->getGlobalLeaderboard($metric, $limit)
-            : $this->getLeaderboardByFranchise((int)$franchise, $metric, $limit);
+        $rows = ctype_digit($franchise)
+            ? $this->getLeaderboardByFranchise((int)$franchise, $metric, $limit)
+            : $this->getGlobalLeaderboard($metric, $limit);
 
         return array_map(fn($row) => [
             'username'      => $row['username'],

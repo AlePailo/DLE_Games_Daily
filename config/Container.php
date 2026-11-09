@@ -22,6 +22,7 @@ use App\Model\Repository\IUserRepository;
 use App\Model\Repository\UserFavouritesRepository;
 use App\Model\Repository\UserFranchiseStatsRepository;
 use App\Service\CharacterComparisonService;
+use App\Service\DailyChallengeService;
 use App\Service\GameService;
 use App\Service\GameSessionService;
 use App\Service\ProfileService;
@@ -63,5 +64,6 @@ return [
     GameSessionService::class           => \DI\autowire(GameSessionService::class),
     CharacterComparisonService::class   => \DI\autowire(CharacterComparisonService::class),
     ProfileService::class               => \DI\autowire(ProfileService::class),
-    UserFranchiseStatsService::class    => \DI\autowire(UserFranchiseStatsService::class)
+    UserFranchiseStatsService::class    => \DI\autowire(UserFranchiseStatsService::class),
+    DailyChallengeService::class        => \DI\autowire(DailyChallengeService::class)
 ];

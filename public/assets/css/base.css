@@ -256,7 +256,7 @@ section {
 
 
 
-/* Non supported browsers basic styling */
+/* Non supported browsers basic styling fallback*/
 
 .franchise-select {
     color-scheme: dark;

@@ -152,3 +152,33 @@
 .btn-play:hover .btn-arrow {
     transform: translateX(4px);
 }
+
+
+
+.franchise-card.is-disabled:hover {
+    transform: none;
+    border-color: var(--black-tertiary);
+    box-shadow: none;
+}
+
+.franchise-card.is-disabled .card-banner::after {
+    background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: grayscale(1);
+    backdrop-filter: grayscale(1);
+}
+
+.franchise-card.is-disabled .card-icon-wrapper img {
+    backdrop-filter: grayscale(1);
+}
+
+.franchise-card.is-disabled .franchise-title {
+    color: var(--text-muted);
+}
+
+.btn-play.is-disabled
+.btn-play.is-disabled:hover {
+    background-color: transparent;
+    border-style: dashed;
+    color: var(--text-muted);
+    cursor: not-allowed;
+}

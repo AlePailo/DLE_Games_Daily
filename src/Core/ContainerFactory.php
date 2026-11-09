@@ -4,7 +4,7 @@ namespace App\Core;
 
 class ContainerFactory {
     public static function build() : \DI\Container {
-        $definitions = require BASE_PATH . 'config/container.php';
+        $definitions = require BASE_PATH . 'config/Container.php';
         return (new \DI\ContainerBuilder())
             ->addDefinitions($definitions)
             ->build();
