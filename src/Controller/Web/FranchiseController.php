@@ -11,7 +11,7 @@ class FranchiseController extends WebController {
     public function __construct(
         private IFranchiseRepository $franchises,
         private IUserFavouritesRepository $userFavourites,
-        protected SessionManager $sessionManager
+        SessionManager $sessionManager
     ) {
         parent::__construct($sessionManager);
     }

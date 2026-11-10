@@ -13,7 +13,6 @@ abstract class BaseController {
         }
     }
 
-    /*
     public function validateCsrfToken() : void {
         $submittedToken = $_POST['csrf_token']
             ?? $_SERVER['HTTP_X_CSRF_TOKEN']
@@ -21,40 +20,12 @@ abstract class BaseController {
 
         $savedToken = $this->sessionManager->getCsrfToken();
 
-        // Return if token is valid
+        // Check if token is valid
         if(!empty($savedToken) && hash_equals($savedToken, $submittedToken)) {
             return;
         }
         
-        $isAjax = !empty($_SERVER['HTTP_X_CSRF_TOKEN']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'));
-
-        if($isAjax) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Invalid CSRF Token. Request denied']);
-            exit;
-        }
-
-        $this->sessionManager->setFlash('error', 'Invalid or expired session. Try again.');
-
-        $referer = $_SERVER['HTTP_REFERER'] ?? BASE_URL;
-        header("Location: " . $referer);
-        exit;
-    }
-    */
-
-    public function validateCsrfToken() : void {
-        $submittedToken = $_POST['csrf_token']
-            ?? $_SERVER['HTTP_X_CSRF_TOKEN']
-            ?? '';
-
-        $savedToken = $this->sessionManager->getCsrfToken();
-
-        // Se il token è valido, tutto ok
-        if(!empty($savedToken) && hash_equals($savedToken, $submittedToken)) {
-            return;
-        }
-        
-        // Controlla se è AJAX O se la rotta inizia per /api/
+        // Check if it's AJAX or route starts with /api/
         $uri = $_SERVER['REQUEST_URI'] ?? '';
         $isApiRoute = str_contains($uri, '/api/');
         $isAjax = $isApiRoute 

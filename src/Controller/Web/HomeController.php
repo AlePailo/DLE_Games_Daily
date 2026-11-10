@@ -9,7 +9,7 @@ use App\Model\Repository\IFranchiseRepository;
 class HomeController extends WebController {
     public function __construct(
         private IFranchiseRepository $franchiseRepo,
-        protected SessionManager $sessionManager
+        SessionManager $sessionManager
     ) {
         parent::__construct($sessionManager);
     }

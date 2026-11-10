@@ -5,16 +5,12 @@ namespace App\Service;
 use App\Model\DTO\CompletedGameData;
 use App\Model\DTO\GameContext;
 use App\Model\Repository\ICharacterRepository;
-//use App\Model\Repository\IDailyChallengeRepository;
-use App\Service\DailyChallengeService;
 use App\Model\Repository\IFranchiseRepository;
 use App\Model\Repository\IGameAttemptRepository;
-use App\Model\Repository\IUserFranchiseStatsRepository;
 
 class GameService {
     public function __construct(
         private IFranchiseRepository $franchiseRepository,
-        //private IDailyChallengeRepository $dailyChallengeRepository,
         private DailyChallengeService $dailyChallengeService,
         private GameSessionService $gameSessionService,
         private ICharacterRepository $characterRepository,
@@ -27,7 +23,6 @@ class GameService {
         $franchise = $this->franchiseRepository->findBySlugWithAttributes($slug);
         if($franchise === null) return new GameContext(null, null, null);
 
-        //$dailyChallenge = $this->dailyChallengeRepository->findByFranchiseAndDate($franchise->getId(), new \DateTimeImmutable());
         $dailyChallenge = $this->dailyChallengeService->getForDate($franchise->getId(), new \DateTimeImmutable());
         if($dailyChallenge === null) return new GameContext($franchise, null, null);
 
@@ -155,18 +150,4 @@ class GameService {
             'completed_data' => new CompletedGameData($correctChar, $stats)
         ];
     }
-
-    /*
-    private function buildUserStatsData(int $userId, int $franchiseId) : ?UserStatsData {
-        $stats = $this->statsRepository->findByUserAndFranchise($userId, $franchiseId);
-        if($stats === null) return null;
-
-        return new UserStatsData(
-            gamesPlayed: $stats->getGamesPlayed(),
-            winRate: $stats->getCompletionRate(),
-            currentStreak: $stats->getCurrentStreak(),
-            maxStreak: $stats->getMaxStreak()
-        );
-    }
-    */
 }

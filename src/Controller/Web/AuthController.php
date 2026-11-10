@@ -11,7 +11,7 @@ use App\Service\GameSessionService;
 class AuthController extends WebController {
     public function __construct(
         private AuthService $authService,
-        protected SessionManager $sessionManager,
+        SessionManager $sessionManager,
         private GameSessionService $gameSessionService
     ) {
         parent::__construct($sessionManager);

@@ -9,7 +9,7 @@ use App\Service\UserFranchiseStatsService;
 
 class LeaderboardsController extends WebController {
     public function __construct(
-        protected SessionManager $sessionManager,
+        SessionManager $sessionManager,
         private UserFranchiseStatsService $statsService,
         private FranchiseRepository $franchiseRepository
     ) {

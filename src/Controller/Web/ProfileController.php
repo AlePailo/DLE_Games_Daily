@@ -12,7 +12,7 @@ use App\Service\UserFranchiseStatsService;
 
 class ProfileController extends WebController {
     public function __construct(
-        protected SessionManager $sessionManager,
+        SessionManager $sessionManager,
         private ProfileService $profileService,
         private UserFranchiseStatsService $statsService,
         private AuthService $authService,

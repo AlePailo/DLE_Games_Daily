@@ -2,14 +2,7 @@
 
 namespace App\Controller;
 
-use App\Core\SessionManager;
-
 class ApiController extends BaseController {
-    public function __construct(
-        protected SessionManager $sessionManager
-    ) {
-        parent::__construct($sessionManager);
-    }
 
     protected function renderJson(mixed $data, int $status = 200) : void {
         if (ob_get_length()) { ob_clean(); }
@@ -33,18 +26,16 @@ class ApiController extends BaseController {
     }
 
     protected function getJsonBody() : array {
-    // 1. Leggiamo il testo grezzo e puliamo eventuali spazi bianchi
         $rawInput = trim(file_get_contents('php://input'));
         
-        // 2. Se è vuoto, evitiamo di darlo in pasto a json_decode e ritorniamo subito un array vuoto
         if (empty($rawInput)) {
             return [];
         }
 
-        // 3. Decodifichiamo. Il secondo parametro 'true' costringe PHP a trasformarlo in array associativo
+        // If input is not empty transorm json in an associative array
         $data = json_decode($rawInput, true);
 
-        // 4. Cintura di sicurezza: se json_decode fallisce (ritorna null), restituiamo comunque un array
+        // If decode fails (returns null), return an array anyway
         return is_array($data) ? $data : [];
     }
 

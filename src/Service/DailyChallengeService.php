@@ -27,7 +27,7 @@ class DailyChallengeService {
 
     public function ensureForDate(int $franchiseId, \DateTimeImmutable $date) : ?DailyChallenge {
         $existing = $this->dailyChallengeRepository->findByFranchiseAndDate($franchiseId, $date);
-        if($existing != null) {
+        if($existing !== null) {
             return $existing;
         }
 

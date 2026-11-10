@@ -8,7 +8,7 @@ use App\Service\GameService;
 
 class GameController extends WebController {
     public function __construct(
-        protected SessionManager $sessionManager,
+        SessionManager $sessionManager,
         private GameService $gameService
     ) {
         parent::__construct($sessionManager);
@@ -30,7 +30,7 @@ class GameController extends WebController {
             $this->render('game_unavailable', [
                 'title'     => "{$context->franchise->getName()} | DLE Games Daily",
                 'css'       => ['game.css'],
-                'js'        => ['game.js'],
+                'js'        => [],
                 'franchise' => $context->franchise
             ]);
             return;

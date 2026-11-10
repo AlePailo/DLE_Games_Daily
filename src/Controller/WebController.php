@@ -3,14 +3,8 @@
 namespace App\Controller;
 
 use App\View\View;
-use App\Core\SessionManager;
 
 class WebController extends BaseController {
-    public function __construct(
-        protected SessionManager $sessionManager
-    ) {
-        parent::__construct($sessionManager);
-    }
 
     protected function render(string $template, array $data = [], bool $requiresNav = true) : void {
         
@@ -33,11 +27,10 @@ class WebController extends BaseController {
         if($requiresNav) {
             $defaultCss[] = 'layout/navigation.css';
         }
-        $data['css'] = array_merge($defaultCss, $data['css']) ?? [];
+        $data['css'] = array_values(array_unique([...$defaultCss, ...($data['css'] ?? [])]));
 
         // JS
-        $defaultJs = ['base.js'];
-        $data['js'] = array_merge($defaultJs, $data['js']) ?? [];
+        $data['js'] = array_values(array_unique(['base.js', ...($data['js'] ?? [])]));
 
         // Final merge
         $data = array_merge(
