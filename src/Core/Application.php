@@ -2,9 +2,10 @@
 
 namespace App\Core;
 
+use App\Controller\Web\ErrorController;
+use App\Exception\NotFoundException;
 use App\Service\AuthService;
 use Dotenv\Dotenv;
-use App\View\View;
 
 class Application {
     public static function run() : void {
@@ -25,7 +26,16 @@ class Application {
         $dispatcher = \FastRoute\simpleDispatcher($routes);
 
         $router = new Router($container, $dispatcher);
-        $router->dispatch();
+        
+        try {
+            $router->dispatch();
+        } catch(NotFoundException) {
+            if(self::isApiRequest()) {
+                self::respondJsonError(404, 'Not Found');
+            } else {
+                $container->get(ErrorController::class)->notFound();
+            }
+        }
     }
 
     private static function guardRoutes(?object $currentUser) : void {
@@ -45,45 +55,41 @@ class Application {
 
     /* ----- Handles errors and exceptions that are not handled already somewhere else ----- */
     private static function registerErrorHandlers() : void {
-        set_exception_handler(function (\Throwable $e) {
-            if ($e instanceof \App\Exception\NotFoundException) {
-                http_response_code(404);
-                if ($_ENV['APP_ENV'] === 'development') {
-                    echo '<pre>404: ' . $e->getMessage() . '</pre>';
-                    return;
-                }
-                \App\View\View::render('errors/404', [
-                    'title'      => 'Page not found | DLE Games Daily',
-                    'isLoggedIn' => !empty($_SESSION['user_id']),
-                    'css'        => [],
-                    'js'         => []
-                ]);
-                return;
-            }
+        $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
 
-            if ($e instanceof \App\Exception\DatabaseException) {
-                error_log($e->getMessage());
-                http_response_code(500);
-                if ($_ENV['APP_ENV'] === 'development') {
-                    echo '<pre>' . $e->getMessage() . "\n" . $e->getTraceAsString() . '</pre>';
-                } else {
-                    View::render('errors/500', [], false);
-                }
-                return;
-            }
-
-            // Default case
+        set_exception_handler(function (\Throwable $e) use ($isDev) {
+            error_log((string) $e);
             http_response_code(500);
-            if($_ENV['APP_ENV'] === 'development') {
-                echo '<pre>' . $e->getMessage() . "\n" . $e->getTraceAsString() . '</pre>';
-            } else {
-                View::render('errors/500', []);
+
+            if ($isDev) {
+                echo '<pre>' . htmlspecialchars($e->getMessage() . "\n" . $e->getTraceAsString()) . '</pre>';
+                return;
             }
+
+            if (self::isApiRequest()) {
+                self::respondJsonError(500, 'Internal server error');
+                return;
+            }
+
+            require BASE_PATH . 'templates/errors/500.php';
         });
 
         //Converts PHP errors in Exceptions
         set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) {
-            throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
+            if (!(error_reporting() & $errno)) {
+                return false;
+            }
+            throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
         });
+    }
+
+    private static function isApiRequest() : bool {
+        return str_contains((string) strtok($_SERVER['REQUEST_URI'] ?? '/', '?'), '/api/');
+    }
+
+    private static function respondJsonError(int $status, string $message) : void {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
     }
 }

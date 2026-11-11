@@ -26,8 +26,8 @@ return function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/resend-verification', [AuthController::class, 'resendVerification']);
 
     /*
-    $r->addRoute('GET', '/check/username', [AuthController::class, 'checkUsername']);
-    $r->addRoute('GET', '/check/email', [AuthController::class, 'checkEmail']);
+    $r->addRoute('GET', '/api/check/username', [AuthController::class, 'checkUsername']);
+    $r->addRoute('GET', '/api/check/email', [AuthController::class, 'checkEmail']);
     */
 
     $r->addRoute('GET', '/api/leaderboards', [LeaderboardsApiController::class, 'fetch']);
