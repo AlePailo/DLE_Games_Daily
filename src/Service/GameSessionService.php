@@ -31,10 +31,6 @@ class GameSessionService {
         return $this->gameSessionRepository->findById($id);
     }
 
-    public function migrateGuestSessions(string $guestToken, int $userId): void {
-        $this->gameSessionRepository->migrateGuestSessions($guestToken, $userId);
-    }
-
     public function registerAttempt(int $sessionId, int $franchiseId, int $guessedCharacterId, int $attemptNumber, array $comparedResults, bool $solved) : void {
         try {
             $this->pdo->beginTransaction();
@@ -87,9 +83,5 @@ class GameSessionService {
         }
 
         return null;
-    }
-
-    public function hasSessionsToMigrate(string $guestToken) : bool {
-        return count($this->gameSessionRepository->findCompletedByGuestToken($guestToken)) > 0;
     }
 }

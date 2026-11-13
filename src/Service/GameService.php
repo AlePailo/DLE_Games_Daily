@@ -109,7 +109,8 @@ class GameService {
                     $userId,
                     $franchise->getId(),
                     $attemptNumber,
-                    true
+                    true,
+                    $context->dailyChallenge->getChallengeDate()
                 );
             }
 
@@ -135,7 +136,8 @@ class GameService {
                 $userId,
                 $franchise->getId(),
                 $gameSession->getAttemptsCount(),
-                false
+                false,
+                $dailyChallenge->getChallengeDate()
             );
         }
 

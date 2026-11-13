@@ -25,6 +25,7 @@ use App\Service\CharacterComparisonService;
 use App\Service\DailyChallengeService;
 use App\Service\GameService;
 use App\Service\GameSessionService;
+use App\Service\GuestDataMigrationService;
 use App\Service\ProfileService;
 use App\Service\UserFranchiseStatsService;
 
@@ -65,5 +66,6 @@ return [
     CharacterComparisonService::class   => \DI\autowire(CharacterComparisonService::class),
     ProfileService::class               => \DI\autowire(ProfileService::class),
     UserFranchiseStatsService::class    => \DI\autowire(UserFranchiseStatsService::class),
-    DailyChallengeService::class        => \DI\autowire(DailyChallengeService::class)
+    DailyChallengeService::class        => \DI\autowire(DailyChallengeService::class),
+    GuestDataMigrationService::class    => \DI\autowire(GuestDataMigrationService::class)
 ];

@@ -11,8 +11,8 @@ class UserFranchiseStatsService {
         private IUserFranchiseStatsRepository $statsRepository
     ){}
 
-    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved): UserFranchiseStats {
-        return $this->statsRepository->upsertOnGameCompletion($userId, $franchiseId, $attempts, $solved);
+    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved, \DateTimeImmutable $challengeDate): UserFranchiseStats {
+        return $this->statsRepository->upsertOnGameCompletion($userId, $franchiseId, $attempts, $solved, $challengeDate);
     }
 
     public function getAggregatedStatsByUser(int $userId) : array {
@@ -47,10 +47,6 @@ class UserFranchiseStatsService {
         return $this->statsRepository->findAllByUser($userId);
     }
 
-    public function insertFromMigratedSessions(int $userId): void {
-        $this->statsRepository->insertFromMigratedSessions($userId);
-    }
-
     public function buildUserStatsData(int $userId, int $franchiseId): ?UserStatsData {
         $stats = $this->statsRepository->findByUserAndFranchise($userId, $franchiseId);
         if ($stats === null) return null;
@@ -58,7 +54,7 @@ class UserFranchiseStatsService {
         return new UserStatsData(
             gamesPlayed:   $stats->getGamesPlayed(),
             avgAttempts:   $stats->getAvgAttempts(),
-            currentStreak: $stats->getCurrentStreak(),
+            currentStreak: $stats->getEffectiveStreak(new \DateTimeImmutable('today')),
             maxStreak:     $stats->getMaxStreak(),
             surrenders:    $stats->getSurrenders()
         );

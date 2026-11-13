@@ -9,35 +9,21 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         private \PDO $pdo
     ) {}
 
-    public function insertFromMigratedSessions(int $userId): void
-    {
-        $stmt = $this->pdo->prepare("INSERT INTO user_franchise_stats(user_id, franchise_id, games_played, games_won, current_streak, max_streak, avg_attempts)
-            SELECT gs.user_id, dc.franchise_id, COUNT(*) AS games_played, SUM(gs.solved) AS games_won, 1 AS current_streak, 1 AS max_streak, AVG(gs.attempts_count) AS avg_attempts 
-            FROM game_sessions gs INNER JOIN daily_challenges dc ON gs.challenge_id = dc.id
-            WHERE gs.user_id = :user_id
-            AND gs.solved = 1
-            AND DATE(gs.created_at) = CURDATE()
-            GROUP BY dc.franchise_id");
-        $stmt->execute(['user_id' => $userId]);
-    }
-
-    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved): UserFranchiseStats
+    public function upsertOnGameCompletion(int $userId, int $franchiseId, int $attempts, bool $solved, \DateTimeImmutable $challengeDate): UserFranchiseStats
     {
         
         $current = $this->findByUserAndFranchise($userId, $franchiseId);
 
         if($current === null) {
             $current = new UserFranchiseStats(id: 0, userId: $userId, franchiseId: $franchiseId, gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0, avgAttempts: 0.0,
-                updatedAt: new \DateTimeImmutable());
+                lastWinDate: null, updatedAt: new \DateTimeImmutable());
         }
 
-        $wonYesterday = $this->wonYesterday($userId, $franchiseId);
-
-        $current->updateStats($solved, $attempts, $wonYesterday);
+        $current->updateStats($solved, $attempts, $challengeDate);
 
         if($current->getId() === 0) {
-            $stmt = $this->pdo->prepare("INSERT INTO user_franchise_stats(user_id, franchise_id, games_played, games_won, current_streak, max_streak, avg_attempts) 
-                VALUES (:user_id, :franchise_id, :games_played, :games_won, :current_streak, :max_streak, :avg_attempts)"
+            $stmt = $this->pdo->prepare("INSERT INTO user_franchise_stats(user_id, franchise_id, games_played, games_won, current_streak, max_streak, avg_attempts, last_win_date)
+                VALUES (:user_id, :franchise_id, :games_played, :games_won, :current_streak, :max_streak, :avg_attempts, :last_win_date)"
             );
         } else {
             $stmt = $this->pdo->prepare("UPDATE user_franchise_stats SET
@@ -46,6 +32,7 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
                 current_streak = :current_streak,
                 max_streak = :max_streak,
                 avg_attempts = :avg_attempts,
+                last_win_date = :last_win_date,
                 updated_at = NOW()
                 WHERE id = :id"
             );
@@ -57,6 +44,7 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
             'current_streak' => $current->getCurrentStreak(),
             'max_streak'     => $current->getMaxStreak(),
             'avg_attempts'   => $current->getAvgAttempts(),
+            'last_win_date'  => $current->getLastWinDate()?->format('Y-m-d')
         ];
 
         if($current->getId() === 0) {
@@ -69,17 +57,6 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
         $stmt->execute($payload);
 
         return $current;
-    }
-
-    private function wonYesterday(int $userId, int $franchiseId) : bool {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) 
-            FROM game_sessions gs INNER JOIN daily_challenges dc ON gs.challenge_id = dc.id 
-            WHERE gs.user_id = :user_id
-            AND dc.franchise_id = :franchise_id
-            AND gs.solved = 1
-            AND DATE(gs.created_at) = CURDATE() - INTERVAL 1 DAY");
-        $stmt->execute(['user_id' => $userId, 'franchise_id' => $franchiseId]);
-        return (bool)$stmt->fetchColumn();
     }
 
     public function findByUserAndFranchise(int $userId, int $franchiseId): ?UserFranchiseStats
@@ -173,6 +150,7 @@ class UserFranchiseStatsRepository implements IUserFranchiseStatsRepository {
             currentStreak: (int)$row['current_streak'],
             maxStreak: (int)$row['max_streak'],
             avgAttempts: (float)$row['avg_attempts'],
+            lastWinDate: isset($row['last_win_date']) ? new \DateTimeImmutable($row['last_win_date']) : null,
             updatedAt: new \DateTimeImmutable($row['updated_at'])
         );
     }

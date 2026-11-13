@@ -35,24 +35,11 @@ class GameSessionRepository implements IGameSessionRepository {
         return $res ? $this->mapGameSession($res) : null;
     }
 
-    public function findCompletedByGuestToken(string $guestToken): array
-    {
-        $stmt = $this->pdo->prepare("SELECT gs.*, dc.franchise_id FROM game_sessions gs INNER JOIN daily_challenges dc ON gs.challenge_id = dc.id WHERE guest_token = :guest_token AND gs.solved = 1 AND DATE(gs.created_at) = CURDATE()");
-        $stmt->execute(['guest_token' => $guestToken]);
-        return array_map(fn($row) => $this->mapGameSession($row), $stmt->fetchAll());
-    }
-
     public function create(array $data) : int {
         $stmt = $this->pdo->prepare("INSERT INTO game_sessions(user_id, guest_token, challenge_id, attempts_count, solved) VALUES (:user_id, :guest_token, :challenge_id, 0, 0)");
         $stmt->execute(['user_id' => $data['user_id'] ?? null, 'guest_token' => $data['guest_token'] ?? null, 'challenge_id' => $data['challenge_id']]);
 
         return (int)$this->pdo->lastInsertId();
-    }
-
-    public function migrateGuestSessions(string $guestToken, int $userId): void
-    {
-        $stmt = $this->pdo->prepare("UPDATE game_sessions SET user_id = :user_id, guest_token = null WHERE guest_token = :guest_token AND DATE(created_at) = CURDATE()");
-        $stmt->execute(['user_id' => $userId, 'guest_token' => $guestToken]);        
     }
 
     public function updateSessionState(int $id, bool $solved) : void
@@ -68,6 +55,35 @@ class GameSessionRepository implements IGameSessionRepository {
     public function markAsCompleted(int $id) : void {
         $stmt = $this->pdo->prepare("UPDATE game_sessions SET completed_at = NOW() WHERE id = :id");
         $stmt->execute(['id' => $id]);
+    }
+
+    public function findMigratable(string $guestToken, int $userId, \DateTimeImmutable $today) : array {
+        $stmt = $this->pdo->prepare("SELECT gs.id, gs.challenge_id, gs.attempts_count, gs.solved, gs.completed_at IS NOT NULL AS is_completed, dc.franchise_id, dc.challenge_date
+            FROM game_sessions gs INNER JOIN daily_challenges dc ON gs.challenge_id = dc.id
+            WHERE gs.guest_token = :guest_token
+                AND dc.challenge_date = :today
+                AND NOT EXISTS (
+                    SELECT 1 FROM game_sessions mine
+                    WHERE mine.user_id = :user_id AND mine.challenge_id = gs.challenge_id
+                )
+            ORDER BY gs.id");
+        $stmt->execute([
+            'guest_token' => $guestToken,
+            'today' => $today->format('Y-m-d'),
+            'user_id' => $userId
+        ]);
+
+        return $stmt->fetchAll();
+    }
+
+    public function assignToUser(array $sessionIds, int $userId) : void {
+        if($sessionIds === []) {
+            return;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($sessionIds), '?'));
+        $stmt = $this->pdo->prepare("UPDATE game_sessions SET user_id = ?, guest_token = NULL WHERE id IN ($placeholders)");
+        $stmt->execute([$userId, ...$sessionIds]);
     }
 
 

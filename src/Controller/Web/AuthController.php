@@ -6,13 +6,13 @@ use App\Controller\WebController;
 use App\Service\AuthService;
 use App\Core\SessionManager;
 use App\Exception\AuthException;
-use App\Service\GameSessionService;
+use App\Service\GuestDataMigrationService;
 
 class AuthController extends WebController {
     public function __construct(
         private AuthService $authService,
-        SessionManager $sessionManager,
-        private GameSessionService $gameSessionService
+        private GuestDataMigrationService $guestDataMigrationService,
+        SessionManager $sessionManager
     ) {
         parent::__construct($sessionManager);
     }
@@ -42,6 +42,7 @@ class AuthController extends WebController {
         try {
             $user = $this->authService->loginLocal($email, $password);
             $this->authService->createSessionForUser($user, $remember);
+            $this->adoptGuestProgress($user->getId());
             $this->redirect('');
         } catch(AuthException $e) {
             if ($e->getCode() === AuthException::EMAIL_NOT_VERIFIED) {
@@ -99,17 +100,8 @@ class AuthController extends WebController {
         }
 
         try {
-            $guestToken = $this->sessionManager->getGuestToken();
             $user = $this->authService->registerLocalUser($username, $email, $password);
-
-            if($guestToken !== null && $this->gameSessionService->hasSessionsToMigrate($guestToken)) {
-                try {
-                    $this->authService->migrateGuestData($guestToken, $user->getId());
-                    $this->sessionManager->clearGuestToken();
-                } catch(\Exception $e) {
-                    error_log('Guest session migration failed: ' . $e->getMessage());
-                }
-            }
+            $this->adoptGuestProgress($user->getId());
 
             $this->sessionManager->setFlash('success', 'Registration completed! Check your email box.');
             $this->redirect('login');
@@ -170,6 +162,20 @@ class AuthController extends WebController {
         $this->validateCsrfToken();
         $this->authService->logout();
         $this->redirect('login');
+    }
+
+    public function adoptGuestProgress(int $userId) : void {
+        $guestToken = $this->sessionManager->getGuestToken();
+        if($guestToken === null) {
+            return;
+        }
+
+        try {
+            $this->guestDataMigrationService->migrate($guestToken, $userId);
+            $this->sessionManager->clearGuestToken();
+        } catch (\Throwable $e) {
+            error_log('Guest data migration failed: ' . $e);
+        }
     }
 
     private function renderAuthForm(string $view, string $title, array $css = ['auth.css'], array $js = ['formHandler.js']) : void {

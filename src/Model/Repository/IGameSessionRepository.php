@@ -10,17 +10,11 @@ interface IGameSessionRepository {
     public function findById(int $id) : ?GameSession;
     public function findByUserAndChallenge(int $userId, int $challengeId) : ?GameSession;
     public function findByGuestTokenAndChallenge(string $guestToken, int $challengeId) : ?GameSession;
-    public function findCompletedByGuestToken(string $guestToken) : array;
     public function create(array $data) : int;
-
-    public function migrateGuestSessions(string $guestToken, int $userId) : void;
-
-    /*
-    public function incrementAttempts(int $id) : void;
-    public function markAsSolved(int $id): void;
-    public function markAsCompleted(int $id) : void;
-    */
 
     public function updateSessionState(int $id, bool $solved) : void;
     public function markAsCompleted(int $id) : void;
+
+    public function findMigratable(string $guestToken, int $userId, \DateTimeImmutable $today) : array;
+    public function assignToUser(array $sessionIds, int $userId) : void;
 }

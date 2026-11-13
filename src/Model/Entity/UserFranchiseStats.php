@@ -12,6 +12,7 @@ final class UserFranchiseStats {
         private int $currentStreak,
         private int $maxStreak,
         private float $avgAttempts,
+        private ?\DateTimeImmutable $lastWinDate,
         private \DateTimeImmutable $updatedAt
     ) {}
 
@@ -64,7 +65,7 @@ final class UserFranchiseStats {
         return $this->gamesPlayed - $this->gamesWon;
     }
 
-    public function updateStats(bool $solved, int $attempts, bool $wonYesterday) : void {
+    public function updateStats(bool $solved, int $attempts, \DateTimeImmutable $challengeDate) : void {
         $this->gamesPlayed++;
 
         if(!$solved) {
@@ -72,6 +73,7 @@ final class UserFranchiseStats {
             return;
         }
 
+        /*
         if($wonYesterday) {
             $this->currentStreak++;
         } else {
@@ -85,5 +87,32 @@ final class UserFranchiseStats {
         $this->avgAttempts = (($this->avgAttempts * $this->gamesWon) + $attempts) / ($this->gamesWon + 1);
 
         $this->gamesWon++;
+        */
+
+        $continues = $this->lastWinDate !== null && $this->lastWinDate->format('Y-m-d') === $challengeDate->modify('-1 day')->format('Y-m-d');
+
+        $this->currentStreak = $continues ? $this->currentStreak + 1 : 1;
+
+        if($this->currentStreak > $this->maxStreak) {
+            $this->maxStreak = $this->currentStreak;
+        }
+
+        $this->avgAttempts = (($this->avgAttempts * $this->gamesWon) + $attempts) / ($this->gamesWon + 1);
+
+        $this->gamesWon++;
+        $this->lastWinDate = $challengeDate;
+    }
+
+    public function getLastWinDate() : ?\DateTimeImmutable {
+        return $this->lastWinDate;
+    }
+
+    public function getEffectiveStreak(\DateTimeImmutable $today) : int {
+        if($this->lastWinDate === null) {
+            return 0;
+        }
+
+        $limit = $today->modify('-1 day')->format('Y-m-d');
+        return $this->lastWinDate->format('Y-m-d') >= $limit ? $this->currentStreak : 0;
     }
 }

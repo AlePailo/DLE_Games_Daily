@@ -7,16 +7,12 @@ use App\Model\Repository\IUserRepository;
 use App\Core\SessionManager;
 use App\Core\Mailer;
 use App\Exception\AuthException;
-use App\Model\Repository\IGameSessionRepository;
 
 class AuthService {
     public function __construct(
         private \PDO $pdo,
-        private GameSessionService $gameSessionService,
-        private UserFranchiseStatsService $statsService,
         private IUserRepository $userRepository,
         private SessionManager $sessionManager,
-        private IGameSessionRepository $gameSessionRepository,
         private AvatarService $avatarService,
         private Mailer $mailer
     ) {}
@@ -222,23 +218,6 @@ class AuthService {
     }
 
 
-
-    // ----- Guest data migration -----
-
-    public function migrateGuestData(string $guestToken, int $userId): void {
-        try {
-            $this->pdo->beginTransaction();
-            $this->gameSessionService->migrateGuestSessions($guestToken, $userId);
-            $this->statsService->insertFromMigratedSessions($userId);
-            $this->pdo->commit();
-        } catch (\Exception $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
-    }
-
-
-
     // ----- Helpers -----
 
     public function usernameExists(string $username) : bool {
@@ -248,11 +227,5 @@ class AuthService {
 
     public function emailExists(string $email) : bool {
         return $this->userRepository->findByEmail($email) !== null;
-    }
-
-
-
-    public function hasSessionsToMigrate(string $guestToken) : bool {
-        return count($this->gameSessionRepository->findCompletedByGuestToken($guestToken)) > 0;
     }
 }

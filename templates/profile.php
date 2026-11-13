@@ -172,7 +172,7 @@ $defaultFranchise = $hasFranchiseStats ? array_key_first($franchise_stats) : nul
                             <span class="stat-label">Surrenders</span>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-value"><?= $value->getCurrentStreak() ?></span>
+                            <span class="stat-value"><?= $value->getEffectiveStreak(new \DateTimeImmutable('today')) ?></span>
                             <span class="stat-label">Current streak</span>
                         </div>
                         <div class="stat-card">
