@@ -13,15 +13,13 @@ readonly class GameContext {
         public ?GameSession $gameSession
     ) {}
 
-    public function isValid(): bool {
+    public function isValid() : bool {
         return $this->franchise !== null
-            && $this->dailyChallenge !== null
-            && $this->gameSession !== null;
+            && $this->dailyChallenge !== null;
     }
- 
-    public function isActive(): bool {
+
+    public function isPlayable() : bool {
         return $this->isValid()
-            && !$this->gameSession->isSolved()
-            && !$this->gameSession->isCompleted();
+            && !($this->gameSession?->isSolved() ?? false);
     }
 }

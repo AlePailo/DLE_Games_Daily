@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Exception\GameException;
 use App\Model\Entity\GameSession;
 use App\Model\Repository\IFranchiseRepository;
 use App\Model\Repository\IGameSessionRepository;
@@ -9,68 +10,48 @@ use App\Model\Repository\IGameAttemptRepository;
 
 class GameSessionService {
     public function __construct(
-        private \PDO $pdo,
         private IFranchiseRepository $franchiseRepository,
         private IGameSessionRepository $gameSessionRepository,
         private IGameAttemptRepository $gameAttemptRepository,
     ) {}
 
-    public function getOrCreateSession(int $challengeId, ?int $userId, ?string $guestToken) : GameSession {
-        $gameSession = $this->findSessionContext($challengeId, $userId, $guestToken);
+    public function lockOrCreateSession(?GameSession $known, ?int $userId, ?string $guestToken, int $challengeId) : GameSession {
+        $id = $known?->getId()
+            ?? $this->gameSessionRepository->createIfMissing($userId, $guestToken, $challengeId);
+        
+        $session = $this->gameSessionRepository->findByIdForUpdate($id);
     
-        if($gameSession !== null) {
-            return $gameSession;
+        if($session->getUserId() !== $userId || $session->getGuestToken() !== $guestToken) {
+            throw GameException::noIdentity();
         }
 
-        $id = $this->gameSessionRepository->create([
-            'user_id'      => $userId,
-            'guest_token'  => $guestToken,
-            'challenge_id' => $challengeId
-        ]);
-
-        return $this->gameSessionRepository->findById($id);
+        return $session;
     }
 
     public function registerAttempt(int $sessionId, int $franchiseId, int $guessedCharacterId, int $attemptNumber, array $comparedResults, bool $solved) : void {
-        try {
-            $this->pdo->beginTransaction();
+        $attributeDefsMap = $this->franchiseRepository->getAttributeDefinitionMapByFranchiseId($franchiseId);
 
-            $attributeDefsMap = $this->franchiseRepository->getAttributeDefinitionMapByFranchiseId($franchiseId);
+        $resultsWithIds = [];
+        foreach($comparedResults as $key => $attrData) {
+            if (isset($attributeDefsMap[$key])) {
+                $attrId = $attributeDefsMap[$key];
+                $rawStatus = $attrData['status'] ?? $attrData;
+                
+                $statusValue = $rawStatus instanceof \BackedEnum
+                    ? $rawStatus->value
+                    : $rawStatus;
 
-            $resultsWithIds = [];
-            foreach($comparedResults as $key => $attrData) {
-                if (isset($attributeDefsMap[$key])) {
-                    $attrId = $attributeDefsMap[$key];
-                    $rawStatus = $attrData['status'] ?? $attrData;
-                    
-                    $statusValue = $rawStatus instanceof \BackedEnum
-                        ? $rawStatus->value
-                        : $rawStatus;
-
-                    $resultsWithIds[$attrId] = $statusValue;
-                }
+                $resultsWithIds[$attrId] = $statusValue;
             }
-
-            $this->gameAttemptRepository->createWithResults($sessionId, $guessedCharacterId, $attemptNumber, $resultsWithIds);
-            $this->gameSessionRepository->updateSessionState($sessionId, $solved);
-            
-            $this->pdo->commit();
-        } catch(\Throwable $e) {
-            $this->pdo->rollBack();
-            throw $e;
         }
+
+        $this->gameAttemptRepository->createWithResults($sessionId, $guessedCharacterId, $attemptNumber, $resultsWithIds);
+        $this->gameSessionRepository->updateSessionState($sessionId, $solved);
     }
 
 
     public function surrender(int $sessionId) : void {
-        try {
-            $this->pdo->beginTransaction();
-            $this->gameSessionRepository->markAsCompleted($sessionId);
-            $this->pdo->commit();
-        } catch(\Throwable $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        $this->gameSessionRepository->markAsCompleted($sessionId);
     }
 
     public function findSessionContext(int $challengeId, ?int $userId, ?string $guestToken) : ?GameSession {

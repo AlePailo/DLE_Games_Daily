@@ -36,14 +36,22 @@ class CharacterRepository implements ICharacterRepository {
         return $res !== false ? (int)$res : null;
     }
 
-    public function findByIdWithAttributes(int $id) : ?Character {
-        $stmt = $this->pdo->prepare("SELECT c.id, c.name, c.image_url, ad.attribute_key, ca.value
-                                        FROM characters c
-                                        JOIN character_attributes ca ON ca.character_id = c.id
-                                        JOIN attribute_definitions ad ON ad.id = ca.attribute_definition_id
-                                        WHERE c.id = :id
-                                        ORDER BY ad.display_order");
-        $stmt->execute(['id' => $id]);
+    public function findByIdWithAttributes(int $id, ?int $franchiseId = null) : ?Character {
+        $sql = "SELECT c.id, c.name, c.image_url, ad.attribute_key, ca.value
+            FROM characters c
+            JOIN character_attributes ca ON ca.character_id = c.id
+            JOIN attribute_definitions ad ON ad.id = ca.attribute_definition_id
+            WHERE c.id = :id";
+        $params = ['id' => $id];
+
+        if($franchiseId !== null) {
+            $sql .= " AND c.franchise_id = :franchise_id";
+            $params['franchise_id'] = $franchiseId;
+        }
+
+        $stmt = $this->pdo->prepare($sql . " ORDER BY ad.display_order");
+        $stmt->execute($params);
+
         $rows = $stmt->fetchAll();
 
         if(empty($rows)) return null;
@@ -65,8 +73,8 @@ class CharacterRepository implements ICharacterRepository {
         ");
         $stmt->execute(['franchise_id' => $franchiseId]);
 
-        // fetchAll(PDO::FETCH_ASSOC) restituisce array associativi semplici.
-        // Usiamo array_values() per garantire indici [0, 1, 2...] -> Array JSON pulito []
+        // fetchAll(PDO::FETCH_ASSOC) returns simple associative arrays.
+        // array_values() is used to have numeric indexes [0, 1, 2...]
         return array_values($stmt->fetchAll(\PDO::FETCH_ASSOC));
     }
 

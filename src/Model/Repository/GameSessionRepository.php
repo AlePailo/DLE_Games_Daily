@@ -19,7 +19,7 @@ class GameSessionRepository implements IGameSessionRepository {
 
     public function findByUserAndChallenge(int $userId, int $challengeId): ?GameSession
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM game_sessions WHERE user_id = :user_id AND challenge_id = :challenge_id AND DATE(created_at) = CURDATE()");
+        $stmt = $this->pdo->prepare("SELECT * FROM game_sessions WHERE user_id = :user_id AND challenge_id = :challenge_id");
         $stmt->execute(['user_id' => $userId, 'challenge_id' => $challengeId]);
         $res = $stmt->fetch();
 
@@ -28,19 +28,30 @@ class GameSessionRepository implements IGameSessionRepository {
 
     public function findByGuestTokenAndChallenge(string $guestToken, int $challengeId): ?GameSession
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM game_sessions WHERE guest_token = :guest_token AND challenge_id = :challenge_id AND DATE(created_at) = CURDATE()");
+        $stmt = $this->pdo->prepare("SELECT * FROM game_sessions WHERE guest_token = :guest_token AND challenge_id = :challenge_id");
         $stmt->execute(['guest_token' => $guestToken, 'challenge_id' => $challengeId]);
         $res = $stmt->fetch();
 
         return $res ? $this->mapGameSession($res) : null;
     }
 
-    public function create(array $data) : int {
-        $stmt = $this->pdo->prepare("INSERT INTO game_sessions(user_id, guest_token, challenge_id, attempts_count, solved) VALUES (:user_id, :guest_token, :challenge_id, 0, 0)");
-        $stmt->execute(['user_id' => $data['user_id'] ?? null, 'guest_token' => $data['guest_token'] ?? null, 'challenge_id' => $data['challenge_id']]);
+    public function createIfMissing(?int $userId, ?string $guestToken, int $challengeId) : int {
+        $stmt = $this->pdo->prepare("INSERT INTO game_sessions(user_id, guest_token, challenge_id)
+            VALUES (:user_id, :guest_token, :challenge_id)
+            ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)");
+        $stmt->execute(['user_id' => $userId, 'guest_token' => $guestToken, 'challenge_id' => $challengeId]);
 
         return (int)$this->pdo->lastInsertId();
     }
+
+    // Used to lock a record inside a transaction, serializes requests on the same session.
+    public function findByIdForUpdate(int $id) : GameSession {
+        $stmt = $this->pdo->prepare("SELECT * FROM game_sessions WHERE id = :id FOR UPDATE");
+        $stmt->execute(['id' => $id]);
+
+        return $this->mapGameSession($stmt->fetch());
+    }
+
 
     public function updateSessionState(int $id, bool $solved) : void
     {
@@ -91,7 +102,7 @@ class GameSessionRepository implements IGameSessionRepository {
     private function mapGameSession(array $row) : GameSession {
         return new GameSession(
             id: (int)$row['id'],
-            userId: (int)$row['user_id'],
+            userId: $row['user_id'] !== null ? (int)$row['user_id'] : null,
             guestToken: $row['guest_token'],
             challengeId: (int)$row['challenge_id'],
             attemptsCount: (int)$row['attempts_count'],

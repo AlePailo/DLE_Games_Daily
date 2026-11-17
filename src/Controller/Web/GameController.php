@@ -36,7 +36,7 @@ class GameController extends WebController {
             return;
         }
 
-        $gameData = $this->gameService->getGameViewData($context, $userId, $guestToken);
+        $gameData = $this->gameService->getGameViewData($context, $userId);
 
         $this->render('game', array_merge($gameData, [
             'title'     => "{$context->franchise->getName()} | DLE Games Daily",

@@ -7,6 +7,6 @@ use App\Model\Entity\Character;
 interface ICharacterRepository {
     public function findByFranchiseId(int $franchiseId) : array;
     public function findRandomIdByFranchise(int $franchiseId, array $excludedIds): ?int;
-    public function findByIdWithAttributes(int $id) : ?Character;
+    public function findByIdWithAttributes(int $id, ?int $franchiseId = null) : ?Character;
     public function findForSearchByFranchise(int $franchiseId): array;
 }

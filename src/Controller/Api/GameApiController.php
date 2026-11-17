@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Controller\ApiController;
 use App\Core\SessionManager;
+use App\Exception\GameException;
 use App\Service\GameService;
 
 class GameApiController extends ApiController {
@@ -25,38 +26,44 @@ class GameApiController extends ApiController {
             $this->renderJson(['success' => false, 'message' => 'Invalid input'], 400);
             return;
         }
+
+        [$userId, $guestToken] = $this->identity();
  
-        $context = $this->resolveActiveContext($vars['slug'] ?? '');
+        $context = $this->resolvePlayableContext($vars['slug'] ?? '', $userId, $guestToken);
         if ($context === null) return;
  
-        $result = $this->gameService->processAttempt(
-            $context,
-            $guessedCharId,
-            $this->sessionManager->getUserId()
-        );
- 
-        // Character not found is a domain error returned from the service
-        $status = isset($result['message']) && $result['success'] === false ? 404 : 200;
-        $this->renderJson($result, $status);
+        try {
+            $this->renderJson($this->gameService->processAttempt($context, $guessedCharId, $userId, $guestToken));
+        } catch (GameException $e) {
+            $this->renderJson(['success' => false, 'message' => $e->getMessage()], $this->statusFor($e));
+        }
+
     }
  
     public function surrender(array $vars): void {
         $this->validateCsrfToken();
-        $context = $this->resolveActiveContext($vars['slug'] ?? '');
+
+        [$userId, $guestToken] = $this->identity();
+
+        $context = $this->resolvePlayableContext($vars['slug'] ?? '', $userId, $guestToken);
         if ($context === null) return;
- 
-        $result = $this->gameService->processSurrender(
-            $context,
-            $this->sessionManager->getUserId()
-        );
- 
-        $this->renderJson($result);
+
+        try {
+            $this->renderJson($this->gameService->processSurrender($context, $userId, $guestToken));
+        } catch (GameException $e) {
+            $this->renderJson(['success' => false, 'message' => $e->getMessage()], $this->statusFor($e));
+        }
+
+    }
+
+    private function identity() : array {
+        $userId = $this->sessionManager->getUserId();
+        $guestToken = $userId === null ? $this->sessionManager->getGuestToken() : null;
+
+        return [$userId, $guestToken];
     }
  
-    private function resolveActiveContext(string $slug): ?\App\Model\DTO\GameContext {
-        $userId     = $this->sessionManager->getUserId();
-        $guestToken = $userId === null ? $this->sessionManager->getGuestToken() : null;
- 
+    private function resolvePlayableContext(string $slug, ?int $userId, ?string $guestToken): ?\App\Model\DTO\GameContext {
         $context = $this->gameService->resolveGameContext($slug, $userId, $guestToken);
  
         if (!$context->isValid()) {
@@ -64,11 +71,19 @@ class GameApiController extends ApiController {
             return null;
         }
  
-        if (!$context->isActive()) {
+        if (!$context->isPlayable()) {
             $this->renderJson(['success' => false, 'message' => 'Game already completed'], 400);
             return null;
         }
  
         return $context;
+    }
+
+    private function statusFor(GameException $e): int {
+        return match($e->getCode()) {
+            GameException::CHARACTER_NOT_FOUND => 404,
+            GameException::ALREADY_GUESSED => 409,
+            default => 400,
+        };
     }
 }
