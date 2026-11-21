@@ -73,22 +73,6 @@ final class UserFranchiseStats {
             return;
         }
 
-        /*
-        if($wonYesterday) {
-            $this->currentStreak++;
-        } else {
-            $this->currentStreak = 1;
-        }
-
-        if($this->currentStreak > $this->maxStreak) {
-            $this->maxStreak = $this->currentStreak;
-        }
-
-        $this->avgAttempts = (($this->avgAttempts * $this->gamesWon) + $attempts) / ($this->gamesWon + 1);
-
-        $this->gamesWon++;
-        */
-
         $continues = $this->lastWinDate !== null && $this->lastWinDate->format('Y-m-d') === $challengeDate->modify('-1 day')->format('Y-m-d');
 
         $this->currentStreak = $continues ? $this->currentStreak + 1 : 1;

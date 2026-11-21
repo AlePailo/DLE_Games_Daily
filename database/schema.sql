@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Apr 28, 2026 alle 23:48
+-- Creato il: Nov 20, 2026 alle 23:37
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `dle_games_daily`
+-- Database: `dle_games_daily_test`
 --
 
 -- --------------------------------------------------------
@@ -145,7 +145,8 @@ CREATE TABLE `game_attempt_results` (
 
 CREATE TABLE `game_sessions` (
   `id` int(10) UNSIGNED NOT NULL,
-  `user_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED DEFAULT NULL,
+  `guest_token` varchar(64) DEFAULT NULL,
   `challenge_id` int(10) UNSIGNED NOT NULL,
   `attempts_count` tinyint(4) NOT NULL DEFAULT 0,
   `solved` tinyint(1) NOT NULL DEFAULT 0,
@@ -177,6 +178,7 @@ CREATE TABLE `users` (
   `id` int(10) UNSIGNED NOT NULL,
   `username` varchar(50) NOT NULL,
   `email` varchar(150) NOT NULL,
+  `user_icon_url` varchar(255) DEFAULT NULL,
   `is_verified` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -206,8 +208,21 @@ CREATE TABLE `users_passwords` (
   `user_id` int(10) UNSIGNED NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `verification_token` varchar(255) DEFAULT NULL,
-  `token_expires_at` datetime DEFAULT NULL
+  `token_expires_at` datetime DEFAULT NULL,
+  `verification_sent_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `user_favourites`
+--
+
+CREATE TABLE `user_favourites` (
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `franchise_id` int(10) UNSIGNED NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -223,6 +238,7 @@ CREATE TABLE `user_franchise_stats` (
   `games_won` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `current_streak` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `max_streak` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `last_win_date` date DEFAULT NULL,
   `avg_attempts` float NOT NULL DEFAULT 0,
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -282,7 +298,8 @@ ALTER TABLE `friendships`
 --
 ALTER TABLE `game_attempts`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_game_attempts_session_id` (`session_id`),
+  ADD UNIQUE KEY `uq_game_attempts_session_number` (`session_id`,`attempt_number`),
+  ADD UNIQUE KEY `uq_game_attempts_session_character` (`session_id`,`guessed_char_id`),
   ADD KEY `idx_game_attempts_guessed_char_id` (`guessed_char_id`);
 
 --
@@ -290,6 +307,7 @@ ALTER TABLE `game_attempts`
 --
 ALTER TABLE `game_attempt_results`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_attempt_results_attempt_attribute` (`attempt_id`,`attribute_def_id`),
   ADD KEY `idx_attempt_results_attempt_id` (`attempt_id`),
   ADD KEY `idx_attempt_results_attr_def_id` (`attribute_def_id`);
 
@@ -299,6 +317,7 @@ ALTER TABLE `game_attempt_results`
 ALTER TABLE `game_sessions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_game_sessions_user_challenge` (`user_id`,`challenge_id`),
+  ADD UNIQUE KEY `uq_game_sessions_guest_challenge` (`guest_token`,`challenge_id`),
   ADD KEY `idx_game_sessions_challenge_id` (`challenge_id`);
 
 --
@@ -329,6 +348,13 @@ ALTER TABLE `users_oauth`
 --
 ALTER TABLE `users_passwords`
   ADD PRIMARY KEY (`user_id`);
+
+--
+-- Indici per le tabelle `user_favourites`
+--
+ALTER TABLE `user_favourites`
+  ADD PRIMARY KEY (`user_id`,`franchise_id`),
+  ADD KEY `franchise_id` (`franchise_id`);
 
 --
 -- Indici per le tabelle `user_franchise_stats`
@@ -490,6 +516,13 @@ ALTER TABLE `users_oauth`
 --
 ALTER TABLE `users_passwords`
   ADD CONSTRAINT `fk_users_passwords_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limiti per la tabella `user_favourites`
+--
+ALTER TABLE `user_favourites`
+  ADD CONSTRAINT `user_favourites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_favourites_ibfk_2` FOREIGN KEY (`franchise_id`) REFERENCES `franchises` (`id`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `user_franchise_stats`

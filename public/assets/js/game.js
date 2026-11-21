@@ -199,6 +199,7 @@ class Game {
         this.dropdown.appendChild(fragment)
         this.isDropdownOpen = true
         this.dropdown.classList.add('is-open')
+        this.dropdown.scrollTop = 0
         this.input.setAttribute('aria-expanded', 'true')
         this.status.textContent = list.length === 1
         ? '1 result available'

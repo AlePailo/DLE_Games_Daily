@@ -72,7 +72,7 @@ class GameService {
         $franchise = $context->franchise;
         $dailyChallenge = $context->dailyChallenge;
 
-        $guessedChar = $this->characterRepository->findByIdWithAttributes($guessedCharId);
+        $guessedChar = $this->characterRepository->findByIdWithAttributes($guessedCharId, $franchise->getId());
         if($guessedChar === null) {
             throw GameException::characterNotFound();
         }
