@@ -5,12 +5,10 @@ namespace App\Core;
 use App\Controller\Web\ErrorController;
 use App\Exception\NotFoundException;
 use App\Service\AuthService;
-use Dotenv\Dotenv;
 
 class Application {
     public static function run() : void {
-        $dotenv = Dotenv::createImmutable(BASE_PATH);
-        $dotenv->load();
+        $dotenv = Environment::load(BASE_PATH);
         $dotenv->required(['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_CHARSET', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM', 'MAIL_FROM_NAME']);
         
         self::registerErrorHandlers();

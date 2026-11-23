@@ -36,6 +36,7 @@ PHP 8.2+ (with PHP-DI, FastRoute and PHPMailer libraries), MySQL / MariaDB, Vani
 | `CHALLENGE_AUTO_CREATE` | See below |
 | `DB_*` | Database connection |
 | `MAIL_*` | SMTP used for verification emails (a Mailtrap sandbox works well) |
+| `APP_TIMEZONE` | Timezone used by PHP and the database; the daily challenge changes at midnight in this timezone |
 
 ## Daily challenges
 By default the first request of the day creates the missing challenge for each franchise
