@@ -90,7 +90,8 @@ class AuthService {
 
         public function rotateRememberToken(int $userId, string $oldHashedToken): void 
     {
-        $this->userRepository->deleteRememberToken($oldHashedToken);
+        // Token is kept valid for a short amount of time so that simultaneous request (which carry the same cookie) don't force a logout cause of token mismatch
+        $this->userRepository->shortenRememberToken($oldHashedToken, new \DateTimeImmutable('+1 minute'));
 
         $this->createRememberToken($userId);
     }
@@ -109,6 +110,8 @@ class AuthService {
 
 
     public function createRememberToken(int $userId) : void {
+        $this->userRepository->deleteExpiredRememberTokens($userId);
+        
         $token = bin2hex(random_bytes(32));
         $hashedToken = hash('sha256', $token);
         $expires = new \DateTimeImmutable('+30 days');

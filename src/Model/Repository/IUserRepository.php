@@ -25,6 +25,8 @@ interface IUserRepository {
     public function updateVerificationToken(int $userId, string $hashedToken, \DateTimeImmutable $expiresAt) : void;
     public function removeVerificationToken(int $userId) : void;
 
+    public function shortenRememberToken(string $hashedToken, \DateTimeImmutable $until) : void;
+    public function deleteExpiredRememberToken(int $userId) : void;
     public function saveRememberToken(int $userId, string $hash, \DateTimeImmutable $expires) : void;
     public function deleteRememberToken(string $hashedToken) : void;
 

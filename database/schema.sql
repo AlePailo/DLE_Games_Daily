@@ -163,7 +163,7 @@ CREATE TABLE `game_sessions` (
 CREATE TABLE `remember_tokens` (
   `id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL,
-  `token_hash` varchar(255) NOT NULL,
+  `token_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `expires_at` datetime NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -325,7 +325,8 @@ ALTER TABLE `game_sessions`
 --
 ALTER TABLE `remember_tokens`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_remember_tokens_user_id` (`user_id`);
+  ADD KEY `idx_remember_tokens_user_id` (`user_id`),
+  ADD UNIQUE KEY `uq_remember_tokens_token_hash` (`token_hash`);
 
 --
 -- Indici per le tabelle `users`

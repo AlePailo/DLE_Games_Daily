@@ -139,6 +139,16 @@ class UserRepository implements IUserRepository {
         $stmt->execute(['token_hash' => $hashedToken]);
     }
 
+    public function shortenRememberToken(string $hashedToken, \DateTimeImmutable $until) : void {
+        $stmt = $this->pdo->prepare("UPDATE remember_tokens SET expires_at = LEAST(expires_at, :until) WHERE token_hash = :token_hash");
+        $stmt->execute(['until' => $until->format('Y-m-d H:i:s'), 'token_hash' => $hashedToken]);
+    }
+
+    public function deleteExpiredRememberTokens(int $userId) : void {
+        $stmt = $this->pdo->prepare("DELETE FROM remember_tokens WHERE user_id = :user_id AND expires_at <= NOW()");
+        $stmt->execute(['user_id' => $userId]);
+    }
+
     public function saveRememberToken(int $userId, string $hash, \DateTimeImmutable $expires) : void {
         $stmt = $this->pdo->prepare("INSERT INTO remember_tokens (user_id, token_hash, expires_at) VALUES (:user_id, :token_hash, :expires_at)");
         $stmt->execute(['user_id' => $userId, 'token_hash' => $hash, 'expires_at' => $expires->format('Y-m-d H:i:s')]);

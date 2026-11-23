@@ -5,11 +5,9 @@ namespace App\Core;
 class SessionManager {
     public function __construct() {
         if(session_status() === PHP_SESSION_NONE) {
-            session_set_cookie_params([
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax'
-            ]);
+            ini_set('session.use_strict_mode', '1');   // doesn't accept session ID not emitted by the server
+            ini_set('session.use_only_cookies', '1');  // never session ID in the url
+            session_set_cookie_params($this->cookieOptions());
             session_start();
         }
     }
@@ -53,7 +51,13 @@ class SessionManager {
 
     public function clearUserSession() : void {
         $_SESSION = [];
-        session_destroy();
+
+        if(session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
+
+        // Remove session cookie from browser
+        setcookie(session_name(), '', $this->cookieOptions(['expires' => time() - 3600]));
     }
 
     public function isLoggedIn() : bool {
@@ -69,21 +73,11 @@ class SessionManager {
     }
 
     public function setRememberCookie(string $token, \DateTimeImmutable $expires) : void {
-        setcookie('remember_token', $token, [
-            'expires' => $expires->getTimestamp(),
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
+        setcookie('remember_token', $token, $this->cookieOptions(['expires' => $expires->getTimestamp()]));
     }
 
     public function clearRememberCookie() : void {
-        setcookie('remember_token', '', [
-            'expires' => time() - 3600,
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
+        setcookie('remember_token', '', $this->cookieOptions(['expires' => time() - 3600]));
     }
 
 
@@ -96,12 +90,7 @@ class SessionManager {
 
     public function createGuestToken() : string {
         $token = bin2hex(random_bytes(32));
-        setcookie('guest_token', $token, [
-            'expires' => strtotime('+30 days'),
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
+        setcookie('guest_token', $token, $this->cookieOptions(['expires' => strtotime('+30 days')]));
 
         return $token;
     }
@@ -111,12 +100,7 @@ class SessionManager {
     }
 
     public function clearGuestToken() : void {
-        setcookie('guest_token', '', [
-            'expires' => time() - 3600,
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
+        setcookie('guest_token', '', $this->cookieOptions(['expires' => time() - 3600]));
     }
 
 
@@ -142,5 +126,24 @@ class SessionManager {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
         return $_SESSION['csrf_token'];
+    }
+
+
+
+    // ----- Session helpers -----
+
+    private function cookieOptions(array $extra = []) : array {
+        return $extra + [
+            'path' => '/',
+            'secure' => $this->isHttps(),
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ];
+    }
+
+    private function isHttps() : bool {
+        $https = strtolower((string)($SERVER['HTTPS'] ?? ''));
+
+        return ($https !== '' && $https !== 'off') || (int)($_SERVER['SERVER_PORT'] ?? 0) === 443;
     }
 }
