@@ -58,6 +58,24 @@ class UserRepository implements IUserRepository {
         return $res ? $this->mapUser($res) : null;
     }
 
+    public function createUser(string $username, string $email, string $avatar) : int {
+        $stmt = $this->pdo->prepare("INSERT INTO users (username, email, user_icon_url) VALUES (:username, :email, :user_icon_url)");
+        $stmt->execute(['username' => $username, 'email' => $email, 'user_icon_url' => $avatar]);
+
+        return (int)$this->pdo->lastInsertId();
+    }
+
+    public function createOAuthIdentity(int $userId, string $provider, string $providerId) : void {
+        $stmt = $this->pdo->prepare("INSERT INTO users_oauth (user_id, provider, provider_id) VALUES (:user_id, :provider, :provider_id)");
+        $stmt->execute(['user_id' => $userId, 'provider' => $provider, 'provider_id' => $providerId]);
+    }
+
+    public function createPasswordCredentials(int $userId, string $passwordHash, string $token, \DateTimeImmutable $expiresAt) : void {
+        $stmt = $this->pdo->prepare("INSERT INTO users_passwords (user_id, password_hash, verification_token, token_expires_at) VALUES (:user_id, :password_hash, :verification_token, :token_expires_at)");
+        $stmt->execute(['user_id' => $userId, 'password_hash' => $passwordHash, 'verification_token' => $token, 'token_expires_at' => $expiresAt]);
+    }
+
+    /*
     public function createLocalUser(string $username, string $email, string $passwordHash, string $token, \DateTimeImmutable $expiresAt, string $avatar) : int {
         try {
             $this->pdo->beginTransaction();
@@ -96,6 +114,7 @@ class UserRepository implements IUserRepository {
         $stmt->execute(['username' => $username, 'email' => $email, 'user_icon_url' => $avatar]);
         return (int)$this->pdo->lastInsertId();
     }
+    */
 
     private function mapUser(array $row) : User {
         return new User(

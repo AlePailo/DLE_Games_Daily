@@ -3,10 +3,9 @@
     $types = ['error', 'success', 'info'];
     foreach ($types as $type):
         $message = $$type ?? null;
-        if($message === null) continue;
+        if ($message === null) continue;
 
-        $lines = $message !== null ? array_filter((array) $message) : [];
-        
+        $lines = array_filter((array) $message);
         if (empty($lines)) continue;
         ?>
         <div class="toast toast-<?= $type ?>" role="alert">
@@ -20,7 +19,7 @@
                             <?php endforeach; ?>
                         </ul>
                     <?php else: ?>
-                        <p><?= htmlspecialchars(reset($lines)) ?></p>
+                        <p><?= htmlspecialchars(trim(reset($lines))) ?></p>
                     <?php endif; ?>
                 </div>
             </div>

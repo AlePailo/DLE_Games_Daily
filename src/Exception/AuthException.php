@@ -12,6 +12,7 @@ class AuthException extends \RuntimeException {
     public const DUPLICATE_ENTRY = 107;
     public const RESEND_COOLDOWN = 108;
     public const INVALID_AVATAR = 109;
+    public const EMAIL_SEND_FAILED = 110;
 
     public static function invalidCredentials() : self {
         return new self('Invalid credentials.', self::INVALID_CREDENTIALS);
@@ -47,5 +48,9 @@ class AuthException extends \RuntimeException {
 
     public static function invalidAvatar() : self {
         return new self('Selected avatar is not valid.', self::INVALID_AVATAR);
+    }
+
+    public static function emailSendFailed() : self {
+        return new self('We could not send the verification email. Please try again later.', self::EMAIL_SEND_FAILED);
     }
 }

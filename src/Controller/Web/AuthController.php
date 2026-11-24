@@ -100,10 +100,14 @@ class AuthController extends WebController {
         }
 
         try {
-            $user = $this->authService->registerLocalUser($username, $email, $password);
-            $this->adoptGuestProgress($user->getId());
+            $result = $this->authService->registerLocalUser($username, $email, $password);
+            $this->adoptGuestProgress($result->user->getId());
 
-            $this->sessionManager->setFlash('success', 'Registration completed! Check your email box.');
+            if($result->verificationEmailSent) {
+                $this->sessionManager->setFlash('success', 'Registration completed! Check your email box.');
+            } else {
+                $this->sessionManager->setFlash('error', 'Account created, but we could not send the verification email. Try logging in to request a new one.');
+            }
             $this->redirect('login');
         } catch(AuthException $e) {
             $this->sessionManager->setFlash('error', $e->getMessage());

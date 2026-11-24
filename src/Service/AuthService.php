@@ -4,9 +4,13 @@ namespace App\Service;
 
 use App\Model\Entity\User;
 use App\Model\Repository\IUserRepository;
+use App\Model\DTO\RegistrationResult;
 use App\Core\SessionManager;
 use App\Core\Mailer;
+use App\Core\Transaction;
 use App\Exception\AuthException;
+
+use function PHPUnit\Framework\throwException;
 
 class AuthService {
     public function __construct(
@@ -14,7 +18,8 @@ class AuthService {
         private IUserRepository $userRepository,
         private SessionManager $sessionManager,
         private AvatarService $avatarService,
-        private Mailer $mailer
+        private Mailer $mailer,
+        private Transaction $transaction
     ) {}
 
 
@@ -47,7 +52,15 @@ class AuthService {
 
         if($user === null) {
             $avatar = $this->avatarService->getRandomAvatar();
-            $user = $this->userRepository->createOAuthUser($username, $email, $provider, $providerId, $avatar);
+
+            $userId = $this->transaction->run(function() use($username, $email, $avatar, $provider, $providerId) {
+                $userId = $this->userRepository->createUser($username, $email, $avatar);
+                $this->userRepository->createOAuthIdentity($userId, $provider, $providerId);
+
+                return $userId;
+            });
+
+            $user = $this->userRepository->findById($userId);
         }
 
         return $user;
@@ -138,7 +151,7 @@ class AuthService {
 
     // ----- Registration -----
 
-    public function registerLocalUser(string $username, string $email, string $plainPassword) : User {
+    public function registerLocalUser(string $username, string $email, string $plainPassword) : RegistrationResult {
         if($this->usernameExists($username)) {
             throw AuthException::usernameAlreadyTaken();
         }
@@ -155,11 +168,38 @@ class AuthService {
 
         $avatar = $this->avatarService->getRandomAvatar();
 
+        /*
         $createdUserId = $this->userRepository->createLocalUser($username, $email, $hashedPassword, $hashedToken, $expiresAt, $avatar);
 
         $this->mailer->sendVerification($email, $verificationToken);
 
         return $this->userRepository->findById($createdUserId);     //Returning user so that controller can use the id for session guest migration
+        */
+
+        try {
+            $userId = $this->transaction->run(function() use($username, $email, $avatar, $hashedPassword, $hashedToken, $expiresAt) {
+                $userId = $this->userRepository->createUser($username, $email, $avatar);
+                $this->userRepository->createPasswordCredentials($userId, $hashedPassword, $hashedToken, $expiresAt);
+
+                return $userId;
+            });
+        } catch (\PDOException $e) {
+            if((int)($e->errorInfo[1] ?? 0) !== 1062) {
+                throw $e;
+            }
+
+            // Another request already registered the same username or email after the checks above
+            throw match(true) {
+                $this->usernameExists($username) => AuthException::usernameAlreadyTaken(),
+                $this->emailExists($email) => AuthException::emailAlreadyTaken(),
+                default => AuthException::duplicateEntry()
+            };
+        }
+
+        return new RegistrationResult(
+            $this->userRepository->findById($userId),
+            $this->sendVerificationEmail($email, $verificationToken)
+        );
     }
 
 
@@ -178,15 +218,10 @@ class AuthService {
             throw AuthException::expiredToken();
         }
 
-        try {
-            $this->pdo->beginTransaction();
+        $this->transaction->run(function() use($userPassword) {
             $this->userRepository->markAsVerified($userPassword->getUserId());
             $this->userRepository->removeVerificationToken($userPassword->getUserId());
-            $this->pdo->commit();
-        } catch (\Throwable $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        });
     }
 
 
@@ -217,7 +252,9 @@ class AuthService {
 
         $this->userRepository->updateVerificationToken($user->getId(), $hashedToken, $expiresAt);
 
-        $this->mailer->sendVerification($email, $newVerificationToken);
+        if(!$this->sendVerificationEmail($email, $newVerificationToken)) {
+            throw AuthException::emailSendFailed();
+        }
     }
 
 
@@ -230,5 +267,15 @@ class AuthService {
 
     public function emailExists(string $email) : bool {
         return $this->userRepository->findByEmail($email) !== null;
+    }
+
+    private function sendVerificationEmail(string $email, string $rawToken) : bool {
+        try {
+            $this->mailer->sendVerification($email, $rawToken);
+            return true;
+        } catch(\Throwable $e) {
+            error_log('Verification email failed' . $e->getMessage());
+            return false;
+        }
     }
 }

@@ -33,6 +33,7 @@ PHP 8.2+ (with PHP-DI, FastRoute and PHPMailer libraries), MySQL / MariaDB, Vani
 |---|---|
 | `APP_ENV` | `development` shows detailed errors; `production` shows only the error page |
 | `APP_BASE_PATH` | Folder the app is served from (must match `.htaccess`) |
+| `APP_URL` | Public URL of the site (scheme and host, no folder), used for links in emails |
 | `CHALLENGE_AUTO_CREATE` | See below |
 | `DB_*` | Database connection |
 | `MAIL_*` | SMTP used for verification emails (a Mailtrap sandbox works well) |

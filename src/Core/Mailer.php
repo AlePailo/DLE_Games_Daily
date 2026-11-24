@@ -23,14 +23,16 @@ class Mailer {
 
     public function sendVerification(string $toEmail, string $rawToken) : void {
         $link = sprintf(
-            '%s://%s%s/verify?token=%s',
-            isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http',
-            $_SERVER['HTTP_HOST'],
-            $_ENV['APP_BASE_PATH'],
+            '%s%s/verify?token=%s',
+            rtrim($_ENV['APP_URL'], '/'),
+            rtrim($_ENV['APP_BASE_PATH'], '/'),
             urlencode($rawToken)
         );
 
-        error_log('Verification link: ' . $link);
+        // Link contains the token, logs show it only in development
+        if(($_ENV['APP_ENV'] ?? 'production') === 'development') {
+            error_log('Verification link: ' . $link);
+}
 
         $this->mailer->clearAddresses();
         $this->mailer->addAddress($toEmail);
