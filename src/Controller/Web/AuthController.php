@@ -7,6 +7,7 @@ use App\Service\AuthService;
 use App\Core\SessionManager;
 use App\Exception\AuthException;
 use App\Service\GuestDataMigrationService;
+use App\Service\UserInputValidator;
 
 class AuthController extends WebController {
     public function __construct(
@@ -70,27 +71,13 @@ class AuthController extends WebController {
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        $errors = [];
-
-        if(empty($username) || empty($email) || empty($password)) {
-            $errors[] = 'All fields are required.';
-        }
-
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Please provide a valid email address.';
-        }
-
-        if(strlen($password) < 8) {
-            $errors[] = 'Password must be at least 8 characters.';
-        }
-
-        if($password !== $confirmPassword) {
-            $errors[] = 'Passwords do not match.';
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $username)) {
-            $errors[] = "Username must be 3-20 characters (alphanumeric and underscore).";
-        }
+        $errors = array_values(array_filter([
+            (empty($username) || empty($email) || empty($password)) ? 'All fields required.' : null,
+            UserInputValidator::email($email),
+            UserInputValidator::password($password),
+            $password !== $confirmPassword ? 'Passwords do not match.' : null,
+            UserInputValidator::username($username)
+        ]));
 
         if(!empty($errors)) {
             $this->sessionManager->setFlash('error', $errors);

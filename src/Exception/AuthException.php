@@ -13,6 +13,7 @@ class AuthException extends \RuntimeException {
     public const RESEND_COOLDOWN = 108;
     public const INVALID_AVATAR = 109;
     public const EMAIL_SEND_FAILED = 110;
+    public const INVALID_INPUT = 111;
 
     public static function invalidCredentials() : self {
         return new self('Invalid credentials.', self::INVALID_CREDENTIALS);
@@ -52,5 +53,9 @@ class AuthException extends \RuntimeException {
 
     public static function emailSendFailed() : self {
         return new self('We could not send the verification email. Please try again later.', self::EMAIL_SEND_FAILED);
+    }
+
+    public static function invalidInput(string $message) : self {
+        return new self($message, self::INVALID_INPUT);
     }
 }

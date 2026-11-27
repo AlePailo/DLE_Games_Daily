@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Model\Repository\IUserRepository;
 use App\Model\Entity\User;
+use App\Service\UserInputValidator;
 
 class ProfileService {
     public function __construct(
@@ -23,15 +24,31 @@ class ProfileService {
             return false;
         }
 
-        if ($usernameChanged && !$this->checkUsernameAvailability($username)) {
-            throw \App\Exception\AuthException::usernameAlreadyTaken();
+        if($usernameChanged) {
+            $error = UserInputValidator::username($username);
+            if($error !== null) {
+                throw \App\Exception\AuthException::invalidInput($error);
+            }
+
+            if(!$this->checkUsernameAvailability($username)) {
+                throw \App\Exception\AuthException::usernameAlreadyTaken();
+            }
         }
 
-        if ($avatarChanged && !$this->avatarService->isValid($userIconUrl)) {
+        if($avatarChanged && !$this->avatarService->isValid($userIconUrl)) {
             throw \App\Exception\AuthException::invalidAvatar();
         }
 
-        $this->userRepository->updateProfile($userId, $username, $userIconUrl);
+        try {
+            $this->userRepository->updateProfile($userId, $username, $userIconUrl);
+        } catch(\PDOException $e) {
+            // Another request took this same username after the last check
+            if ((int)($e->errorInfo[1] ?? 0) === 1062) {
+                throw \App\Exception\AuthException::usernameAlreadyTaken();
+            }
+            throw $e;
+        }
+
         return true;
     }
 
